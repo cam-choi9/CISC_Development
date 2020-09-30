@@ -1,5 +1,6 @@
 package Project6461;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -19,6 +20,7 @@ public class ComputerMain extends JFrame {
 
 	private static CPU cpu;
 	private JPanel contentPane;
+	private JLabel lblstopping;
 	//these text fields are where the value of each register is displayed.
 	protected JTextField gpr0field;
 	protected JTextField gpr1field;
@@ -50,6 +52,11 @@ public class ComputerMain extends JFrame {
 	private JCheckBox address2;
 	private JCheckBox address3;
 	private JCheckBox address4;
+	private JTextField visualizefield;
+	private JButton btnStore; //these buttons are declared up here because they were created after the Run Toggle.
+	private JButton btnLoad;
+	private JButton btnIPL;
+	private JButton btnExeSingleInstruction;
 
 	/**
 	 * Launch the application.
@@ -69,7 +76,7 @@ public class ComputerMain extends JFrame {
 		});
 	}
 	
-	public String getInput() { //converts the ticked checkboxes to a binary number string.
+	public String getInput() { //converts the ticked checkboxes to a binary number String.
 		String userInput = "";
 		if (operation0.isSelected() == true) {userInput += "1";}
 		else {userInput += "0";}
@@ -122,18 +129,42 @@ public class ComputerMain extends JFrame {
 		//System.out.println(userInput); //for debugging purposes
 		return userInput;
 	}
+	
+	private short binaryStrToShort(String binary) { //converts the binary string created by getInput to a Short so it can be sent to the CPU for storage.
+		int intermediate = Integer.parseInt(binary, 2);
+		short result = (short) intermediate;
+		return result;
+	}
+	
+	public void waittimer(int ms) { // a lot of thread sleeps happen in this class. This method is here to condense the code.
+		try {
+			Thread.sleep(ms);
+		}
+		catch (Exception e) {
+			System.out.println("Thread failure, restart program");
+		}
+	}
 
 	/**
 	 Everything below here is JFrame GUI components; buttons, labels, etc.
 	 */
 	public ComputerMain() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //this group of items sets up the GUI window.
 		setBounds(100, 100, 950, 500);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		SpringLayout sl_contentPane = new SpringLayout();
 		contentPane.setLayout(sl_contentPane);
+		
+		/*
+		 * NOTE TO READER
+		 * JSwing automatically adds objects as they are created in the design panel to the bottom of this section of code. If you try and move them around to group them by object type, the code stops working.
+		 * Most objects should be self explanatory by looking at the object type and variable name. Additional comments are written to help clarify blocks of objects where possible.
+		 * For things like Clicks and other ActionEvents, the entire method is explained in detail the first time it is introduced. It is not duplicated for subsequent methods with similar functions.
+		 */
+		
+		//Text labels to go along with the GPR and IXR text boxes. The other stuff under each class declaration is JSwing calculating where to position the text box on the GUI.
 		
 		JLabel lblGpr_0 = new JLabel("GPR 0");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblGpr_0, 10, SpringLayout.NORTH, contentPane);
@@ -169,6 +200,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblixr_3, 25, SpringLayout.SOUTH, lblixr_2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblixr_3, 0, SpringLayout.WEST, lblGpr_0);
 		contentPane.add(lblixr_3);
+		
+		//Output text fields for the GPR and IXR. Text fields are accessed by other classes. The other stuff under each class declaration is JSwing calculating where to position the text box on the GUI.
 		
 		gpr0field = new JTextField();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr0field, 0, SpringLayout.NORTH, lblGpr_0);
@@ -219,13 +252,15 @@ public class ComputerMain extends JFrame {
 		ixr3field.setColumns(10);
 		contentPane.add(ixr3field);
 		
+		//load buttons
+		
 		JButton gpr0load = new JButton("Load");
-		gpr0load.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String inputBinary = getInput();
-				gpr0field.setText(inputBinary);
-				//cpu.gpr0 = inputBinary;
-			}
+		gpr0load.addActionListener(new ActionListener() { //all load buttons function the same way
+			public void actionPerformed(ActionEvent e) { //when a load button is pressed, three things will happen:
+				String inputBinary = getInput(); //1) it will convert the input boxes to a binary String
+				gpr0field.setText(inputBinary); //2) it will set the text on the field left of the button to display the string
+				//cpu.gpr0 = binaryStrToShort(inputBinary); //3) it will convert the string to a Short and pass along that value to the CPU class
+			} //all the other load buttons function the same way.
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr0load, 0, SpringLayout.NORTH, lblGpr_0);
 		sl_contentPane.putConstraint(SpringLayout.WEST, gpr0load, 6, SpringLayout.EAST, gpr0field);
@@ -297,6 +332,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, ixr3load, 6, SpringLayout.EAST, ixr3field);
 		contentPane.add(ixr3load);
 		
+		//text labels for PC, MAR, MBR, IR
+		
 		JLabel lblPC = new JLabel("PC");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblPC, 0, SpringLayout.NORTH, lblGpr_0);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblPC, 90, SpringLayout.EAST, gpr0load);
@@ -316,6 +353,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblIR, 0, SpringLayout.NORTH, lblGpr_3);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblIR, 0, SpringLayout.WEST, lblPC);
 		contentPane.add(lblIR);
+		
+		//output text fields for the PC, MBR, IR, MAR
 		
 		pcfield = new JTextField();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, pcfield, 0, SpringLayout.NORTH, lblGpr_0);
@@ -344,6 +383,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, marfield, 0, SpringLayout.EAST, pcfield);
 		marfield.setColumns(10);
 		contentPane.add(marfield);
+		
+		//These buttons load the content from the Input to the PC, MAR, and MBR.
 		
 		JButton pcload = new JButton("Load");
 		pcload.addActionListener(new ActionListener() {
@@ -378,6 +419,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, mbrload, 6, SpringLayout.EAST, mbrfield);
 		contentPane.add(mbrload);
 		
+		//output text fields for Condition Code and MFR
+		
 		ccfield = new JTextField();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ccfield, -3, SpringLayout.NORTH, lblixr_2);
 		ccfield.setColumns(10);
@@ -390,6 +433,8 @@ public class ComputerMain extends JFrame {
 		mfrfield.setColumns(10);
 		contentPane.add(mfrfield);
 		
+		//These JLabels are more text labels
+		
 		JLabel lblMFR = new JLabel("MFR");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblMFR, 0, SpringLayout.NORTH, lblixr_1);
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblMFR, -17, SpringLayout.WEST, mfrfield);
@@ -400,7 +445,7 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblCC, 0, SpringLayout.EAST, lblMFR);
 		contentPane.add(lblCC);
 		
-		//below here are all the check boxes.
+		//all the JCheckBox objects below here are all the check boxes used for User Input. Their position corresponds to the variable name.
 		
 		operation0 = new JCheckBox("");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, operation0, 65, SpringLayout.SOUTH, ixr3field);
@@ -482,6 +527,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.NORTH, address4, 0, SpringLayout.NORTH, operation0);
 		contentPane.add(address4);
 		
+		//JLabels below here are all text labels, and show the text stated in the argument.
+		
 		JLabel lblOperation = new JLabel("Operation");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblOperation, 17, SpringLayout.SOUTH, operation2);
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblOperation, 0, SpringLayout.EAST, operation3);
@@ -508,31 +555,109 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblAddress, 107, SpringLayout.EAST, lblI);
 		contentPane.add(lblAddress);
 		
-		JLabel lblInstructions = new JLabel("Input below. Tick for 1, untick for 0.");
+		JLabel lblInstructions = new JLabel("Input below. Tick for 1, untick for 0."); //an instruction label for the inputs
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblInstructions, 0, SpringLayout.WEST, operation5);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblInstructions, -17, SpringLayout.NORTH, operation5);
 		lblInstructions.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		contentPane.add(lblInstructions);
 		
-		JToggleButton runToggle = new JToggleButton("RUN");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, -17, SpringLayout.NORTH, lblOperation);
+		JToggleButton runToggle = new JToggleButton("RUN"); //RUN toggle button
+		sl_contentPane.putConstraint(SpringLayout.EAST, runToggle, 112, SpringLayout.WEST, pcload);
+		runToggle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(runToggle.isSelected()) {
+					//TODO - start loop
+					lblstopping.setText("RUNNING");
+					gpr0load.setEnabled(false);
+					gpr1load.setEnabled(false);
+					gpr2load.setEnabled(false);
+					gpr3load.setEnabled(false);
+					ixr1load.setEnabled(false);
+					ixr2load.setEnabled(false);
+					ixr3load.setEnabled(false);
+					pcload.setEnabled(false);
+					marload.setEnabled(false);
+					mbrload.setEnabled(false);
+					btnStore.setEnabled(false);
+					btnLoad.setEnabled(false);
+					btnIPL.setEnabled(false);
+					btnExeSingleInstruction.setEnabled(false);
+					runToggle.setText("STOP");
+
+				}
+				if(!runToggle.isSelected()) {
+					//TODO - stop loop					
+					lblstopping.setText("WAITING");
+					gpr0load.setEnabled(true);
+					gpr1load.setEnabled(true);
+					gpr2load.setEnabled(true);
+					gpr3load.setEnabled(true);
+					ixr1load.setEnabled(true);
+					ixr2load.setEnabled(true);
+					ixr3load.setEnabled(true);
+					pcload.setEnabled(true);
+					marload.setEnabled(true);
+					mbrload.setEnabled(true);
+					btnStore.setEnabled(true);
+					btnLoad.setEnabled(true);
+					btnIPL.setEnabled(true);
+					btnExeSingleInstruction.setEnabled(true);
+					runToggle.setText("RUN");
+				}
+			}
+		});
+		sl_contentPane.putConstraint(SpringLayout.WEST, runToggle, 0, SpringLayout.WEST, pcload);
 		runToggle.setFont(new Font("Tahoma", Font.BOLD, 24));
 		contentPane.add(runToggle);
 		
-		JButton btnStore = new JButton("STORE");
+		btnStore = new JButton("STORE MBR at MAR address"); //Store MBR contents at MAR address button
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnStore, 0, SpringLayout.WEST, pcload);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStore, 0, SpringLayout.SOUTH, lblInstructions);
 		contentPane.add(btnStore);
 		
-		JButton btnLoad = new JButton("LOAD");
-		sl_contentPane.putConstraint(SpringLayout.EAST, runToggle, 0, SpringLayout.EAST, btnLoad);
-		sl_contentPane.putConstraint(SpringLayout.WEST, btnLoad, 6, SpringLayout.EAST, btnStore);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnLoad, 0, SpringLayout.SOUTH, lblInstructions);
+		btnLoad = new JButton("LOAD MAR address contents to MBR"); //Load MAR address contents to MBR button
+		sl_contentPane.putConstraint(SpringLayout.NORTH, btnLoad, 6, SpringLayout.SOUTH, btnStore);
+		sl_contentPane.putConstraint(SpringLayout.WEST, btnLoad, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnLoad);
 		
-		JButton btnIPL = new JButton("Initial Program Load");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, btnIPL, 6, SpringLayout.SOUTH, btnStore);
+		btnIPL = new JButton("Initial Program Load"); //Initial Program Load button
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnIPL, -109, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStore, -36, SpringLayout.NORTH, btnIPL);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnIPL, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnIPL);
+		
+		btnExeSingleInstruction = new JButton("Execute Single Instruction"); //Execute Single Instruction Button
+		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, btnExeSingleInstruction, 6, SpringLayout.SOUTH, btnIPL);
+		sl_contentPane.putConstraint(SpringLayout.WEST, btnExeSingleInstruction, 0, SpringLayout.WEST, pcload);
+		contentPane.add(btnExeSingleInstruction);
+		
+		
+		
+		visualizefield = new JTextField(); //text field to the left of the visualize input button
+		visualizefield.setText("Preview input here");
+		sl_contentPane.putConstraint(SpringLayout.NORTH, visualizefield, 22, SpringLayout.SOUTH, lblGPR);
+		sl_contentPane.putConstraint(SpringLayout.WEST, visualizefield, -104, SpringLayout.WEST, operation4);
+		visualizefield.setColumns(10);
+		contentPane.add(visualizefield);
+		
+		JButton btnVisualizeInput = new JButton("Visualize Input as Binary"); //visualize input button
+		btnVisualizeInput.addActionListener(new ActionListener() { //when the button is pressed, it translates the checkboxes to binary and prints it out in the visualizefield
+			public void actionPerformed(ActionEvent e) {
+				String inputBinary = getInput();
+				visualizefield.setText(inputBinary);
+				//System.out.println(binaryStrToShort(inputBinary)); //for debugging
+			}
+		});
+		sl_contentPane.putConstraint(SpringLayout.EAST, visualizefield, -6, SpringLayout.WEST, btnVisualizeInput);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, btnVisualizeInput, 21, SpringLayout.SOUTH, lblIxr);
+		sl_contentPane.putConstraint(SpringLayout.EAST, btnVisualizeInput, 0, SpringLayout.EAST, lblIR);
+		contentPane.add(btnVisualizeInput);
+		
+		lblstopping = new JLabel("WAITING");
+		sl_contentPane.putConstraint(SpringLayout.NORTH, lblstopping, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
+		sl_contentPane.putConstraint(SpringLayout.WEST, lblstopping, -39, SpringLayout.EAST, btnStore);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblstopping, 0, SpringLayout.SOUTH, runToggle);
+		sl_contentPane.putConstraint(SpringLayout.EAST, lblstopping, 0, SpringLayout.EAST, btnLoad);
+		contentPane.add(lblstopping);
 	}
 }
