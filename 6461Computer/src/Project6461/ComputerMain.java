@@ -68,7 +68,6 @@ public class ComputerMain extends JFrame {
 					ComputerMain gui = new ComputerMain(); //the GUI is launched first. The Graphic User Interface is really just there to pull values from the CPU class and present them to the user, or allow the user to input values and send them to the CPU class.
 					gui.setVisible(true);
 					cpu = new CPU(gui); //once the GUI is launched it starts up a class for the CPU which runs in a separate thread. If you are looking for most of the actions discussed in the project rubric, they take place in that CPU class.
-					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -566,9 +565,9 @@ public class ComputerMain extends JFrame {
 		runToggle.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(runToggle.isSelected()) {
-					//TODO - start loop
+					cpu.setRunning(true); //sets the instruction cycle to loop
 					lblstopping.setText("RUNNING");
-					gpr0load.setEnabled(false);
+					gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
 					gpr1load.setEnabled(false);
 					gpr2load.setEnabled(false);
 					gpr3load.setEnabled(false);
@@ -583,12 +582,13 @@ public class ComputerMain extends JFrame {
 					btnIPL.setEnabled(false);
 					btnExeSingleInstruction.setEnabled(false);
 					runToggle.setText("STOP");
+					cpu.runInstructionCycle(); //launches the instruction cycle method
 
 				}
-				if(!runToggle.isSelected()) {
-					//TODO - stop loop					
+				if(!runToggle.isSelected()) {				
+					cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
 					lblstopping.setText("WAITING");
-					gpr0load.setEnabled(true);
+					gpr0load.setEnabled(true); //other buttons are reenabled.
 					gpr1load.setEnabled(true);
 					gpr2load.setEnabled(true);
 					gpr3load.setEnabled(true);
@@ -626,12 +626,45 @@ public class ComputerMain extends JFrame {
 		contentPane.add(btnIPL);
 		
 		btnExeSingleInstruction = new JButton("Execute Single Instruction"); //Execute Single Instruction Button
+		btnExeSingleInstruction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
+				gpr1load.setEnabled(false);
+				gpr2load.setEnabled(false);
+				gpr3load.setEnabled(false);
+				ixr1load.setEnabled(false);
+				ixr2load.setEnabled(false);
+				ixr3load.setEnabled(false);
+				pcload.setEnabled(false);
+				marload.setEnabled(false);
+				mbrload.setEnabled(false);
+				btnStore.setEnabled(false);
+				btnLoad.setEnabled(false);
+				btnIPL.setEnabled(false);
+				btnExeSingleInstruction.setEnabled(false);
+				runToggle.setEnabled(false);
+				cpu.runInstructionCycle(); //launches the instruction cycle method. Because SetRunning is false, the instructioncycle only happens once.
+				gpr0load.setEnabled(true); //other buttons are reenabled.
+				gpr1load.setEnabled(true);
+				gpr2load.setEnabled(true);
+				gpr3load.setEnabled(true);
+				ixr1load.setEnabled(true);
+				ixr2load.setEnabled(true);
+				ixr3load.setEnabled(true);
+				pcload.setEnabled(true);
+				marload.setEnabled(true);
+				mbrload.setEnabled(true);
+				btnStore.setEnabled(true);
+				btnLoad.setEnabled(true);
+				btnIPL.setEnabled(true);
+				btnExeSingleInstruction.setEnabled(true);
+				runToggle.setEnabled(true);
+			}
+		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnExeSingleInstruction, 6, SpringLayout.SOUTH, btnIPL);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnExeSingleInstruction, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnExeSingleInstruction);
-		
-		
 		
 		visualizefield = new JTextField(); //text field to the left of the visualize input button
 		visualizefield.setText("Preview input here");
