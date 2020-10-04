@@ -5,21 +5,21 @@ import java.lang.Integer.*;
 
 public class CPU extends Thread {
 	private ComputerMain gui; //used by the CPU to reference the GUI where necessary
-	private short gpr0 = 0; //gpr0-3 are general-purpose registers
-	private short gpr1 = 0; 
-	private short gpr2 = 0;
-	private short gpr3 = 0;
-	private short ixr1 = 0; //ixr 1-3 are Index registers
-	private short ixr2 = 0;
-	private short ixr3 = 0;
-	private short pc = 0; //program counter
-	private short mar = 0; //Memory Address Register
-	private short mbr = 0; //MBR
+	protected short gpr0 = 0; //gpr0-3 are general-purpose registers
+	protected short gpr1 = 0; 
+	protected short gpr2 = 0;
+	protected short gpr3 = 0;
+	protected short ixr1 = 0; //ixr 1-3 are Index registers
+	protected short ixr2 = 0;
+	protected short ixr3 = 0;
+	protected short pc = 0; //program counter
+	protected short mar = 0; //Memory Address Register
+	protected short mbr = 0; //MBR
 	private short ir = 0; //(Current) Instruction Register
 	private short mfr = 0; //Machine Fault Register
 	private short cc = 0; //Condition Code
 	private boolean run = false;
-	private short[] memory = new short[2048];
+	protected short[] memory = new short[2048];
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and assigns the values to the appropriate locations.
 		this.gui = gui;
@@ -57,7 +57,6 @@ public class CPU extends Thread {
 		gui.irfield.setText(shortToBinaryString(ir, 16));
 		gui.mfrfield.setText(shortToBinaryString(mfr, 4));
 		gui.ccfield.setText(shortToBinaryString(cc, 4));
-
 	}
 	
 	public void iPL() {//initial program load from text file
@@ -92,7 +91,7 @@ public class CPU extends Thread {
 	
 	public short decode(short mbr){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
 		short operationcode = mbr;
-		operationcode = (short) (operationcode >> 11); //remove everything else from the word to get the opcode
+		operationcode = (short) (operationcode >> 10); //remove everything else from the word to get the opcode
 		return operationcode;
 	}
 	public void execute(short opcode){ //this is the second part of the control unit. 
@@ -114,27 +113,37 @@ public class CPU extends Thread {
 		}
 	}
 	
+	public void storeMemAtMARtoMBR() { //GUI button, stores memory at MAR address to MBR
+		mbr = memory[mar];
+		updateGUI(); //...and updates the gui to reflect that
+	}
+	
+	public void storeMBRtoMemAtMAR() { //GUI button, stores MBR content to Memory at the address in MAR
+		memory[mar] = mbr; 
+		//you can't see the contents of the memory, so there's no GUI update here.
+	}
+	
 	/*
 	 * All of the instruction methods will be placed below here, in numerical order
 	 * */
-	public void hlt() { // 00
+	public void hlt() { // 00 Halt
 		System.out.println("Halted!");
 		//run = false;
 	}
-	public void ldr() { // 01
-		
+	public void ldr() { // 01 Load Register from Memory
+		System.out.println("01");
 	}
-	public void str() { //02
-		
+	public void str() { //02 Load Register to Memory
+		System.out.println("02");
 	}
-	public void lda() { //03
-		
+	public void lda() { //03 Load Register with Address
+		System.out.println("03");
 	}
-	public void ldx() { //41
-		
+	public void ldx() { //41 Load Index Register from Memory
+		System.out.println("41");
 	}
-	public void stx() { //42
-		
+	public void stx() { //42 Store Index Register to Memory
+		System.out.println("42");
 	}
 
 }
