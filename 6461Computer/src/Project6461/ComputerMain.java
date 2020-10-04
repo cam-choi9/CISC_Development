@@ -1,6 +1,5 @@
 package Project6461;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -257,8 +256,8 @@ public class ComputerMain extends JFrame {
 		gpr0load.addActionListener(new ActionListener() { //all load buttons function the same way
 			public void actionPerformed(ActionEvent e) { //when a load button is pressed, three things will happen:
 				String inputBinary = getInput(); //1) it will convert the input boxes to a binary String
-				gpr0field.setText(inputBinary); //2) it will set the text on the field left of the button to display the string
-				//cpu.gpr0 = binaryStrToShort(inputBinary); //3) it will convert the string to a Short and pass along that value to the CPU class
+				cpu.gpr0 = binaryStrToShort(inputBinary); //2) it will convert the string to a Short and pass along that value to the CPU class
+				cpu.updateGUI(); //2) it will update the GUI
 			} //all the other load buttons function the same way.
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr0load, 0, SpringLayout.NORTH, lblGpr_0);
@@ -269,7 +268,8 @@ public class ComputerMain extends JFrame {
 		gpr1load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				gpr1field.setText(inputBinary);
+				cpu.gpr1 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr1load, 0, SpringLayout.NORTH, gpr1field);
@@ -280,7 +280,8 @@ public class ComputerMain extends JFrame {
 		gpr2load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				gpr2field.setText(inputBinary);
+				cpu.gpr2 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr2load, 0, SpringLayout.NORTH, lblGpr_2);
@@ -291,7 +292,8 @@ public class ComputerMain extends JFrame {
 		gpr3load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				gpr3field.setText(inputBinary);
+				cpu.gpr3 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr3load, 0, SpringLayout.NORTH, lblGpr_3);
@@ -302,7 +304,8 @@ public class ComputerMain extends JFrame {
 		ixr1load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				ixr1field.setText(inputBinary);
+				cpu.ixr1 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr1load, 0, SpringLayout.NORTH, lblixr_1);
@@ -313,7 +316,8 @@ public class ComputerMain extends JFrame {
 		ixr2load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				ixr2field.setText(inputBinary);
+				cpu.ixr2 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr2load, 0, SpringLayout.NORTH, lblixr_2);
@@ -324,7 +328,8 @@ public class ComputerMain extends JFrame {
 		ixr3load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				ixr3field.setText(inputBinary);
+				cpu.ixr3 = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr3load, 0, SpringLayout.NORTH, lblixr_3);
@@ -389,7 +394,8 @@ public class ComputerMain extends JFrame {
 		pcload.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				pcfield.setText(inputBinary);
+				cpu.pc = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, pcload, 0, SpringLayout.NORTH, lblGpr_0);
@@ -400,7 +406,8 @@ public class ComputerMain extends JFrame {
 		marload.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				marfield.setText(inputBinary);
+				cpu.mar = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, marload, 0, SpringLayout.NORTH, lblGpr_1);
@@ -411,7 +418,8 @@ public class ComputerMain extends JFrame {
 		mbrload.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
-				mbrfield.setText(inputBinary);
+				cpu.mbr = binaryStrToShort(inputBinary);
+				cpu.updateGUI();
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, mbrload, 0, SpringLayout.NORTH, lblGpr_2);
@@ -610,16 +618,31 @@ public class ComputerMain extends JFrame {
 		runToggle.setFont(new Font("Tahoma", Font.BOLD, 24));
 		contentPane.add(runToggle);
 		
-		btnStore = new JButton("STORE MBR at MAR address"); //Store MBR contents at MAR address button
+		btnStore = new JButton("STORE MBR at MAR address"); //Store MBR contents at MAR address in memory
+		btnStore.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cpu.storeMBRtoMemAtMAR();
+			}
+		});
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnStore, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnStore);
 		
-		btnLoad = new JButton("LOAD MAR address contents to MBR"); //Load MAR address contents to MBR button
+		btnLoad = new JButton("LOAD MAR address contents to MBR"); //Load MAR address contents to MBR
+		btnLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cpu.storeMemAtMARtoMBR();
+			}
+		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnLoad, 6, SpringLayout.SOUTH, btnStore);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnLoad, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnLoad);
 		
 		btnIPL = new JButton("Initial Program Load"); //Initial Program Load button
+		btnIPL.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cpu.iPL();
+			}
+		});
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnIPL, -109, SpringLayout.SOUTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnStore, -36, SpringLayout.NORTH, btnIPL);
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnIPL, 0, SpringLayout.WEST, pcload);
