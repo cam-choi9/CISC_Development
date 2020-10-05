@@ -75,6 +75,7 @@ public class CPU extends Thread {
 				System.out.println(content);
 				memory[address] = content; //loads the line to the specified address location
 			}
+			fileReader.close();
 			gui.visualizefield.setText("Program written to Memory");
 		}
 		catch (FileNotFoundException e) {
