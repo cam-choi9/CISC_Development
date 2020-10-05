@@ -84,11 +84,11 @@ public class CPU extends Thread {
 	}
 	
 	public void runInstructionCycle() {
-		short opcode;
+		Word executable;
 		while (true) {
 			fetch();
-			opcode = decode(mbr);
-			execute(opcode);
+			executable = decode(mbr);
+			execute(executable);
 			updateGUI();
 			if (run == false) break;
 			if (pc == 2048) { //this is for Part III, but it's being placed in here early to stop the pc from running out of control
@@ -109,25 +109,24 @@ public class CPU extends Thread {
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
 	
-	public short decode(short mbr){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
-		short operationcode = mbr;
-		operationcode = (short) (operationcode >> 10); //remove everything else from the word to get the opcode
-		return operationcode;
+	public Word decode(short mbr){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
+		Word executable = new Word(mbr);
+		return executable;
 	}
-	public void execute(short opcode){ //this is the second part of the control unit. 
+	public void execute(Word word){ //this is the second part of the control unit. 
 	//It takes the opcode from the decode section and turns it into an executable instruction 
-		switch (opcode) {
+		switch (word.opcode) {
 			case 0: hlt();
 					break;
-			case 1: ldr();
+			case 1: ldr(word);
 					break;
-			case 2: str();
+			case 2: str(word);
 					break;
-			case 3: lda();
+			case 3: lda(word);
 					break;
-			case 41: ldx();
+			case 41: ldx(word);
 					break;
-			case 42: lda();
+			case 42: lda(word);
 					break;
 			default: gui.visualizefield.setText("Failed to get opcode.");
 		}
@@ -150,20 +149,71 @@ public class CPU extends Thread {
 		System.out.println("Halted!");
 		//run = false;
 	}
-	public void ldr() { // 01 Load Register from Memory
+	public void ldr(Word word) { // 01 Load Register from Memory
 		System.out.println("01");
+		switch (word.reg1) {
+		case 0: gpr0 = memory[word.address];
+				break;
+		case 1: gpr1 = memory[word.address];
+				break;
+		case 2: gpr2 = memory[word.address];
+				break;
+		case 3: gpr3 = memory[word.address];
+				break;
+		default: gui.visualizefield.setText("LDR failed.");
+		}
 	}
-	public void str() { //02 Load Register to Memory
+	public void str(Word word) { //02 Load Register to Memory
 		System.out.println("02");
+		switch (word.reg1) {
+		case 0: memory[word.address] = gpr0;
+				break;
+		case 1: memory[word.address] = gpr1;
+				break;
+		case 2: memory[word.address] = gpr2;
+				break;
+		case 3: memory[word.address] = gpr3;
+				break;
+		default: gui.visualizefield.setText("STR failed.");
+		}
 	}
-	public void lda() { //03 Load Register with Address
+	public void lda(Word word) { //03 Load Register with Address
 		System.out.println("03");
+		switch (word.reg1) {
+		case 0: gpr0 = word.address;
+				break;
+		case 1: gpr1 = word.address;
+				break;
+		case 2: gpr2 = word.address;
+				break;
+		case 3: gpr3 = word.address;
+				break;
+		default: gui.visualizefield.setText("LDA failed.");
+		}
 	}
-	public void ldx() { //41 Load Index Register from Memory
+	public void ldx(Word word) { //41 Load Index Register from Memory
 		System.out.println("41");
+		switch (word.reg2) {
+		case 1: ixr1 = memory[word.address];
+				break;
+		case 2: ixr2 = memory[word.address];
+				break;
+		case 3: ixr3 = memory[word.address];
+				break;
+		default: gui.visualizefield.setText("LDX failed.");
+		}
 	}
-	public void stx() { //42 Store Index Register to Memory
+	public void stx(Word word) { //42 Store Index Register to Memory
 		System.out.println("42");
+		switch (word.reg2) {
+		case 1: memory[word.address] = ixr1;
+				break;
+		case 2: memory[word.address] = ixr2;
+				break;
+		case 3: memory[word.address] = ixr3;
+				break;
+		default: gui.visualizefield.setText("STX failed.");
+		}
 	}
 
 }
