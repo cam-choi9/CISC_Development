@@ -51,7 +51,7 @@ public class ComputerMain extends JFrame {
 	private JCheckBox address2;
 	private JCheckBox address3;
 	private JCheckBox address4;
-	private JTextField visualizefield;
+	protected JTextField visualizefield;
 	private JButton btnStore; //these buttons are declared up here because they were created after the Run Toggle.
 	private JButton btnLoad;
 	private JButton btnIPL;
@@ -591,7 +591,6 @@ public class ComputerMain extends JFrame {
 					btnExeSingleInstruction.setEnabled(false);
 					runToggle.setText("STOP");
 					cpu.runInstructionCycle(); //launches the instruction cycle method
-
 				}
 				if(!runToggle.isSelected()) {				
 					cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
