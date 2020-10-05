@@ -1,6 +1,8 @@
 package Project6461;
 
-
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.Integer.*;
 
 public class CPU extends Thread {
@@ -42,8 +44,7 @@ public class CPU extends Thread {
 		run = state;
 	} 
 	
-	public void updateGUI() { //updates the GUI once any actions are performed.
-		
+	public void updateGUI() { //updates the GUI once any actions are performed.	
 		gui.gpr0field.setText(shortToBinaryString(gpr0, 16));
 		gui.gpr1field.setText(shortToBinaryString(gpr1, 16));
 		gui.gpr2field.setText(shortToBinaryString(gpr2, 16));
@@ -60,7 +61,26 @@ public class CPU extends Thread {
 	}
 	
 	public void iPL() {//initial program load from text file
-		//TODO
+		try {
+			File initialProgram = new File("program.txt");
+			Scanner fileReader = new Scanner(initialProgram);
+			int address = 0;
+			short content = 0;
+			String line;
+			while (fileReader.hasNextLine()) {
+				line = fileReader.nextLine();
+				address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
+				System.out.println(address);
+				content = (short) Integer.parseInt(line.substring((line.length() - 3), (line.length() - 0)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
+				System.out.println(content);
+				memory[address] = content; //loads the line to the specified address location
+			}
+			gui.visualizefield.setText("Program written to Memory");
+		}
+		catch (FileNotFoundException e) {
+			gui.visualizefield.setText("IPL File Not Found");
+			e.printStackTrace();
+		}
 	}
 	
 	public void runInstructionCycle() {
@@ -109,7 +129,7 @@ public class CPU extends Thread {
 					break;
 			case 42: lda();
 					break;
-			default: System.out.println("Failed to get opcode.");
+			default: gui.visualizefield.setText("Failed to get opcode.");
 		}
 	}
 	
