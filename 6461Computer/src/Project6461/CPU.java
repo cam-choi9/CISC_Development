@@ -3,7 +3,6 @@ package Project6461;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.Integer.*;
 
 public class CPU extends Thread {
 	private ComputerMain gui; //used by the CPU to reference the GUI where necessary
@@ -88,7 +87,7 @@ public class CPU extends Thread {
 		Word executable;
 		while (true) {
 			fetch();
-			executable = decode(mbr);
+			executable = decode(ir);
 			execute(executable);
 			updateGUI();
 			if (run == false) break;
@@ -110,8 +109,8 @@ public class CPU extends Thread {
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
 	
-	public Word decode(short mbr){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
-		Word executable = new Word(mbr);
+	public Word decode(short ir){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
+		Word executable = new Word(ir);
 		return executable;
 	}
 	public void execute(Word word){ //this is the second part of the control unit. 
@@ -216,5 +215,4 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("STX failed.");
 		}
 	}
-
 }
