@@ -15,6 +15,8 @@ import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+//RUN THIS FILE! THIS IS WHERE MAIN IS!
+
 public class ComputerMain extends JFrame {
 
 	private static CPU cpu;
@@ -51,11 +53,13 @@ public class ComputerMain extends JFrame {
 	private JCheckBox address2;
 	private JCheckBox address3;
 	private JCheckBox address4;
+	protected JToggleButton runToggle; //This is the toggle switch for the Run button. Unlike the other buttons, this has an ON/OFF state
 	protected JTextField visualizefield;
-	private JButton btnStore; //these buttons are declared up here because they were created after the Run Toggle.
+	private JButton btnStore; //these buttons are declared down here because they were created after the Run Toggle.
 	private JButton btnLoad;
 	private JButton btnIPL;
 	private JButton btnExeSingleInstruction;
+	private JTextField hexField;
 
 	/**
 	 * Launch the application.
@@ -76,7 +80,7 @@ public class ComputerMain extends JFrame {
 	
 	public String getInput() { //converts the ticked checkboxes to a binary number String.
 		String userInput = "";
-		if (operation0.isSelected() == true) {userInput += "1";}
+		if (operation0.isSelected() == true) {userInput += "1";} //reads the checkboxes left to right.
 		else {userInput += "0";}
 		
 		if (operation1.isSelected() == true) {userInput += "1";}
@@ -123,8 +127,6 @@ public class ComputerMain extends JFrame {
 		
 		if (address4.isSelected() == true) {userInput += "1";}
 		else {userInput += "0";}
-		
-		//System.out.println(userInput); //for debugging purposes
 		return userInput;
 	}
 	
@@ -132,15 +134,6 @@ public class ComputerMain extends JFrame {
 		int intermediate = Integer.parseInt(binary, 2);
 		short result = (short) intermediate;
 		return result;
-	}
-	
-	public void waittimer(int ms) { // a lot of thread sleeps happen in this class. This method is here to condense the code.
-		try {
-			Thread.sleep(ms);
-		}
-		catch (Exception e) {
-			System.out.println("Thread failure, restart program");
-		}
 	}
 
 	/**
@@ -157,15 +150,19 @@ public class ComputerMain extends JFrame {
 		
 		/*
 		 * NOTE TO READER
-		 * JSwing automatically adds objects as they are created in the design panel to the bottom of this section of code. If you try and move them around to group them by object type, the code stops working.
-		 * Most objects should be self explanatory by looking at the object type and variable name. Additional comments are written to help clarify blocks of objects where possible.
-		 * For things like Clicks and other ActionEvents, the entire method is explained in detail the first time it is introduced. It is not duplicated for subsequent methods with similar functions.
+		 * JSwing automatically adds objects as they are created in the design panel to the bottom of this section of code.
+		 * Each time it does, it uses the positions of previously-created objects to establish the position on the GUI of new objects. 
+		 * If you try and move objects around to group them by object type, the code stops working, because the objects are out of order.
+		 * Most objects should be self explanatory by looking at the object type and variable name. 
+		 * Additional comments are written to help clarify blocks of objects where possible.
+		 * For things like Clicks and other ActionEvents, the entire method is explained in detail the first time it is introduced. 
+		 * It is not duplicated for subsequent methods with similar functions.
 		 */
 		
 		//Text labels to go along with the GPR and IXR text boxes. The other stuff under each class declaration is JSwing calculating where to position the text box on the GUI.
 		
 		JLabel lblGpr_0 = new JLabel("GPR 0");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, lblGpr_0, 10, SpringLayout.NORTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, lblGpr_0, 10, SpringLayout.NORTH, contentPane); //As mentioned before, these lines help JSwing position new objects by comparing their position to other objects.
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblGpr_0, 10, SpringLayout.WEST, contentPane);
 		contentPane.add(lblGpr_0);
 		
@@ -253,7 +250,7 @@ public class ComputerMain extends JFrame {
 		//load buttons
 		
 		JButton gpr0load = new JButton("Load");
-		gpr0load.addActionListener(new ActionListener() { //all load buttons function the same way
+		gpr0load.addActionListener(new ActionListener() { //all LOAD buttons function the same way
 			public void actionPerformed(ActionEvent e) { //when a load button is pressed, three things will happen:
 				String inputBinary = getInput(); //1) it will convert the input boxes to a binary String
 				cpu.gpr0 = binaryStrToShort(inputBinary); //2) it will convert the string to a Short and pass along that value to the CPU class
@@ -388,7 +385,7 @@ public class ComputerMain extends JFrame {
 		marfield.setColumns(10);
 		contentPane.add(marfield);
 		
-		//These buttons load the content from the Input to the PC, MAR, and MBR.
+		//These buttons load the content from the Input to the PC, MAR, and MBR. Function the same way as the buttons above.
 		
 		JButton pcload = new JButton("Load");
 		pcload.addActionListener(new ActionListener() {
@@ -452,7 +449,7 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblCC, 0, SpringLayout.EAST, lblMFR);
 		contentPane.add(lblCC);
 		
-		//all the JCheckBox objects below here are all the check boxes used for User Input. Their position corresponds to the variable name.
+		//The JCheckBox objects below here are all the check boxes used for User Input. Their position corresponds to the variable name.
 		
 		operation0 = new JCheckBox("");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, operation0, 65, SpringLayout.SOUTH, ixr3field);
@@ -568,13 +565,13 @@ public class ComputerMain extends JFrame {
 		lblInstructions.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		contentPane.add(lblInstructions);
 		
-		JToggleButton runToggle = new JToggleButton("RUN"); //RUN toggle button
+		runToggle = new JToggleButton("RUN"); //RUN toggle button
 		sl_contentPane.putConstraint(SpringLayout.EAST, runToggle, 112, SpringLayout.WEST, pcload);
 		runToggle.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(runToggle.isSelected()) {
+				if(runToggle.isSelected()) { //if RUN is clicked on to start the loop...
 					cpu.setRunning(true); //sets the instruction cycle to loop
-					lblstopping.setText("RUNNING");
+					lblstopping.setText("RUNNING"); //sets the state label in the bottom right corner to RUNNING
 					gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
 					gpr1load.setEnabled(false);
 					gpr2load.setEnabled(false);
@@ -589,12 +586,12 @@ public class ComputerMain extends JFrame {
 					btnLoad.setEnabled(false);
 					btnIPL.setEnabled(false);
 					btnExeSingleInstruction.setEnabled(false);
-					runToggle.setText("STOP");
+					runToggle.setText("STOP"); //The Run button label is changed to STOP for user clarity.
 					cpu.runInstructionCycle(); //launches the instruction cycle method
 				}
-				if(!runToggle.isSelected()) {				
+				if(!runToggle.isSelected()) { //if RUN (now labled as 'stop') is clicked again to stop the loop...				
 					cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
-					lblstopping.setText("WAITING");
+					lblstopping.setText("WAITING"); //sets the state label in the bottomr right corner to WAITING
 					gpr0load.setEnabled(true); //other buttons are reenabled.
 					gpr1load.setEnabled(true);
 					gpr2load.setEnabled(true);
@@ -609,7 +606,7 @@ public class ComputerMain extends JFrame {
 					btnLoad.setEnabled(true);
 					btnIPL.setEnabled(true);
 					btnExeSingleInstruction.setEnabled(true);
-					runToggle.setText("RUN");
+					runToggle.setText("RUN"); //RUN button label changed back to "RUN"
 				}
 			}
 		});
@@ -620,7 +617,7 @@ public class ComputerMain extends JFrame {
 		btnStore = new JButton("STORE MBR at MAR address"); //Store MBR contents at MAR address in memory
 		btnStore.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				cpu.storeMBRtoMemAtMAR();
+				cpu.storeMBRtoMemAtMAR(); //Runs the StoreMBRtoMemAtMAR method in the CPU class, which does exactly as the name implies.
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnStore, 0, SpringLayout.WEST, pcload);
@@ -628,8 +625,8 @@ public class ComputerMain extends JFrame {
 		
 		btnLoad = new JButton("LOAD MAR address contents to MBR"); //Load MAR address contents to MBR
 		btnLoad.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cpu.storeMemAtMARtoMBR();
+			public void actionPerformed(ActionEvent e) { //when clicked
+				cpu.storeMemAtMARtoMBR(); //Runs the StoreMemAtMARtoMBR method, which does exactly as the name implies.
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, btnLoad, 6, SpringLayout.SOUTH, btnStore);
@@ -638,8 +635,8 @@ public class ComputerMain extends JFrame {
 		
 		btnIPL = new JButton("Initial Program Load"); //Initial Program Load button
 		btnIPL.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				cpu.iPL();
+			public void actionPerformed(ActionEvent e) { //when clicked
+				cpu.iPL(); //performs the IPL method from the CPU class, which loads the text file to memory.
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnIPL, -109, SpringLayout.SOUTH, contentPane);
@@ -650,6 +647,7 @@ public class ComputerMain extends JFrame {
 		btnExeSingleInstruction = new JButton("Execute Single Instruction"); //Execute Single Instruction Button
 		btnExeSingleInstruction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				lblstopping.setText("RUNNING"); //sets the state label in the bottom right corner to RUNNING
 				gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
 				gpr1load.setEnabled(false);
 				gpr2load.setEnabled(false);
@@ -681,6 +679,7 @@ public class ComputerMain extends JFrame {
 				btnIPL.setEnabled(true);
 				btnExeSingleInstruction.setEnabled(true);
 				runToggle.setEnabled(true);
+				lblstopping.setText("WAITING"); //sets the state label in the bottom right corner to WAITING
 			}
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
@@ -695,11 +694,19 @@ public class ComputerMain extends JFrame {
 		visualizefield.setColumns(10);
 		contentPane.add(visualizefield);
 		
-		JButton btnVisualizeInput = new JButton("Visualize Input as Binary"); //visualize input button
+		JButton btnVisualizeInput = new JButton("Visualize Input as Binary/Hex"); //visualize input button
 		btnVisualizeInput.addActionListener(new ActionListener() { //when the button is pressed, it translates the checkboxes to binary and prints it out in the visualizefield
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
 				visualizefield.setText(inputBinary);
+				String dispHex = "";
+				for (int i = 0; i < 16; i+=4) {
+					System.out.println(inputBinary.substring(i, i+4));
+					int digit = Integer.parseInt(inputBinary.substring(i, i+4), 2);
+					System.out.println(digit);
+					dispHex += Integer.toHexString(digit);
+				}
+				hexField.setText(dispHex);
 				//System.out.println(binaryStrToShort(inputBinary)); //for debugging
 			}
 		});
@@ -714,5 +721,11 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblstopping, 0, SpringLayout.SOUTH, runToggle);
 		sl_contentPane.putConstraint(SpringLayout.EAST, lblstopping, 0, SpringLayout.EAST, btnLoad);
 		contentPane.add(lblstopping);
+		
+		hexField = new JTextField();
+		sl_contentPane.putConstraint(SpringLayout.NORTH, hexField, 0, SpringLayout.NORTH, visualizefield);
+		sl_contentPane.putConstraint(SpringLayout.WEST, hexField, 6, SpringLayout.EAST, btnVisualizeInput);
+		contentPane.add(hexField);
+		hexField.setColumns(10);
 	}
 }
