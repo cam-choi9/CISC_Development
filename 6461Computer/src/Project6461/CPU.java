@@ -4,6 +4,8 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+//RUN ComputerMain.java ,  this is NOT the Main file!
+
 public class CPU extends Thread {
 	private ComputerMain gui; //used by the CPU to reference the GUI where necessary
 	protected short gpr0 = 0; //gpr0-3 are general-purpose registers
@@ -15,24 +17,24 @@ public class CPU extends Thread {
 	protected short ixr3 = 0;
 	protected short pc = 0; //program counter
 	protected short mar = 0; //Memory Address Register
-	protected short mbr = 0; //MBR
+	protected short mbr = 0; //Memory Buffer Register
 	private short ir = 0; //(Current) Instruction Register
 	private short mfr = 0; //Machine Fault Register
 	private short cc = 0; //Condition Code
 	private boolean run = false;
 	protected short[] memory = new short[2048];
 	
-	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and assigns the values to the appropriate locations.
+	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
 		this.start();
 		updateGUI();
 	}
 	
-	public String shortToBinaryString(short val, int size) { //for registers of other lengths
+	public String shortToBinaryString(short val, int size) { //Java doesn't provide a short to Binary string method or leading zeroes, just Integers to Binary. This method does that.
 		String binary = "";
-		String firstConversion = Integer.toBinaryString(val);
+		String firstConversion = Integer.toBinaryString(val); //performs the initial conversion
 		int leadingzeros = size - firstConversion.length();
-		for (int i = 0; i < leadingzeros; i++) {
+		for (int i = 0; i < leadingzeros; i++) { //places leading zeroes on the front of the string.
 			binary += "0";
 		}
 		binary += firstConversion;
@@ -44,7 +46,7 @@ public class CPU extends Thread {
 	} 
 	
 	public void updateGUI() { //updates the GUI once any actions are performed.	
-		gui.gpr0field.setText(shortToBinaryString(gpr0, 16));
+		gui.gpr0field.setText(shortToBinaryString(gpr0, 16)); //the second digit is the length of the string
 		gui.gpr1field.setText(shortToBinaryString(gpr1, 16));
 		gui.gpr2field.setText(shortToBinaryString(gpr2, 16));
 		gui.gpr3field.setText(shortToBinaryString(gpr3, 16));
@@ -69,9 +71,8 @@ public class CPU extends Thread {
 			while (fileReader.hasNextLine()) {
 				line = fileReader.nextLine();
 				address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
-				System.out.println(address);
 				content = (short) Integer.parseInt(line.substring((line.length() - 3), (line.length() - 0)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
-				System.out.println(content);
+				//System.out.println(address + "  " + content);//for debugging.
 				memory[address] = content; //loads the line to the specified address location
 			}
 			fileReader.close();
@@ -83,15 +84,15 @@ public class CPU extends Thread {
 		}
 	}
 	
-	public void runInstructionCycle() {
-		Word executable;
+	public void runInstructionCycle() { //This is the instruction cycle
+		Word executable; //The executable word... defined shortly!
 		while (true) {
-			fetch();
-			executable = decode(ir);
-			execute(executable);
-			updateGUI();
-			if (run == false) break;
-			if (pc == 2048) { //this is for Part III, but it's being placed in here early to stop the pc from running out of control
+			fetch(); //Performs the fetch method (see method below)
+			executable = decode(ir); //Decode the contents of the IR (see method below)
+			execute(executable); //Executes the decoded word using the opcode (see method below)
+			updateGUI(); //Refresh the gui to reflect everything that happened.
+			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
+			if (pc == 2048) { //this is for Part III, but it's being placed in here early as a precaution to stop the pc from running past the end of the memory array.
 				mfr = 8;
 				gui.mfrfield.setText("1000");
 				run = false;
@@ -109,7 +110,7 @@ public class CPU extends Thread {
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
 	
-	public Word decode(short ir){ //this is the first part of the control unit. It takes the value in the MBR and finds the opcode
+	public Word decode(short ir){ //this is the first part of the control unit. It takes the IR and decodes it into an executable Word
 		Word executable = new Word(ir);
 		return executable;
 	}
@@ -146,12 +147,13 @@ public class CPU extends Thread {
 	 * All of the instruction methods will be placed below here, in numerical order
 	 * */
 	public void hlt() { // 00 Halt
-		System.out.println("Halted!");
-		//run = false;
+		//System.out.println("Halted!"); //Debugging tool
+		run = false; //stops the fetch cycle loop.
+		if (gui.runToggle.isSelected()) gui.runToggle.doClick(); //if the halt occurred during a running program, this resets the state of the Run button.
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
-		System.out.println("01");
-		switch (word.reg1) {
+		//System.out.println("01"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = memory[word.address];
 				break;
 		case 1: gpr1 = memory[word.address];
@@ -164,8 +166,8 @@ public class CPU extends Thread {
 		}
 	}
 	public void str(Word word) { //02 Load Register to Memory
-		System.out.println("02");
-		switch (word.reg1) {
+		//System.out.println("02"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: memory[word.address] = gpr0;
 				break;
 		case 1: memory[word.address] = gpr1;
@@ -178,8 +180,8 @@ public class CPU extends Thread {
 		}
 	}
 	public void lda(Word word) { //03 Load Register with Address
-		System.out.println("03");
-		switch (word.reg1) {
+		//System.out.println("03"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = word.address;
 				break;
 		case 1: gpr1 = word.address;
@@ -192,8 +194,8 @@ public class CPU extends Thread {
 		}
 	}
 	public void ldx(Word word) { //41 Load Index Register from Memory
-		System.out.println("41");
-		switch (word.reg2) {
+		//System.out.println("41"); ////Debugging tool
+		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: ixr1 = memory[word.address];
 				break;
 		case 2: ixr2 = memory[word.address];
@@ -204,8 +206,8 @@ public class CPU extends Thread {
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
-		System.out.println("42");
-		switch (word.reg2) {
+		//System.out.println("42"); //Debugging tool
+		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: memory[word.address] = ixr1;
 				break;
 		case 2: memory[word.address] = ixr2;
