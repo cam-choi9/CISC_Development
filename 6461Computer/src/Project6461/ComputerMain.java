@@ -14,6 +14,7 @@ import java.awt.Font;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
 
 //RUN THIS FILE! THIS IS WHERE MAIN IS!
 
@@ -53,12 +54,16 @@ public class ComputerMain extends JFrame {
 	private JCheckBox address2;
 	private JCheckBox address3;
 	private JCheckBox address4;
-	protected JToggleButton runToggle; //This is the toggle switch for the Run button. Unlike the other buttons, this has an ON/OFF state
-	protected JTextField visualizefield;
+	//These are the toggle switches for the Run and Execute Single Instruction buttons. Unlike the other buttons, this has an ON/OFF state
+	protected JToggleButton runToggle; 
+	protected JToggleButton tglExeSingleInstruction;
+	
 	private JButton btnStore; //these buttons are declared down here because they were created after the Run Toggle.
 	private JButton btnLoad;
 	private JButton btnIPL;
-	private JButton btnExeSingleInstruction;
+	
+	//text fields for visualizing the input check boxes as Hexidecimal or Binary.
+	protected JTextField visualizefield;
 	private JTextField hexField;
 
 	/**
@@ -141,7 +146,7 @@ public class ComputerMain extends JFrame {
 	 */
 	public ComputerMain() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //this group of items sets up the GUI window.
-		setBounds(100, 100, 950, 500);
+		setBounds(100, 100, 1050, 500);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -569,44 +574,49 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, runToggle, 112, SpringLayout.WEST, pcload);
 		runToggle.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(runToggle.isSelected()) { //if RUN is clicked on to start the loop...
-					cpu.setRunning(true); //sets the instruction cycle to loop
-					lblstopping.setText("RUNNING"); //sets the state label in the bottom right corner to RUNNING
-					gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
-					gpr1load.setEnabled(false);
-					gpr2load.setEnabled(false);
-					gpr3load.setEnabled(false);
-					ixr1load.setEnabled(false);
-					ixr2load.setEnabled(false);
-					ixr3load.setEnabled(false);
-					pcload.setEnabled(false);
-					marload.setEnabled(false);
-					mbrload.setEnabled(false);
-					btnStore.setEnabled(false);
-					btnLoad.setEnabled(false);
-					btnIPL.setEnabled(false);
-					btnExeSingleInstruction.setEnabled(false);
-					runToggle.setText("STOP"); //The Run button label is changed to STOP for user clarity.
-					cpu.runInstructionCycle(); //launches the instruction cycle method
+				if(tglExeSingleInstruction.isSelected()) { //if the Execute Single Instruction toggle is activated, the Execute Single Instruction method is run instead.
+					cpu.executeSingleInstruction();
 				}
-				if(!runToggle.isSelected()) { //if RUN (now labled as 'stop') is clicked again to stop the loop...				
-					cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
-					lblstopping.setText("WAITING"); //sets the state label in the bottomr right corner to WAITING
-					gpr0load.setEnabled(true); //other buttons are reenabled.
-					gpr1load.setEnabled(true);
-					gpr2load.setEnabled(true);
-					gpr3load.setEnabled(true);
-					ixr1load.setEnabled(true);
-					ixr2load.setEnabled(true);
-					ixr3load.setEnabled(true);
-					pcload.setEnabled(true);
-					marload.setEnabled(true);
-					mbrload.setEnabled(true);
-					btnStore.setEnabled(true);
-					btnLoad.setEnabled(true);
-					btnIPL.setEnabled(true);
-					btnExeSingleInstruction.setEnabled(true);
-					runToggle.setText("RUN"); //RUN button label changed back to "RUN"
+				else { //otherwise, we run the whole fetch/decode/execute cycle in automatic mode.
+					if(runToggle.isSelected()) { //if RUN is clicked on to start the loop...
+						cpu.setRunning(true); //sets the instruction cycle to loop
+						lblstopping.setText("RUNNING"); //sets the state label in the bottom right corner to RUNNING
+						gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
+						gpr1load.setEnabled(false);
+						gpr2load.setEnabled(false);
+						gpr3load.setEnabled(false);
+						ixr1load.setEnabled(false);
+						ixr2load.setEnabled(false);
+						ixr3load.setEnabled(false);
+						pcload.setEnabled(false);
+						marload.setEnabled(false);
+						mbrload.setEnabled(false);
+						btnStore.setEnabled(false);
+						btnLoad.setEnabled(false);
+						btnIPL.setEnabled(false);
+						tglExeSingleInstruction.setEnabled(false);
+						runToggle.setText("STOP"); //The Run button label is changed to STOP for user clarity.
+						cpu.runInstructionCycle(); //launches the instruction cycle method
+					}
+					if(!runToggle.isSelected()) { //if RUN (now labled as 'stop') is clicked again to stop the loop...				
+						cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
+						lblstopping.setText("WAITING - Automatic"); //sets the state label in the bottomr right corner to WAITING
+						gpr0load.setEnabled(true); //other buttons are reenabled.
+						gpr1load.setEnabled(true);
+						gpr2load.setEnabled(true);
+						gpr3load.setEnabled(true);
+						ixr1load.setEnabled(true);
+						ixr2load.setEnabled(true);
+						ixr3load.setEnabled(true);
+						pcload.setEnabled(true);
+						marload.setEnabled(true);
+						mbrload.setEnabled(true);
+						btnStore.setEnabled(true);
+						btnLoad.setEnabled(true);
+						btnIPL.setEnabled(true);
+						tglExeSingleInstruction.setEnabled(true);
+						runToggle.setText("RUN"); //RUN button label changed back to "RUN"
+					}
 				}
 			}
 		});
@@ -634,6 +644,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(btnLoad);
 		
 		btnIPL = new JButton("Initial Program Load"); //Initial Program Load button
+		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, 30, SpringLayout.SOUTH, btnIPL);
 		btnIPL.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { //when clicked
 				cpu.iPL(); //performs the IPL method from the CPU class, which loads the text file to memory.
@@ -644,48 +655,22 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, btnIPL, 0, SpringLayout.WEST, pcload);
 		contentPane.add(btnIPL);
 		
-		btnExeSingleInstruction = new JButton("Execute Single Instruction"); //Execute Single Instruction Button
-		btnExeSingleInstruction.addActionListener(new ActionListener() {
+		tglExeSingleInstruction = new JToggleButton("Execute Single Instruction");
+		tglExeSingleInstruction.setHorizontalAlignment(SwingConstants.LEFT);
+		sl_contentPane.putConstraint(SpringLayout.WEST, tglExeSingleInstruction, 0, SpringLayout.WEST, pcload);
+		sl_contentPane.putConstraint(SpringLayout.EAST, tglExeSingleInstruction, 186, SpringLayout.WEST, pcload);
+		tglExeSingleInstruction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				lblstopping.setText("RUNNING"); //sets the state label in the bottom right corner to RUNNING
-				gpr0load.setEnabled(false); //all of the other buttons are disabled to prevent things from being changed in the middle of the cycle.
-				gpr1load.setEnabled(false);
-				gpr2load.setEnabled(false);
-				gpr3load.setEnabled(false);
-				ixr1load.setEnabled(false);
-				ixr2load.setEnabled(false);
-				ixr3load.setEnabled(false);
-				pcload.setEnabled(false);
-				marload.setEnabled(false);
-				mbrload.setEnabled(false);
-				btnStore.setEnabled(false);
-				btnLoad.setEnabled(false);
-				btnIPL.setEnabled(false);
-				btnExeSingleInstruction.setEnabled(false);
-				runToggle.setEnabled(false);
-				cpu.runInstructionCycle(); //launches the instruction cycle method. Because SetRunning is false, the instructioncycle only happens once.
-				gpr0load.setEnabled(true); //other buttons are reenabled.
-				gpr1load.setEnabled(true);
-				gpr2load.setEnabled(true);
-				gpr3load.setEnabled(true);
-				ixr1load.setEnabled(true);
-				ixr2load.setEnabled(true);
-				ixr3load.setEnabled(true);
-				pcload.setEnabled(true);
-				marload.setEnabled(true);
-				mbrload.setEnabled(true);
-				btnStore.setEnabled(true);
-				btnLoad.setEnabled(true);
-				btnIPL.setEnabled(true);
-				btnExeSingleInstruction.setEnabled(true);
-				runToggle.setEnabled(true);
-				lblstopping.setText("WAITING"); //sets the state label in the bottom right corner to WAITING
+				if(tglExeSingleInstruction.isSelected()) {
+					lblstopping.setText("WAITING - Single Instruction");
+				}
+				if(!tglExeSingleInstruction.isSelected()) {
+					lblstopping.setText("WAITING - Automatic");
+				}
 			}
 		});
-		sl_contentPane.putConstraint(SpringLayout.NORTH, runToggle, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
-		sl_contentPane.putConstraint(SpringLayout.NORTH, btnExeSingleInstruction, 6, SpringLayout.SOUTH, btnIPL);
-		sl_contentPane.putConstraint(SpringLayout.WEST, btnExeSingleInstruction, 0, SpringLayout.WEST, pcload);
-		contentPane.add(btnExeSingleInstruction);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, tglExeSingleInstruction, 6, SpringLayout.SOUTH, btnIPL);
+		contentPane.add(tglExeSingleInstruction);
 		
 		visualizefield = new JTextField(); //text field to the left of the visualize input button
 		visualizefield.setText("Preview input here");
@@ -715,11 +700,11 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, btnVisualizeInput, 0, SpringLayout.EAST, lblIR);
 		contentPane.add(btnVisualizeInput);
 		
-		lblstopping = new JLabel("WAITING");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, lblstopping, 6, SpringLayout.SOUTH, btnExeSingleInstruction);
+		lblstopping = new JLabel("WAITING - Automatic");
+		sl_contentPane.putConstraint(SpringLayout.NORTH, lblstopping, 30, SpringLayout.SOUTH, btnIPL);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblstopping, -39, SpringLayout.EAST, btnStore);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblstopping, 0, SpringLayout.SOUTH, runToggle);
-		sl_contentPane.putConstraint(SpringLayout.EAST, lblstopping, 0, SpringLayout.EAST, btnLoad);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, lblstopping, -37, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, lblstopping, 92, SpringLayout.EAST, btnLoad);
 		contentPane.add(lblstopping);
 		
 		hexField = new JTextField();
