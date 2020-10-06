@@ -101,6 +101,15 @@ public class CPU extends Thread {
 		} 
 	}
 	
+	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
+		Word executable;
+		ir = mbr; //there is no load button for the ir, so it must use the value in the MBR.
+		executable = decode(ir); //Decode the contents of the IR (see method below)
+		execute(executable); //Executes the decoded word using the opcode (see method below)
+		updateGUI(); //Refresh the gui to reflect everything that happened.
+		if(gui.runToggle.isSelected()) {gui.runToggle.doClick();} //ensures the Run button is deselected at the end.
+	}
+	
 	public void fetch(){
 		mar = pc; //The CPU sends the contents of the PC to the MAR
 		mbr = memory[mar]; //In response to the read command (with address equal to PC), 
