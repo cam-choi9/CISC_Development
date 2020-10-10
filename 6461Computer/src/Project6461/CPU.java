@@ -45,7 +45,7 @@ public class CPU extends Thread {
 		run = state;
 	} 
 	
-	public void updateGUI() { //updates the GUI once any actions are performed.	
+	public void updateGUI() { //updates the GUI once any actions are performed.	Each line corresponds to a visible register.
 		gui.gpr0field.setText(shortToBinaryString(gpr0, 16)); //the second digit is the length of the string
 		gui.gpr1field.setText(shortToBinaryString(gpr1, 16));
 		gui.gpr2field.setText(shortToBinaryString(gpr2, 16));
@@ -61,9 +61,9 @@ public class CPU extends Thread {
 		gui.ccfield.setText(shortToBinaryString(cc, 4));
 	}
 	
-	public void iPL() {//initial program load from text file
+	public void iPL() {//initial program load from text file. Basically, the ROM loader
 		try {
-			File initialProgram = new File("program.txt");
+			File initialProgram = new File("program.txt"); //program.txt is the ROM.
 			Scanner fileReader = new Scanner(initialProgram);
 			int address = 0;
 			short content = 0;
@@ -87,17 +87,17 @@ public class CPU extends Thread {
 	public void runInstructionCycle() { //This is the instruction cycle
 		Word executable; //The executable word... defined shortly!
 		while (true) {
-			fetch(); //Performs the fetch method (see method below)
-			executable = decode(ir); //Decode the contents of the IR (see method below)
-			execute(executable); //Executes the decoded word using the opcode (see method below)
-			updateGUI(); //Refresh the gui to reflect everything that happened.
-			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
-			if (pc == 2048) { //this is for Part III, but it's being placed in here early as a precaution to stop the pc from running past the end of the memory array.
+			if (pc >= 2048) { //this if-branch is for Part III, but it's being placed in here early as a precaution to stop the pc from running past the end of the memory array.
 				mfr = 8;
 				gui.mfrfield.setText("1000");
 				run = false;
 				break;
 			}
+			fetch(); //Performs the fetch method (see method below)
+			executable = decode(ir); //Decode the contents of the IR (see method below)
+			execute(executable); //Executes the decoded word using the opcode (see method below)
+			updateGUI(); //Refresh the gui to reflect everything that happened.
+			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
 		} 
 	}
 	
@@ -152,6 +152,41 @@ public class CPU extends Thread {
 		//you can't see the contents of the memory, so there's no GUI update here.
 	}
 	
+	public short effectiveAddress(Word word) { //Calculates the Effective Address using the parameters in instruction packet on page 7
+		short indAddress = 0;
+		if (word.idb == false) {//If Indirect Bit IS NOT set
+			if (word.ixrN == 0) { //if the IXR number is 0
+				return word.address; //return just the Word's base address value
+			}
+			else { //if IXR number is 1-3
+				switch (word.ixrN) { //calculate the IXR plus the base address value
+				case 1: indAddress = (short) (ixr1 + word.address);
+					break;
+				case 2: indAddress = (short) (ixr2 + word.address);
+					break;
+				case 3: indAddress = (short) (ixr3 + word.address);
+					break;
+				}
+				return indAddress; //...and return that
+			}
+		}
+		else { //IF Indirect Bit IS set
+			if (word.ixrN == 0) { //if the IXR number is 0
+				return memory[word.address]; //return the contents at memory address that the address value is pointing to
+			}
+			else { //if IXR number is 1-3
+				switch (word.ixrN) { //calculate the IXR plus the base address value
+				case 1: indAddress = (short) (ixr1 + word.address);
+					break;
+				case 2: indAddress = (short) (ixr2 + word.address);
+					break;
+				case 3: indAddress = (short) (ixr3 + word.address);
+					break;
+				}
+				return memory[indAddress]; //...and return the contents at memory address that the new value is pointing to.
+			}
+		}
+	}
 	/*
 	 * All of the instruction methods will be placed below here, in numerical order
 	 * */
@@ -163,27 +198,27 @@ public class CPU extends Thread {
 	public void ldr(Word word) { // 01 Load Register from Memory
 		//System.out.println("01"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 = memory[word.address];
-				break;
-		case 1: gpr1 = memory[word.address];
-				break;
-		case 2: gpr2 = memory[word.address];
-				break;
-		case 3: gpr3 = memory[word.address];
-				break;
+		case 0: gpr0 = memory[effectiveAddress(word)];
+			break;
+		case 1: gpr1 = memory[effectiveAddress(word)];
+			break;
+		case 2: gpr2 = memory[effectiveAddress(word)];
+			break;
+		case 3: gpr3 = memory[effectiveAddress(word)];
+			break;
 		default: gui.visualizefield.setText("LDR failed.");
 		}
 	}
 	public void str(Word word) { //02 Load Register to Memory
 		//System.out.println("02"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: memory[word.address] = gpr0;
+		case 0: memory[effectiveAddress(word)] = gpr0;
 				break;
-		case 1: memory[word.address] = gpr1;
+		case 1: memory[effectiveAddress(word)] = gpr1;
 				break;
-		case 2: memory[word.address] = gpr2;
+		case 2: memory[effectiveAddress(word)] = gpr2;
 				break;
-		case 3: memory[word.address] = gpr3;
+		case 3: memory[effectiveAddress(word)] = gpr3;
 				break;
 		default: gui.visualizefield.setText("STR failed.");
 		}
@@ -191,13 +226,13 @@ public class CPU extends Thread {
 	public void lda(Word word) { //03 Load Register with Address
 		//System.out.println("03"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 = word.address;
+		case 0: gpr0 = effectiveAddress(word);
 				break;
-		case 1: gpr1 = word.address;
+		case 1: gpr1 = effectiveAddress(word);
 				break;
-		case 2: gpr2 = word.address;
+		case 2: gpr2 = effectiveAddress(word);
 				break;
-		case 3: gpr3 = word.address;
+		case 3: gpr3 = effectiveAddress(word);
 				break;
 		default: gui.visualizefield.setText("LDA failed.");
 		}
@@ -205,23 +240,23 @@ public class CPU extends Thread {
 	public void ldx(Word word) { //41 Load Index Register from Memory
 		//System.out.println("41"); ////Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
-		case 1: ixr1 = memory[word.address];
-				break;
-		case 2: ixr2 = memory[word.address];
-				break;
-		case 3: ixr3 = memory[word.address];
-				break;
-		default: gui.visualizefield.setText("LDX failed.");
+		case 1: ixr1 = memory[effectiveAddress(word)];
+			break;
+		case 2: ixr2 = memory[effectiveAddress(word)];
+			break;
+		case 3: ixr3 = memory[effectiveAddress(word)];
+			break;
+		default: gui.visualizefield.setText("LDR failed.");
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
 		//System.out.println("42"); //Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
-		case 1: memory[word.address] = ixr1;
+		case 1: memory[effectiveAddress(word)] = ixr1;
 				break;
-		case 2: memory[word.address] = ixr2;
+		case 2: memory[effectiveAddress(word)] = ixr2;
 				break;
-		case 3: memory[word.address] = ixr3;
+		case 3: memory[effectiveAddress(word)] = ixr3;
 				break;
 		default: gui.visualizefield.setText("STX failed.");
 		}
