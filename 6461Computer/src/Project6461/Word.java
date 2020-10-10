@@ -15,6 +15,7 @@ public class Word {
 		opcode = getOpcode(ir);
 		gprN = getGprN(ir);
 		ixrN = getIxrN(ir);
+		idb = getIndirectBit(ir);
 		address = getAddress(ir);
 		//debugging();
 	}
@@ -39,17 +40,27 @@ public class Word {
 		return ixrN;
 	}
 	
+	private boolean getIndirectBit(short ir) { //determines if the indirect bit is set
+		short idbN = ir;
+		idbN = (short) (idbN << 10); //remove leading bits.
+		idbN = (short) Math.abs((idbN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		if (idbN == 1) return true;
+		else return false;
+	}
+	
 	private short getAddress(short ir) { //performs bit shifting to isolate and find address
 		short addr = ir;
 		addr = (short) (addr << 11); //remove leading bits
 		addr = (short) Math.abs((addr >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
 		return addr;
 	}
-	
+	/*
 	private void debugging() { //Troubleshooting tool for checking the contents of the word. Disabled otherwise
 		System.out.println("opcode=" + opcode);
 		System.out.println("gprN=" + gprN);
 		System.out.println("ixrN=" + ixrN);
+		System.out.println("idb=" + idb);
 		System.out.println("Addr=" + address);
 	}
+	*/
 }
