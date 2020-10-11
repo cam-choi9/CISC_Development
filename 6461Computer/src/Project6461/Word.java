@@ -10,6 +10,7 @@ public class Word {
 	protected short ixrN; //IXR number, derived from bits 9 and 10 of the word.
 	protected boolean idb; //Indirect bit, derived from bit 11 of the word.
 	protected short address; //Memory address, derived from bits 12 through 16 of the word.
+	private boolean debug = true; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
 		opcode = getOpcode(ir);
@@ -17,12 +18,25 @@ public class Word {
 		ixrN = getIxrN(ir);
 		idb = getIndirectBit(ir);
 		address = getAddress(ir);
-		//debugging();
+		if (debug == true) {
+			System.out.println("IR passed " + ir + " in binary " + Integer.toBinaryString(ir));
+			debugging();
+		}
 	}
 	
 	private short getOpcode(short ir) { //performs bit shifting to isolate and find the OpCode
 		short operationcode = ir;
-		operationcode = (short) (operationcode >> 10); //remove everything else from the word to get the opcode
+		String parsed = "";
+		if (ir < 0) {
+			parsed = Integer.toBinaryString(ir);
+			//System.out.println("try " + parsed);
+			parsed = parsed.substring(16, 22);
+			//System.out.println("try2 " + parsed);
+			operationcode = Short.parseShort(parsed, 2);
+		}
+		else {
+			operationcode = (short) (operationcode >> 10);//remove everything else from the word to get the opcode
+		} 
 		return operationcode;
 	}
 	
@@ -54,13 +68,14 @@ public class Word {
 		addr = (short) Math.abs((addr >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
 		return addr;
 	}
-	/*
+	
 	private void debugging() { //Troubleshooting tool for checking the contents of the word. Disabled otherwise
+		
 		System.out.println("opcode=" + opcode);
 		System.out.println("gprN=" + gprN);
 		System.out.println("ixrN=" + ixrN);
 		System.out.println("idb=" + idb);
 		System.out.println("Addr=" + address);
 	}
-	*/
+	
 }
