@@ -23,6 +23,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private boolean run = false;
 	protected short[] memory = new short[2048];
+	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
@@ -33,6 +34,9 @@ public class CPU extends Thread {
 	public String shortToBinaryString(short val, int size) { //Java doesn't provide a short to Binary string method or leading zeroes, just Integers to Binary. This method does that.
 		String binary = "";
 		String firstConversion = Integer.toBinaryString(val); //performs the initial conversion
+		if (firstConversion.length() > 16) { //Deals with situations where the binary string has a ton of extra 1s due to 2's compliment.
+			firstConversion = firstConversion.substring(16);
+		}
 		int leadingzeros = size - firstConversion.length();
 		for (int i = 0; i < leadingzeros; i++) { //places leading zeroes on the front of the string.
 			binary += "0";
@@ -67,12 +71,24 @@ public class CPU extends Thread {
 			Scanner fileReader = new Scanner(initialProgram);
 			int address = 0;
 			short content = 0;
+			int contentInt = 0;
+			String parsed = "";
 			String line;
 			while (fileReader.hasNextLine()) {
 				line = fileReader.nextLine();
 				address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
-				content = (short) Integer.parseInt(line.substring((line.length() - 3), (line.length() - 0)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
-				//System.out.println(address + "  " + content);//for debugging.
+				contentInt = Integer.parseInt(line.substring((line.length() - 4)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
+				parsed = Integer.toBinaryString(contentInt);
+				if (parsed.length() > 16) { //Java keeps turning the short into a 32 bit value and storing that in the array. This prevents that.
+					parsed = parsed.substring(16);
+					//System.out.println("try2 " + parsed);
+					content = Short.parseShort(parsed, 2);
+				}
+				else {
+					content = (short) contentInt;
+				}
+				System.out.println(Integer.toBinaryString(content));
+				System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
 				memory[address] = content; //loads the line to the specified address location
 			}
 			fileReader.close();
@@ -191,12 +207,12 @@ public class CPU extends Thread {
 	 * All of the instruction methods will be placed below here, in numerical order
 	 * */
 	public void hlt() { // 00 Halt
-		//System.out.println("Halted!"); //Debugging tool
+		if(isaConsole == true) System.out.println("Halted!"); //Debugging tool
 		run = false; //stops the fetch cycle loop.
 		if (gui.runToggle.isSelected()) gui.runToggle.doClick(); //if the halt occurred during a running program, this resets the state of the Run button.
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
-		//System.out.println("01"); //Debugging tool
+		if(isaConsole == true) System.out.println("01"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = memory[effectiveAddress(word)];
 			break;
@@ -210,7 +226,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void str(Word word) { //02 Load Register to Memory
-		//System.out.println("02"); //Debugging tool
+		if(isaConsole == true) System.out.println("02"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: memory[effectiveAddress(word)] = gpr0;
 				break;
@@ -224,7 +240,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void lda(Word word) { //03 Load Register with Address
-		//System.out.println("03"); //Debugging tool
+		if(isaConsole == true) System.out.println("03"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = effectiveAddress(word);
 				break;
@@ -238,7 +254,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void ldx(Word word) { //41 Load Index Register from Memory
-		//System.out.println("41"); ////Debugging tool
+		if(isaConsole == true) System.out.println("41"); ////Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: ixr1 = memory[effectiveAddress(word)];
 			break;
@@ -250,7 +266,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
-		//System.out.println("42"); //Debugging tool
+		if(isaConsole == true) System.out.println("42"); //Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: memory[effectiveAddress(word)] = ixr1;
 				break;
