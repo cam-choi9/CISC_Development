@@ -23,7 +23,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private boolean run = false;
 	protected short[] memory = new short[2048];
-	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
+	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
@@ -72,6 +72,7 @@ public class CPU extends Thread {
 			int address = 0;
 			short content = 0;
 			int contentInt = 0;
+			boolean first = true;
 			String parsed = "";
 			String line;
 			while (fileReader.hasNextLine()) {
@@ -87,11 +88,15 @@ public class CPU extends Thread {
 				else {
 					content = (short) contentInt;
 				}
-				System.out.println(Integer.toBinaryString(content));
-				System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
+				//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
 				memory[address] = content; //loads the line to the specified address location
+				if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
+					pc = (short) address;
+					first = false;
+				}
 			}
 			fileReader.close();
+			updateGUI();
 			gui.visualizefield.setText("Program written to Memory");
 		}
 		catch (FileNotFoundException e) {
@@ -119,11 +124,11 @@ public class CPU extends Thread {
 	
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
 		Word executable;
-		ir = mbr; //there is no load button for the ir, so it must use the value in the MBR.
+		fetch();
 		executable = decode(ir); //Decode the contents of the IR (see method below)
 		execute(executable); //Executes the decoded word using the opcode (see method below)
 		updateGUI(); //Refresh the gui to reflect everything that happened.
-		if(gui.runToggle.isSelected()) {gui.runToggle.doClick();} //ensures the Run button is deselected at the end.
+		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.
 	}
 	
 	public void fetch(){
@@ -209,7 +214,7 @@ public class CPU extends Thread {
 	public void hlt() { // 00 Halt
 		if(isaConsole == true) System.out.println("Halted!"); //Debugging tool
 		run = false; //stops the fetch cycle loop.
-		if (gui.runToggle.isSelected()) gui.runToggle.doClick(); //if the halt occurred during a running program, this resets the state of the Run button.
+		gui.runToggle.setSelected(false);//if the halt occurred during a running program, this resets the state of the Run button. 
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
 		if(isaConsole == true) System.out.println("01"); //Debugging tool
