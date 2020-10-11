@@ -259,7 +259,7 @@ public class ComputerMain extends JFrame {
 			public void actionPerformed(ActionEvent e) { //when a load button is pressed, three things will happen:
 				String inputBinary = getInput(); //1) it will convert the input boxes to a binary String
 				cpu.gpr0 = binaryStrToShort(inputBinary); //2) it will convert the string to a Short and pass along that value to the CPU class
-				cpu.updateGUI(); //2) it will update the GUI
+				cpu.updateGUI(); //3) it will update the GUI
 			} //all the other load buttons function the same way.
 		});
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr0load, 0, SpringLayout.NORTH, lblGpr_0);
@@ -686,9 +686,9 @@ public class ComputerMain extends JFrame {
 				visualizefield.setText(inputBinary);
 				String dispHex = "";
 				for (int i = 0; i < 16; i+=4) {
-					System.out.println(inputBinary.substring(i, i+4));
+					//System.out.println(inputBinary.substring(i, i+4));
 					int digit = Integer.parseInt(inputBinary.substring(i, i+4), 2);
-					System.out.println(digit);
+					//System.out.println(digit);
 					dispHex += Integer.toHexString(digit);
 				}
 				hexField.setText(dispHex);
