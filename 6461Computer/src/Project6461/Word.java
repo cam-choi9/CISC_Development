@@ -10,7 +10,7 @@ public class Word {
 	protected short ixrN; //IXR number, derived from bits 9 and 10 of the word.
 	protected boolean idb; //Indirect bit, derived from bit 11 of the word.
 	protected short address; //Memory address, derived from bits 12 through 16 of the word.
-	private boolean debug = true; //set to true to enable console debugging
+	private boolean debug = false; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
 		opcode = getOpcode(ir);
@@ -76,6 +76,5 @@ public class Word {
 		System.out.println("ixrN=" + ixrN);
 		System.out.println("idb=" + idb);
 		System.out.println("Addr=" + address);
-	}
-	
+	}	
 }
