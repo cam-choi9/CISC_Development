@@ -18,6 +18,17 @@ import javax.swing.SwingConstants;
 
 //RUN THIS FILE! THIS IS WHERE MAIN IS!
 
+/*ComputerMain.java
+ * This class handles the GUI. It contains all the variables and functions for the buttons, text fields, toggles, checkboxes, and labels.
+ * It also contains functions for converting the input binary value checkboxes to a short for transfer over to the CPU class.
+ * While it does contain a function for binary-to-hex conversion as part of an ease-of-use tool, 
+ * there are no critical calculations or processing that happen in this class. 
+ * Instead, everything is designed to hand values over to CPU.java, which does all of the actual computing.
+ * A CPU object is created automatically when the simulator starts, with a reference to this UI object so the two can pass data back and forth.
+ * 
+ * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
+ * */
+
 public class ComputerMain extends JFrame {
 
 	private static CPU cpu;
