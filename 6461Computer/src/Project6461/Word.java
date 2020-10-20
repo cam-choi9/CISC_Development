@@ -4,6 +4,15 @@ import java.lang.Math;
 
 //Run ComputerMain.java , this is NOT the Main file!
 
+/*
+ * Word.java
+ * During the decode portion of CPU.java's instruction cycle, a 16-bit string is used to create a Word object.
+ * Word objects take the 16-bit value and parse it into smaller values that can be easily referenced  
+ * by CPU.java's Instruction Set Architecture.
+ * 
+ * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
+ * */
+
 public class Word {
 	protected short opcode; //Operation Code, derived from the first six bits of the word
 	protected short gprN; //GPR number, derived from bits 7 and 8 of the word.
@@ -76,5 +85,6 @@ public class Word {
 		System.out.println("ixrN=" + ixrN);
 		System.out.println("idb=" + idb);
 		System.out.println("Addr=" + address);
-	}	
+	}
+	
 }
