@@ -6,6 +6,18 @@ import java.io.FileNotFoundException;
 
 //RUN ComputerMain.java ,  this is NOT the Main file!
 
+/*
+ * CPU.java is the "brains" of the simulator, and performs all of the actual calculations and functions.
+ * It also contains the values for the registers which are pushed to the gui after update events.
+ * The Initial Program Load method can be found here, along with the Instruction Cycle and
+ * Instruction Set Architecture. During the instruction cycle, it takes content from the Instruction Register (ir)
+ * and converts them into Word objects. These Word objects are then placed into the execute method which
+ * uses them to execute the appropriate instruction.
+ * Because ComputerMain.java's GUI and CPU.java must run concurrently, this object runs in a separate thread.
+ * 
+ * Part 1 written by Michael Ashery, reviewed by Jaeseok Choi and Daniel Brewer.
+ * */
+
 public class CPU extends Thread {
 	private ComputerMain gui; //used by the CPU to reference the GUI where necessary
 	protected short gpr0 = 0; //gpr0-3 are general-purpose registers
@@ -66,6 +78,22 @@ public class CPU extends Thread {
 	}
 	
 	public void iPL() {//initial program load from text file. Basically, the ROM loader
+		//clear all registers and memory
+		gpr0 = 0;
+		gpr1 = 0; 
+		gpr2 = 0;
+		gpr3 = 0;
+		ixr1 = 0;
+		ixr2 = 0;
+		ixr3 = 0;
+		pc = 0; 
+		mar = 0;
+		mbr = 0;
+		ir = 0; 
+		mfr = 0;
+		cc = 0; 
+		memory = new short[2048];
+		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
 			Scanner fileReader = new Scanner(initialProgram);
@@ -214,6 +242,7 @@ public class CPU extends Thread {
 	public void hlt() { // 00 Halt
 		if(isaConsole == true) System.out.println("Halted!"); //Debugging tool
 		run = false; //stops the fetch cycle loop.
+		pc--; //cancels out the PC increment in the fetch method.
 		gui.runToggle.setSelected(false);//if the halt occurred during a running program, this resets the state of the Run button. 
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
