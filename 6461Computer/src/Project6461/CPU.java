@@ -34,7 +34,8 @@ public class CPU extends Thread {
 	private short mfr = 0; //Machine Fault Register
 	private short cc = 0; //Condition Code
 	private boolean run = false;
-	protected short[] memory = new short[2048];
+	protected short[] memory = new short[2048]; // # of words = 2048 => main memory size = # of words (2048) * block size (2 bytes) = 4096 bytes = 2^12 bytes => physical address = 12 bits
+        protected short[] cache = new short[16]; // # of cache lines = 16 => cache size = # of cache lines (16) * block size (2 bytes) = 32 bytes = 2^5 bytes => cache address = 5 bits
 	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
@@ -75,7 +76,7 @@ public class CPU extends Thread {
 		gui.irfield.setText(shortToBinaryString(ir, 16));
 		gui.mfrfield.setText(shortToBinaryString(mfr, 4));
 		gui.ccfield.setText(shortToBinaryString(cc, 4));
-	}
+	}        
 	
 	public void iPL() {//initial program load from text file. Basically, the ROM loader
 		//clear all registers and memory
@@ -93,6 +94,7 @@ public class CPU extends Thread {
 		mfr = 0;
 		cc = 0; 
 		memory = new short[2048];
+                cache = new short[16];
 		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
@@ -101,6 +103,7 @@ public class CPU extends Thread {
 			short content = 0;
 			int contentInt = 0;
 			boolean first = true;
+                        int cacheLineNumber = 0;    // an index pointing to the first block to be added/removed (initially points to the beginning of the cache memory)
 			String parsed = "";
 			String line;
 			while (fileReader.hasNextLine()) {
@@ -116,8 +119,13 @@ public class CPU extends Thread {
 				else {
 					content = (short) contentInt;
 				}
-				//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
-				memory[address] = content; //loads the line to the specified address location
+				//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.                                                                
+                                memory[address] = content; //loads the line to the specified address location                         
+                                cache[cacheLineNumber] = content; // loads the line to replace the first block in cache memory
+                                cacheLineNumber++; // move index to point the next block to be out
+                                if (cacheLineNumber == cache.length) { // if the pointer reaches the end of the cache memory, 
+                                    cacheLineNumber = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+                                }
 				if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
 					pc = (short) address;
 					first = false;
@@ -132,7 +140,7 @@ public class CPU extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+	        
 	public void runInstructionCycle() { //This is the instruction cycle
 		Word executable; //The executable word... defined shortly!
 		while (true) {
@@ -153,6 +161,7 @@ public class CPU extends Thread {
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
 		Word executable;
 		fetch();
+                // cache_search(); // search cache memory first => If 'hit', execute the instruction. Else, access main memory.
 		executable = decode(ir); //Decode the contents of the IR (see method below)
 		execute(executable); //Executes the decoded word using the opcode (see method below)
 		updateGUI(); //Refresh the gui to reflect everything that happened.
@@ -245,6 +254,16 @@ public class CPU extends Thread {
 		pc--; //cancels out the PC increment in the fetch method.
 		gui.runToggle.setSelected(false);//if the halt occurred during a running program, this resets the state of the Run button. 
 	}
+        
+        public void cache_search() { // search through the cache memory and execute the instruction if found in the cache memory
+            for (int i=0; i<cache.length; i++) {                
+                if (cache[i] == ir) {     // "hit" case
+                    // execute 
+                    // no need to access main memory
+                }
+            }
+        }
+        
 	public void ldr(Word word) { // 01 Load Register from Memory
 		if(isaConsole == true) System.out.println("01"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
