@@ -11,6 +11,7 @@ import java.lang.Math;
  * by CPU.java's Instruction Set Architecture.
  * 
  * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
+ * Part 2 Modifications for new ISA by Michael Ashery
  * */
 
 public class Word {
@@ -18,7 +19,9 @@ public class Word {
 	protected short gprN; //GPR number, derived from bits 7 and 8 of the word.
 	protected short ixrN; //IXR number, derived from bits 9 and 10 of the word.
 	protected boolean idb; //Indirect bit, derived from bit 11 of the word.
-	protected short address; //Memory address, derived from bits 12 through 16 of the word.
+	protected short address; //Memory address, derived from bits 12 through 16 of the word. Also used for immed
+	protected short rx; //for logical/arithmeitc operations. Also R for Register shift/Rotations
+	protected short ry;
 	private boolean debug = false; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
@@ -26,6 +29,8 @@ public class Word {
 		gprN = getGprN(ir);
 		ixrN = getIxrN(ir);
 		idb = getIndirectBit(ir);
+		rx = getRx(ir);
+		ry = getRy(ir);
 		address = getAddress(ir);
 		if (debug == true) {
 			System.out.println("IR passed " + ir + " in binary " + Integer.toBinaryString(ir));
@@ -65,9 +70,7 @@ public class Word {
 	
 	private boolean getIndirectBit(short ir) { //determines if the indirect bit is set
 		short idbN = ir;
-		idbN = (short) (idbN << 10); //remove leading bits.
-		idbN = (short) Math.abs((idbN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
-		if (idbN == 1) return true;
+		if ((idbN & 0b0000000000100000) == 0b0000000000100000) {return true;}
 		else return false;
 	}
 	
@@ -77,6 +80,18 @@ public class Word {
 		addr = (short) Math.abs((addr >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
 		return addr;
 	}
+	private short getRx(short ir) {
+		short regx = ir;
+		regx = (short) (regx << 6);
+		regx = (short) (regx >> 14);
+		return regx;
+	}
+	private short getRy(short ir) {
+		short regy = ir;
+		regy = (short) (regy << 6);
+		regy = (short) (regy >> 14);
+		return regy;
+	}
 	
 	private void debugging() { //Troubleshooting tool for checking the contents of the word. Disabled otherwise
 		
@@ -85,6 +100,8 @@ public class Word {
 		System.out.println("ixrN=" + ixrN);
 		System.out.println("idb=" + idb);
 		System.out.println("Addr=" + address);
+		System.out.println("Rx=" + rx);
+		System.out.println("Ry=" + ry);
 	}
 	
 }
