@@ -27,6 +27,7 @@ import javax.swing.SwingConstants;
  * A CPU object is created automatically when the simulator starts, with a reference to this UI object so the two can pass data back and forth.
  * 
  * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
+ * Part 2 GUI updates for keyboard and printer written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
  * */
 
 public class ComputerMain extends JFrame {
@@ -34,6 +35,8 @@ public class ComputerMain extends JFrame {
 	private static CPU cpu;
 	private JPanel contentPane;
 	private JLabel lblstopping;
+	private JLabel printerlbl;
+	private JLabel kblbl;
 	//these text fields are where the value of each register is displayed.
 	protected JTextField gpr0field;
 	protected JTextField gpr1field;
@@ -48,6 +51,9 @@ public class ComputerMain extends JFrame {
 	protected JTextField marfield;
 	protected JTextField ccfield;
 	protected JTextField mfrfield;
+	//more text fields for the Keyboard and printer
+	protected JTextField printer;
+	protected JTextField keyboard;
 	//these variables are for the check boxes for user input
 	private JCheckBox operation0;
 	private JCheckBox operation1;
@@ -65,9 +71,10 @@ public class ComputerMain extends JFrame {
 	private JCheckBox address2;
 	private JCheckBox address3;
 	private JCheckBox address4;
-	//These are the toggle switches for the Run and Execute Single Instruction buttons. Unlike the other buttons, this has an ON/OFF state
+	//These are the toggle switches for the Run, keyboard Enter, and Execute Single Instruction buttons. Unlike the other buttons, this has an ON/OFF state
 	protected JToggleButton runToggle; 
 	protected JToggleButton tglExeSingleInstruction;
+	protected JToggleButton kbEnter;
 	
 	private JButton btnStore; //these buttons are declared down here because they were created after the Run Toggle.
 	private JButton btnLoad;
@@ -76,6 +83,8 @@ public class ComputerMain extends JFrame {
 	//text fields for visualizing the input check boxes as Hexidecimal or Binary.
 	protected JTextField visualizefield;
 	private JTextField hexField;
+	
+	
 
 	/**
 	 * Launch the application.
@@ -146,7 +155,7 @@ public class ComputerMain extends JFrame {
 		return userInput;
 	}
 	
-	private short binaryStrToShort(String binary) { //converts the binary string created by getInput to a Short so it can be sent to the CPU for storage.
+	protected short binaryStrToShort(String binary) { //converts the binary string created by getInput to a Short so it can be sent to the CPU for storage.
 		int intermediate = Integer.parseInt(binary, 2);
 		short result = (short) intermediate;
 		return result;
@@ -723,5 +732,34 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, hexField, 6, SpringLayout.EAST, btnVisualizeInput);
 		contentPane.add(hexField);
 		hexField.setColumns(10);
+		
+		printer = new JTextField();
+		sl_contentPane.putConstraint(SpringLayout.NORTH, printer, 0, SpringLayout.NORTH, lblGpr_0);
+		sl_contentPane.putConstraint(SpringLayout.WEST, printer, 50, SpringLayout.WEST, lblstopping);
+		sl_contentPane.putConstraint(SpringLayout.EAST, printer, -43, SpringLayout.EAST, contentPane);
+		contentPane.add(printer);
+		printer.setColumns(10);
+		
+		keyboard = new JTextField();
+		sl_contentPane.putConstraint(SpringLayout.NORTH, keyboard, 0, SpringLayout.NORTH, lblGpr_1);
+		sl_contentPane.putConstraint(SpringLayout.WEST, keyboard, 0, SpringLayout.WEST, printer);
+		sl_contentPane.putConstraint(SpringLayout.EAST, keyboard, 50, SpringLayout.EAST, lblstopping);
+		keyboard.setColumns(10);
+		contentPane.add(keyboard);
+		
+		printerlbl = new JLabel("Printer/Output");
+		sl_contentPane.putConstraint(SpringLayout.NORTH, printerlbl, 3, SpringLayout.NORTH, gpr0field);
+		sl_contentPane.putConstraint(SpringLayout.EAST, printerlbl, 0, SpringLayout.EAST, btnStore);
+		contentPane.add(printerlbl);
+		
+		kblbl = new JLabel("Keyboard/Input");
+		sl_contentPane.putConstraint(SpringLayout.WEST, kblbl, 0, SpringLayout.WEST, printerlbl);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, kblbl, 0, SpringLayout.SOUTH, gpr1field);
+		contentPane.add(kblbl);
+		
+		kbEnter = new JToggleButton("ENTER");
+		sl_contentPane.putConstraint(SpringLayout.NORTH, kbEnter, 0, SpringLayout.NORTH, lblGpr_2);
+		sl_contentPane.putConstraint(SpringLayout.EAST, kbEnter, 0, SpringLayout.EAST, printer);
+		contentPane.add(kbEnter);
 	}
 }
