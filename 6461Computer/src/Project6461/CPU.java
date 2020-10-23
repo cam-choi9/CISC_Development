@@ -39,6 +39,7 @@ public class CPU extends Thread {
 	protected short[] memory = new short[2048]; // # of words = 2048 => main memory size = # of words (2048) * block size (2 bytes) = 4096 bytes = 2^12 bytes => physical address = 12 bits
     protected short[] cache = new short[16]; // # of cache lines = 16 => cache size = # of cache lines (16) * block size (2 bytes) = 32 bytes = 2^5 bytes => cache address = 5 bits
 	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
+	protected String printOut = ""; //This is what appears on the printer.
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
@@ -78,6 +79,7 @@ public class CPU extends Thread {
 		gui.irfield.setText(shortToBinaryString(ir, 16));
 		gui.mfrfield.setText(shortToBinaryString(mfr, 4));
 		gui.ccfield.setText(shortToBinaryString(cc, 4));
+		gui.printer.setText(printOut);
 	}
 	
 	public void iPL() {//initial program load from text file. Basically, the ROM loader
@@ -97,6 +99,7 @@ public class CPU extends Thread {
 		cc = 0; 
 		memory = new short[2048];
 		cache = new short[16];
+		gui.printer.setText("");
 		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
@@ -349,7 +352,7 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("LDA failed.");
 		}
 	}
-	public void amr(Word word) {//TODO 04 Add Memory to Register
+	public void amr(Word word) {// 04 Add Memory to Register
 		if(isaConsole == true) System.out.println("04"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 += effectiveAddress(word);
@@ -363,7 +366,7 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("AMR failed.");
 		}
 	}
-	public void smr(Word word) {//TODO 05 Subtract Memory from Register
+	public void smr(Word word) {// 05 Subtract Memory from Register
 		if(isaConsole == true) System.out.println("05"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 -= effectiveAddress(word);
@@ -377,11 +380,35 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("AMR failed.");
 		}
 	}
-	public void air(Word word) {//TODO 06 Add Immediate to Register
+	public void air(Word word) {// 06 Add Immediate to Register
 		if(isaConsole == true) System.out.println("06"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
+		case 0: gpr0 += word.immed;
+				break;
+		case 1: gpr1 += word.immed;
+				break;
+		case 2: gpr2 += word.immed;
+				break;
+		case 3: gpr3 += word.immed;
+				break;
+		default: gui.visualizefield.setText("AMR failed.");
+		//TODO check for overflow
+		}
 	}
-	public void sir(Word word) {//TODO 07 Subtract Immediate from Register
+	public void sir(Word word) {// 07 Subtract Immediate from Register
 		if(isaConsole == true) System.out.println("07"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
+		case 0: gpr0 -= word.immed;
+				break;
+		case 1: gpr1 -= word.immed;
+				break;
+		case 2: gpr2 -= word.immed;
+				break;
+		case 3: gpr3 -= word.immed;
+				break;
+		default: gui.visualizefield.setText("AMR failed.");
+		//TODO check for underflow
+		}
 	}
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10"); //Debugging tool
@@ -437,11 +464,17 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("12"); //Debugging tool
 		pc = effectiveAddress(word);
 	}
-	public void jsr(Word word) {//TODO 14 Jump and Save Return Address
+	public void jsr(Word word) {// 14 Jump and Save Return Address
 		if(isaConsole == true) System.out.println("14"); //Debugging tool
+		gpr3 = (short) (pc + 1);
+		pc = effectiveAddress(word);
+		gpr0 = effectiveAddress(word); //TODO verify that this is what he means by " R0 should contain pointer to arguments. He means the subroutine, right?
+		
 	}
-	public void rfs(Word word) {//TODO 15 Return from Subroutine with Return Code as Immed portion stored in the instruction's address field.
+	public void rfs(Word word) {// 15 Return from Subroutine with Return Code as Immed portion stored in the instruction's address field.
 		if(isaConsole == true) System.out.println("15"); //Debugging tool
+		gpr0 = word.immed;
+		pc = gpr3;
 	}
 	public void sob(Word word) {//16 Subtract One and Branch
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
@@ -475,29 +508,236 @@ public class CPU extends Thread {
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		}
 	}
-	public void mlt(Word word) {//TODO 20 Multiply Register by Register
+	public void mlt(Word word) {// 20 Multiply Register by Register
 		if(isaConsole == true) System.out.println("20"); //Debugging tool
+		if ((word.rx * word.ry) > 65535); //TODO Set Overflow flag?
+		else {
+			int product;
+			short highorder, loworder;
+			switch (word.rx) { //uses rx number in the word to determine which register to use.
+			case 0: product = word.rx * word.ry;
+					highorder = (short) (product >> 16);
+					loworder = (short) ((product << 16) >> 16);
+					gpr0 = highorder;
+					gpr1 = loworder;
+					break;
+			case 2: product = word.rx * word.ry;
+					highorder = (short) (product >> 16);
+					loworder = (short) ((product << 16) >> 16);
+					gpr2 = highorder;
+					gpr3 = loworder;
+					break;
+			default: gui.visualizefield.setText("MLT failed.");
+			}
+		}
 	}
-	public void dvd(Word word) {//TODO 21 Divide Register by Register
+	public void dvd(Word word) {// 21 Divide Register by Register
 		if(isaConsole == true) System.out.println("21"); //Debugging tool
+		if (word.ry == 0) ;//TODO Set DivideZero Flag?
+		else {
+			short quotient, remainder;
+			switch (word.rx) { //uses rx number in the word to determine which register to use.
+			case 0: quotient = (short) (word.rx / word.ry);
+					remainder = (short) (word.rx % word.ry);
+					gpr0 = quotient;
+					gpr1 = remainder;
+					break;
+			case 2: quotient = (short) (word.rx / word.ry);
+					remainder = (short) (word.rx % word.ry);
+					gpr2 = quotient;
+					gpr3 = remainder;
+					break;
+			default: gui.visualizefield.setText("DVD failed.");
+			}
+		}
 	}
-	public void trr(Word word) {//TODO 22 Test Equality of two Registers
+	public void trr(Word word) {// 22 Test Equality of two Registers
 		if(isaConsole == true) System.out.println("22"); //Debugging tool
+		if (word.rx == word.ry) cc = 1; //TODO Check with professor regarding condition code.
+		else cc = 0;
 	}
-	public void and(Word word) {//TODO 23 Logical AND Register by Register
+	public void and(Word word) {// 23 Logical AND Register by Register
 		if(isaConsole == true) System.out.println("23"); //Debugging tool
+		short crx = 0, cry = 0, result = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		result = (short) (crx & cry); //perform bitwise AND on the contents of the two registers
+		switch (word.rx) {
+		case 0: gpr0 = result;
+				break;
+		case 1: gpr1 = result;
+				break;
+		case 2: gpr2 = result;
+				break;
+		case 3: gpr3 = result;
+				break;
+		}
 	}
-	public void orr(Word word) {//TODO 24 Logical OR Register by Register
+	public void orr(Word word) {// 24 Logical OR Register by Register
 		if(isaConsole == true) System.out.println("24"); //Debugging tool
+		short crx = 0, cry = 0, result = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		result = (short) (crx | cry); //perform bitwise OR on the contents of the two registers
+		switch (word.rx) {
+		case 0: gpr0 = result;
+				break;
+		case 1: gpr1 = result;
+				break;
+		case 2: gpr2 = result;
+				break;
+		case 3: gpr3 = result;
+				break;
+		}
 	}
-	public void not(Word word) {//TODO 25 Logical NOT Register by Register
+	public void not(Word word) {//25 Logical NOT Register by Register
 		if(isaConsole == true) System.out.println("25"); //Debugging tool
+		short crx =0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		crx = (short) (~crx);
+		switch (word.rx) {
+		case 0: gpr0 = crx;
+				break;
+		case 1: gpr1 = crx;
+				break;
+		case 2: gpr2 = crx;
+				break;
+		case 3: gpr3 = crx;
+				break;
+		}
 	}
 	public void src(Word word) {//TODO 31 Shift Register by Count
 		if(isaConsole == true) System.out.println("31"); //Debugging tool
+		short result = 0;
+		int usablecount = (int) word.count;
+		switch (word.r) {
+		case 0: result = gpr0;
+				break;
+		case 1: result = gpr1;
+				break;
+		case 2: result = gpr2;
+				break;
+		case 3: result = gpr3;
+				break;
+		}
+		if (word.al == true) { //logical shift
+			if (word.lr == true) { //LR True is left
+				//result = (short) (result <<< usablecount); //TODO Java doesn't have a <<< figure out how to do it yourself.
+			}
+			else { //LR False is right
+				result = (short) (result >>> usablecount);
+			}
+		}
+		else { //arithmetic shift
+			if (word.lr == true) { //LR True is left
+				result = (short) (result << usablecount);
+			}
+			else { //LR False is right
+				result = (short) (result >> usablecount);
+			}
+		}
+		switch (word.r) {
+		case 0: gpr0 = result;
+				break;
+		case 1: gpr1 = result;
+				break;
+		case 2: gpr2 = result;
+				break;
+		case 3: gpr3 = result;
+				break;
+		}
 	}
-	public void rrc(Word word) {//TODO 32 Rotate Register by Count
+	public void rrc(Word word) {// 32 Rotate Register by Count
 		if(isaConsole == true) System.out.println("32"); //Debugging tool
+		if (word.count == 0) ; //if Count is 0, don't move anything.
+		else {
+			short result = 0;
+			String resultstring = "", tempstring = "";
+			switch (word.r) {
+			case 0: result = gpr0;
+					break;
+			case 1: result = gpr1;
+					break;
+			case 2: result = gpr2;
+					break;
+			case 3: result = gpr3;
+					break;
+			}
+			tempstring = shortToBinaryString(result, 16);
+			// read into new string in requested order
+			if (word.lr == true) { //LR True is left
+				for (int i = word.count; i < 16 ; i++) {
+					resultstring += tempstring.charAt(i);
+				}
+				for (int i = 0; i < word.count ; i++) {
+					resultstring += tempstring.charAt(i);
+				}
+			}
+			else { //LR false is right
+				for (int i = (16 - word.count); i < 16 ; i++) { //read rightmost first
+					resultstring += tempstring.charAt(i);
+				}
+				for (int i = 0; i < (16 - word.count) ; i++) { //read from left until countpoint
+					resultstring += tempstring.charAt(i);
+				}
+			}
+			result = gui.binaryStrToShort(resultstring);
+			switch (word.r) {
+			case 0: gpr0 = result;
+					break;
+			case 1: gpr1 = result;
+					break;
+			case 2: gpr2 = result;
+					break;
+			case 3: gpr3 = result;
+					break;
+			}
+		}
 	}
 	public void ldx(Word word) { //41 Load Index Register from Memory
 		if(isaConsole == true) {System.out.println("41"); ////Debugging tool
@@ -525,11 +765,43 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("STX failed.");
 		}
 	}
-	public void in(Word word) {//TODO 61 Input character to Register from Device
+	public void in(Word word) {// 61 Input character to Register from Device
 		if(isaConsole == true) System.out.println("61"); //Debugging tool
+		if (word.devID == 0) {
+			char firstCharacter = gui.keyboard.getText().charAt(0); //pulls only the first character of the string in the keyboard field
+			switch (word.r) { //uses gpr number in the word to determine which register to use.
+			case 0: gpr0 = (short) firstCharacter;
+					break;
+			case 1: gpr1 = (short) firstCharacter;
+					break;
+			case 2: gpr2 = (short) firstCharacter;
+					break;
+			case 3: gpr3 = (short) firstCharacter;
+					break;
+			}
+		}
+		else {
+			gui.printer.setText("Wrong DevID in pgm");
+		}
 	}
-	public void out(Word word) {//TODO 62 Output character to Device from Register
+	public void out(Word word) {// 62 Output character to Device from Register
 		if(isaConsole == true) System.out.println("62"); //Debugging tool
+		if(word.devID != 1) {
+			gui.printer.setText("Wrong DevID in pgm");
+		} 
+		else { //take whatever's currently on the printer, add another character to it, and return it.
+			switch (word.r) { //uses gpr number in the word to determine which register to use.
+			case 0: printOut += (char) gpr0;
+					break;
+			case 1: printOut += (char) gpr1;
+					break;
+			case 2: printOut += (char) gpr2;
+					break;
+			case 3: printOut += (char) gpr3;
+					break;
+			}
+			//gui.printer.setText(printOut);//for debugging. printOut is updated to the GUI along with everything else at the end of the Instruction Cycle
+		}
 	}
 	public void chk(Word word) {//TODO 63 Check Device Status to Register
 		if(isaConsole == true) System.out.println("63"); //Debugging tool
