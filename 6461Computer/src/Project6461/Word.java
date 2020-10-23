@@ -22,6 +22,11 @@ public class Word {
 	protected short address; //Memory address, derived from bits 12 through 16 of the word. Also used for immed
 	protected short rx; //for logical/arithmeitc operations. Also R for Register shift/Rotations
 	protected short ry;
+	protected short immed;
+	protected short r;
+	protected boolean al, lr;
+	protected short count;
+	protected short devID;
 	private boolean debug = false; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
@@ -32,6 +37,12 @@ public class Word {
 		rx = getRx(ir);
 		ry = getRy(ir);
 		address = getAddress(ir);
+		immed = address; //yes, we technically don't need to do this, but it makes the code in CPU easier to understand.
+		r = rx;
+		al = getAL(ir);
+		lr = getLR(ir);
+		count = count(ir);
+		devID = address;
 		if (debug == true) {
 			System.out.println("IR passed " + ir + " in binary " + Integer.toBinaryString(ir));
 			debugging();
@@ -53,27 +64,23 @@ public class Word {
 		} 
 		return operationcode;
 	}
-	
 	private short getGprN(short ir) { //performs bit shifting to isolate and find gpr value
 		short gprN = ir;
 		gprN = (short) (gprN << 6); //remove leading bits.
 		gprN = (short) Math.abs((gprN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
 		return gprN;
 	}
-	
 	private short getIxrN(short ir) { //performs bit shifting to isolate and find ixr value
 		short ixrN = ir;
 		ixrN = (short) (ixrN << 8); //remove leading bits.
 		ixrN = (short) Math.abs((ixrN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
 		return ixrN;
 	}
-	
 	private boolean getIndirectBit(short ir) { //determines if the indirect bit is set
 		short idbN = ir;
 		if ((idbN & 0b0000000000100000) == 0b0000000000100000) {return true;}
 		else return false;
 	}
-	
 	private short getAddress(short ir) { //performs bit shifting to isolate and find address
 		short addr = ir;
 		addr = (short) (addr << 11); //remove leading bits
@@ -92,6 +99,23 @@ public class Word {
 		regy = (short) (regy >> 14);
 		return regy;
 	}
+	private boolean getAL(short ir) { //determines if the indirect bit is set
+		short idbN = ir;
+		if ((idbN & 0b0000000010000000) == 0b0000000010000000) {return true;}
+		else return false;
+	}
+	private boolean getLR(short ir) { //determines if the indirect bit is set
+		short idbN = ir;
+		if ((idbN & 0b0000000001000000) == 0b0000000001000000) {return true;}
+		else return false;
+	}
+	
+	private short count(short ir) {
+		short countVal = ir;
+		countVal = (short) (countVal << 11); //remove leading bits
+		countVal = (short) Math.abs((countVal >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		return countVal;
+	}
 	
 	private void debugging() { //Troubleshooting tool for checking the contents of the word. Disabled otherwise
 		
@@ -99,9 +123,10 @@ public class Word {
 		System.out.println("gprN=" + gprN);
 		System.out.println("ixrN=" + ixrN);
 		System.out.println("idb=" + idb);
-		System.out.println("Addr=" + address);
-		System.out.println("Rx=" + rx);
+		System.out.println("Addr, Immed, devID=" + address);
+		System.out.println("Rx, r=" + rx);
 		System.out.println("Ry=" + ry);
+		System.out.println("Count=" + count);
 	}
 	
 }
