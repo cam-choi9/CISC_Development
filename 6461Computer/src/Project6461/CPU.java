@@ -113,28 +113,32 @@ public class CPU extends Thread {
 			String line;
 			while (fileReader.hasNextLine()) {
 				line = fileReader.nextLine();
-				address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
-				contentInt = Integer.parseInt(line.substring((line.length() - 4)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
-				parsed = Integer.toBinaryString(contentInt);
-				if (parsed.length() > 16) { //Java keeps turning the short into a 32 bit value and storing that in the array. This prevents that.
-					parsed = parsed.substring(16);
-					//System.out.println("try2 " + parsed);
-					content = Short.parseShort(parsed, 2);
-				}
+				
+				if (line.charAt(0) == '#') {;}//If the first character in the line is # do nothing. This lets us add comments to the code.
 				else {
-					content = (short) contentInt;
-				}
-				//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
-				memory[address] = content; //loads the line to the specified address location                         
-                cache[cacheLineNumber] = content; // loads the line to replace the first block in cache memory
-                cacheLineNumber++; // move index to point the next block to be out
-                if (cacheLineNumber == cache.length) { // if the pointer reaches the end of the cache memory, 
-                    cacheLineNumber = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+					address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
+					contentInt = Integer.parseInt(line.substring((line.length() - 4)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
+					parsed = Integer.toBinaryString(contentInt);
+					if (parsed.length() > 16) { //Java keeps turning the short into a 32 bit value and storing that in the array. This prevents that.
+						parsed = parsed.substring(16);
+						//System.out.println("try2 " + parsed);
+						content = Short.parseShort(parsed, 2);
+					}
+					else {
+						content = (short) contentInt;
+					}
+					//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
+					memory[address] = content; //loads the line to the specified address location                         
+					cache[cacheLineNumber] = content; // loads the line to replace the first block in cache memory
+					cacheLineNumber++; // move index to point the next block to be out
+					if (cacheLineNumber == cache.length) { // if the pointer reaches the end of the cache memory, 
+						cacheLineNumber = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+					}
+					if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
+						pc = (short) address;
+						first = false;
+					}
                 }
-                if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
-					pc = (short) address;
-					first = false;
-				}
 			}
 			fileReader.close();
 			updateGUI();
@@ -240,7 +244,7 @@ public class CPU extends Thread {
 				break;
 		case 41: ldx(word);
 				break;
-		case 42: lda(word);
+		case 42: stx(word);
 				break;
 		case 61: in(word);
 				break;
@@ -1051,5 +1055,32 @@ public class CPU extends Thread {
 	}
 	public void chk(Word word) {//TODO 63 Check Device Status to Register
 		if(isaConsole == true) System.out.println("63"); //Debugging tool
+		
+		if (word.devID == 0) {//this is for reading from the kb on the UI.
+			if (gui.kbEnter.isSelected()) {
+				switch(word.r) {
+				case 0: gpr0 = 1;
+						break;
+				case 1: gpr1 = 1;
+						break;
+				case 2: gpr2 = 1;
+						break;
+				case 3: gpr3 = 1;
+						break;
+				}
+			}
+			else {
+				switch(word.r) {
+				case 0: gpr0 = 0;
+						break;
+				case 1: gpr1 = 0;
+						break;
+				case 2: gpr2 = 0;
+						break;
+				case 3: gpr3 = 0;
+						break;
+				}
+			}
+		}
 	}
 }
