@@ -354,60 +354,268 @@ public class CPU extends Thread {
 	}
 	public void amr(Word word) {// 04 Add Memory to Register
 		if(isaConsole == true) System.out.println("04"); //Debugging tool
-		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 += effectiveAddress(word);
+		else {
+			switch (word.gprN) { //uses gpr number in the word to determine which register to use.
+			case 0: 
+				if ((gpr0 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+					cc = 8; //set overflow
+					hlt();
+					break;
+				}
+				else if ((gpr0 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					break;
+				}
+				else {
+				gpr0 += effectiveAddress(word);
 				break;
-		case 1: gpr1 += effectiveAddress(word);
-				break;
-		case 2: gpr2 += effectiveAddress(word);
-				break;
-		case 3: gpr3 += effectiveAddress(word);
-				break;
-		default: gui.visualizefield.setText("AMR failed.");
+				}
+			case 1: 
+				if ((gpr1 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+					cc = 8; //set overflow
+					hlt();
+					break;
+				}
+				else if ((gpr1 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					break;
+				}
+				else {
+					gpr1 += effectiveAddress(word);
+					break;
+				}
+			case 2: 
+				if ((gpr2 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+					cc = 8; //set overflow
+					hlt();
+					break;
+				}
+				else if ((gpr2 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					break;
+				}
+				else {
+					gpr2 += effectiveAddress(word);
+					break;
+				}
+			case 3: 
+				if ((gpr3 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+					cc = 8; //set overflow
+					hlt();
+					break;
+				}
+				else if ((gpr3 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					break;
+				}
+				else {
+					gpr3 += effectiveAddress(word);
+					break;
+				}
+			default: gui.visualizefield.setText("AMR failed.");
+			}
 		}
 	}
 	public void smr(Word word) {// 05 Subtract Memory from Register
 		if(isaConsole == true) System.out.println("05"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 -= effectiveAddress(word);
+		case 0: 
+			if ((gpr0 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		case 1: gpr1 -= effectiveAddress(word);
+			}
+			else if ((gpr0 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
 				break;
-		case 2: gpr2 -= effectiveAddress(word);
+			}
+			else {
+			gpr0 -= effectiveAddress(word);
+			break;
+			}
+		case 1: 
+			if ((gpr1 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		case 3: gpr3 -= effectiveAddress(word);
+			}
+			else if ((gpr1 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
 				break;
-		default: gui.visualizefield.setText("AMR failed.");
+			}
+			else {
+				gpr1 -= effectiveAddress(word);
+				break;
+			}
+		case 2: 
+			if ((gpr2 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr2 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr2 -= effectiveAddress(word);
+				break;
+			}
+		case 3: 
+			if ((gpr3 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr3 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr3 -= effectiveAddress(word);
+				break;
+			}
+		default: gui.visualizefield.setText("SMR failed.");
 		}
 	}
 	public void air(Word word) {// 06 Add Immediate to Register
 		if(isaConsole == true) System.out.println("06"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 += word.immed;
+		case 0: 
+			if ((gpr0 + word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		case 1: gpr1 += word.immed;
+			}
+			else if ((gpr0 + word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
 				break;
-		case 2: gpr2 += word.immed;
+			}
+			else {
+				gpr0 += word.immed;
 				break;
-		case 3: gpr3 += word.immed;
+			}
+		case 1: 
+			if ((gpr1 + word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		default: gui.visualizefield.setText("AMR failed.");
-		//TODO check for overflow
+			}
+			else if ((gpr1 + word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr1 += word.immed;
+				break;
+			}
+		case 2:  
+			if ((gpr2 + word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr2 + word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr2 += word.immed;
+				break;
+			}
+		case 3: 
+			if ((gpr3 + word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr3 + word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr3 += word.immed;
+				break;
+			}
+		default: gui.visualizefield.setText("AIR failed.");
 		}
 	}
 	public void sir(Word word) {// 07 Subtract Immediate from Register
 		if(isaConsole == true) System.out.println("07"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 -= word.immed;
+		case 0: 
+			if ((gpr0 - word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		case 1: gpr1 -= word.immed;
+			}
+			else if ((gpr0 - word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
 				break;
-		case 2: gpr2 -= word.immed;
+			}
+			else {
+				gpr0 -= word.immed;
 				break;
-		case 3: gpr3 -= word.immed;
+			}
+		case 1: 
+			if ((gpr1 - word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
 				break;
-		default: gui.visualizefield.setText("AMR failed.");
-		//TODO check for underflow
+			}
+			else if ((gpr1 - word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr1 -= word.immed;
+				break;
+			}
+		case 2:  
+			if ((gpr2 - word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr2 - word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr2 -= word.immed;
+				break;
+			}
+		case 3: 
+			if ((gpr3 - word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				cc = 8; //set overflow
+				hlt();
+				break;
+			}
+			else if ((gpr3 - word.immed) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				cc = 4; //set underflow
+				hlt();
+				break;
+			}
+			else {
+				gpr3 -= word.immed;
+				break;
+			}
+		default: gui.visualizefield.setText("SIR failed.");
 		}
 	}
 	public void jz(Word word) { //10 Jump if Zero
@@ -468,8 +676,7 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("14"); //Debugging tool
 		gpr3 = (short) (pc + 1);
 		pc = effectiveAddress(word);
-		gpr0 = effectiveAddress(word); //TODO verify that this is what he means by " R0 should contain pointer to arguments. He means the subroutine, right?
-		
+		//gpr0 should be set to pointer before this is started //TODO verify that this is what he means by " R0 should contain pointer to arguments. He means the subroutine, right?
 	}
 	public void rfs(Word word) {// 15 Return from Subroutine with Return Code as Immed portion stored in the instruction's address field.
 		if(isaConsole == true) System.out.println("15"); //Debugging tool
@@ -510,30 +717,57 @@ public class CPU extends Thread {
 	}
 	public void mlt(Word word) {// 20 Multiply Register by Register
 		if(isaConsole == true) System.out.println("20"); //Debugging tool
-		if ((word.rx * word.ry) > 65535); //TODO Set Overflow flag?
-		else {
 			int product;
 			short highorder, loworder;
 			switch (word.rx) { //uses rx number in the word to determine which register to use.
 			case 0: product = word.rx * word.ry;
-					highorder = (short) (product >> 16);
-					loworder = (short) ((product << 16) >> 16);
-					gpr0 = highorder;
-					gpr1 = loworder;
-					break;
+					if (product > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+						cc = 8; //set overflow
+						hlt();
+						break;
+					}
+					else if (product < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+						cc = 4; //set underflow
+						hlt();
+						break;
+					}
+					else {
+						highorder = (short) (product >> 16);
+						loworder = (short) ((product << 16) >> 16);
+						gpr0 = highorder;
+						gpr1 = loworder;
+						break;
+					}
 			case 2: product = word.rx * word.ry;
+				if (product > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+					cc = 8; //set overflow
+					hlt();
+					break;
+				}
+				else if (product < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					break;
+				}
+				else {
 					highorder = (short) (product >> 16);
 					loworder = (short) ((product << 16) >> 16);
 					gpr2 = highorder;
 					gpr3 = loworder;
 					break;
+				}
+			case 1:
+			case 3: gui.visualizefield.setText("MLT Invalid Reg");
+					break;
 			default: gui.visualizefield.setText("MLT failed.");
-			}
-		}
+		}	
 	}
 	public void dvd(Word word) {// 21 Divide Register by Register
 		if(isaConsole == true) System.out.println("21"); //Debugging tool
-		if (word.ry == 0) ;//TODO Set DivideZero Flag?
+		if (word.ry == 0) {
+			cc = 2; //set divzero flag
+			hlt();
+		}
 		else {
 			short quotient, remainder;
 			switch (word.rx) { //uses rx number in the word to determine which register to use.
@@ -547,13 +781,16 @@ public class CPU extends Thread {
 					gpr2 = quotient;
 					gpr3 = remainder;
 					break;
+			case 1:
+			case 3: gui.visualizefield.setText("DVD Invalid Reg");
+					break;
 			default: gui.visualizefield.setText("DVD failed.");
 			}
 		}
 	}
 	public void trr(Word word) {// 22 Test Equality of two Registers
 		if(isaConsole == true) System.out.println("22"); //Debugging tool
-		if (word.rx == word.ry) cc = 1; //TODO Check with professor regarding condition code.
+		if (word.rx == word.ry) cc = 1;
 		else cc = 0;
 	}
 	public void and(Word word) {// 23 Logical AND Register by Register
@@ -651,9 +888,10 @@ public class CPU extends Thread {
 				break;
 		}
 	}
-	public void src(Word word) {//TODO 31 Shift Register by Count
+	public void src(Word word) {//31 Shift Register by Count
 		if(isaConsole == true) System.out.println("31"); //Debugging tool
 		short result = 0;
+		boolean crash = false;
 		int usablecount = (int) word.count;
 		switch (word.r) {
 		case 0: result = gpr0;
@@ -667,7 +905,7 @@ public class CPU extends Thread {
 		}
 		if (word.al == true) { //logical shift
 			if (word.lr == true) { //LR True is left
-				//result = (short) (result <<< usablecount); //TODO Java doesn't have a <<< figure out how to do it yourself.
+				result = (short) (result << usablecount); // Java doesn't have a <<< because << removes the leftmost bit anyway.
 			}
 			else { //LR False is right
 				result = (short) (result >>> usablecount);
@@ -679,17 +917,25 @@ public class CPU extends Thread {
 			}
 			else { //LR False is right
 				result = (short) (result >> usablecount);
+				if (result < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+					cc = 4; //set underflow
+					hlt();
+					crash = true;
+					gui.visualizefield.setText("SRC Underflow");
+				}
 			}
 		}
-		switch (word.r) {
-		case 0: gpr0 = result;
-				break;
-		case 1: gpr1 = result;
-				break;
-		case 2: gpr2 = result;
-				break;
-		case 3: gpr3 = result;
-				break;
+		if (crash == false) {//this check occurs to ensure that the switch doesn't happen in the event of a underflow halt.
+			switch (word.r) {
+			case 0: gpr0 = result;
+					break;
+			case 1: gpr1 = result;
+					break;
+			case 2: gpr2 = result;
+					break;
+			case 3: gpr3 = result;
+					break;
+			}
 		}
 	}
 	public void rrc(Word word) {// 32 Rotate Register by Count
