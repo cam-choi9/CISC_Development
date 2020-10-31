@@ -1,6 +1,8 @@
 package Project6461;
 
 import java.util.Scanner;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -40,6 +42,7 @@ public class CPU extends Thread {
     protected short[] cache = new short[16]; // # of cache lines = 16 => cache size = # of cache lines (16) * block size (2 bytes) = 32 bytes = 2^5 bytes => cache address = 5 bits
 	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
 	protected String printOut = ""; //This is what appears on the printer.
+	protected Deque<Character> inputBuffer = new LinkedList<Character>();
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
@@ -238,14 +241,18 @@ public class CPU extends Thread {
 				break;
 		case 25: not(word);
 				break;
+		case 30: trap(); //nonfunctional, waiting for part 3
+				break;
 		case 31: src(word);
 				break;
 		case 32: rrc(word);
 				break;
+		//33-37 reserved for floating point
 		case 41: ldx(word);
 				break;
 		case 42: stx(word);
 				break;
+		//50-51 reserved for floating point
 		case 61: in(word);
 				break;
 		case 62: out(word);
@@ -892,6 +899,10 @@ public class CPU extends Thread {
 				break;
 		}
 	}
+	public void trap() {//30 Trap code
+		if(isaConsole == true) System.out.println("30"); //Debugging tool
+		//add content in Part III
+	}
 	public void src(Word word) {//31 Shift Register by Count
 		if(isaConsole == true) System.out.println("31"); //Debugging tool
 		short result = 0;
@@ -1018,7 +1029,7 @@ public class CPU extends Thread {
 	public void in(Word word) {// 61 Input character to Register from Device
 		if(isaConsole == true) System.out.println("61"); //Debugging tool
 		if (word.devID == 0) {
-			char firstCharacter = gui.keyboard.getText().charAt(0); //pulls only the first character of the string in the keyboard field
+			char firstCharacter = inputBuffer.remove(); //pulls only the first character of the string in the keyboard field
 			switch (word.r) { //uses gpr number in the word to determine which register to use.
 			case 0: gpr0 = (short) firstCharacter;
 					break;
@@ -1057,7 +1068,7 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("63"); //Debugging tool
 		
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
-			if (gui.kbEnter.isSelected()) {
+			if (inputBuffer.peek() != null) {
 				switch(word.r) {
 				case 0: gpr0 = 1;
 						break;
