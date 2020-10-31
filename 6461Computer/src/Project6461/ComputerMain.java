@@ -10,11 +10,13 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JScrollPane;
 import java.awt.Font;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
+import javax.swing.JTextArea;
 
 //RUN THIS FILE! THIS IS WHERE MAIN IS!
 
@@ -51,8 +53,6 @@ public class ComputerMain extends JFrame {
 	protected JTextField marfield;
 	protected JTextField ccfield;
 	protected JTextField mfrfield;
-	//more text fields for the Keyboard and printer
-	protected JTextField printer;
 	protected JTextField keyboard;
 	//these variables are for the check boxes for user input
 	private JCheckBox operation0;
@@ -74,7 +74,7 @@ public class ComputerMain extends JFrame {
 	//These are the toggle switches for the Run, keyboard Enter, and Execute Single Instruction buttons. Unlike the other buttons, this has an ON/OFF state
 	protected JToggleButton runToggle; 
 	protected JToggleButton tglExeSingleInstruction;
-	protected JToggleButton kbEnter;
+	protected JButton kbEnter;
 	
 	private JButton btnStore; //these buttons are declared down here because they were created after the Run Toggle.
 	private JButton btnLoad;
@@ -84,7 +84,8 @@ public class ComputerMain extends JFrame {
 	protected JTextField visualizefield;
 	private JTextField hexField;
 	
-	
+	//The console printer
+	protected JTextArea printer;
 
 	/**
 	 * Launch the application.
@@ -224,6 +225,7 @@ public class ComputerMain extends JFrame {
 		//Output text fields for the GPR and IXR. Text fields are accessed by other classes. The other stuff under each class declaration is JSwing calculating where to position the text box on the GUI.
 		
 		gpr0field = new JTextField();
+		gpr0field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr0field, 0, SpringLayout.NORTH, lblGpr_0);
 		sl_contentPane.putConstraint(SpringLayout.WEST, gpr0field, 6, SpringLayout.EAST, lblGpr_0);
 		sl_contentPane.putConstraint(SpringLayout.EAST, gpr0field, 206, SpringLayout.EAST, lblGpr_0);
@@ -231,6 +233,7 @@ public class ComputerMain extends JFrame {
 		gpr0field.setColumns(10);
 		
 		gpr1field = new JTextField();
+		gpr1field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr1field, -3, SpringLayout.NORTH, lblGpr_1);
 		sl_contentPane.putConstraint(SpringLayout.WEST, gpr1field, 6, SpringLayout.EAST, lblGpr_1);
 		sl_contentPane.putConstraint(SpringLayout.EAST, gpr1field, 206, SpringLayout.EAST, lblGpr_1);
@@ -238,6 +241,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(gpr1field);
 		
 		gpr2field = new JTextField();
+		gpr2field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr2field, 0, SpringLayout.NORTH, lblGpr_2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, gpr2field, -200, SpringLayout.EAST, gpr0field);
 		sl_contentPane.putConstraint(SpringLayout.EAST, gpr2field, 0, SpringLayout.EAST, gpr0field);
@@ -245,6 +249,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(gpr2field);
 		
 		gpr3field = new JTextField();
+		gpr3field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, gpr3field, 0, SpringLayout.NORTH, lblGpr_3);
 		sl_contentPane.putConstraint(SpringLayout.WEST, gpr3field, 6, SpringLayout.EAST, lblGpr_3);
 		sl_contentPane.putConstraint(SpringLayout.EAST, gpr3field, 0, SpringLayout.EAST, gpr0field);
@@ -252,6 +257,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(gpr3field);
 		
 		ixr1field = new JTextField();
+		ixr1field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr1field, 0, SpringLayout.NORTH, lblixr_1);
 		sl_contentPane.putConstraint(SpringLayout.WEST, ixr1field, 0, SpringLayout.WEST, gpr0field);
 		sl_contentPane.putConstraint(SpringLayout.EAST, ixr1field, 200, SpringLayout.WEST, gpr0field);
@@ -259,6 +265,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(ixr1field);
 		
 		ixr2field = new JTextField();
+		ixr2field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr2field, 0, SpringLayout.NORTH, lblixr_2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, ixr2field, 0, SpringLayout.WEST, gpr0field);
 		sl_contentPane.putConstraint(SpringLayout.EAST, ixr2field, 209, SpringLayout.EAST, lblixr_2);
@@ -266,6 +273,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(ixr2field);
 		
 		ixr3field = new JTextField();
+		ixr3field.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ixr3field, 0, SpringLayout.NORTH, lblixr_3);
 		sl_contentPane.putConstraint(SpringLayout.WEST, ixr3field, -200, SpringLayout.EAST, gpr0field);
 		sl_contentPane.putConstraint(SpringLayout.EAST, ixr3field, 0, SpringLayout.EAST, gpr0field);
@@ -383,6 +391,7 @@ public class ComputerMain extends JFrame {
 		//output text fields for the PC, MBR, IR, MAR
 		
 		pcfield = new JTextField();
+		pcfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, pcfield, 0, SpringLayout.NORTH, lblGpr_0);
 		sl_contentPane.putConstraint(SpringLayout.WEST, pcfield, 17, SpringLayout.EAST, lblPC);
 		sl_contentPane.putConstraint(SpringLayout.EAST, pcfield, 217, SpringLayout.EAST, lblPC);
@@ -390,6 +399,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(pcfield);
 		
 		mbrfield = new JTextField();
+		mbrfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, mbrfield, 0, SpringLayout.NORTH, lblGpr_2);
 		sl_contentPane.putConstraint(SpringLayout.WEST, mbrfield, 0, SpringLayout.WEST, pcfield);
 		sl_contentPane.putConstraint(SpringLayout.EAST, mbrfield, 200, SpringLayout.WEST, pcfield);
@@ -397,6 +407,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(mbrfield);
 		
 		irfield = new JTextField();
+		irfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, irfield, 0, SpringLayout.NORTH, lblGpr_3);
 		sl_contentPane.putConstraint(SpringLayout.WEST, irfield, 0, SpringLayout.WEST, pcfield);
 		sl_contentPane.putConstraint(SpringLayout.EAST, irfield, 0, SpringLayout.EAST, pcfield);
@@ -404,6 +415,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(irfield);
 		
 		marfield = new JTextField();
+		marfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, marfield, 0, SpringLayout.NORTH, lblGpr_1);
 		sl_contentPane.putConstraint(SpringLayout.WEST, marfield, 0, SpringLayout.WEST, pcfield);
 		sl_contentPane.putConstraint(SpringLayout.EAST, marfield, 0, SpringLayout.EAST, pcfield);
@@ -451,11 +463,13 @@ public class ComputerMain extends JFrame {
 		//output text fields for Condition Code and MFR
 		
 		ccfield = new JTextField();
+		ccfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, ccfield, -3, SpringLayout.NORTH, lblixr_2);
 		ccfield.setColumns(10);
 		contentPane.add(ccfield);
 		
 		mfrfield = new JTextField();
+		mfrfield.setEditable(false);
 		sl_contentPane.putConstraint(SpringLayout.WEST, ccfield, 0, SpringLayout.WEST, mfrfield);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, mfrfield, 0, SpringLayout.NORTH, lblixr_1);
 		sl_contentPane.putConstraint(SpringLayout.EAST, mfrfield, 0, SpringLayout.EAST, pcfield);
@@ -693,6 +707,7 @@ public class ComputerMain extends JFrame {
 		contentPane.add(tglExeSingleInstruction);
 		
 		visualizefield = new JTextField(); //text field to the left of the visualize input button
+		visualizefield.setEditable(false);
 		visualizefield.setText("Preview input here");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, visualizefield, 22, SpringLayout.SOUTH, lblGPR);
 		sl_contentPane.putConstraint(SpringLayout.WEST, visualizefield, -104, SpringLayout.WEST, operation4);
@@ -728,38 +743,60 @@ public class ComputerMain extends JFrame {
 		contentPane.add(lblstopping);
 		
 		hexField = new JTextField();
+		hexField.setEditable(false); //user is not allowed to edit this field
 		sl_contentPane.putConstraint(SpringLayout.NORTH, hexField, 0, SpringLayout.NORTH, visualizefield);
 		sl_contentPane.putConstraint(SpringLayout.WEST, hexField, 6, SpringLayout.EAST, btnVisualizeInput);
 		contentPane.add(hexField);
 		hexField.setColumns(10);
 		
-		printer = new JTextField();
-		sl_contentPane.putConstraint(SpringLayout.NORTH, printer, 0, SpringLayout.NORTH, lblGpr_0);
-		sl_contentPane.putConstraint(SpringLayout.WEST, printer, 50, SpringLayout.WEST, lblstopping);
-		sl_contentPane.putConstraint(SpringLayout.EAST, printer, -43, SpringLayout.EAST, contentPane);
-		contentPane.add(printer);
-		printer.setColumns(10);
-		
 		keyboard = new JTextField();
-		sl_contentPane.putConstraint(SpringLayout.NORTH, keyboard, 0, SpringLayout.NORTH, lblGpr_1);
-		sl_contentPane.putConstraint(SpringLayout.WEST, keyboard, 0, SpringLayout.WEST, printer);
-		sl_contentPane.putConstraint(SpringLayout.EAST, keyboard, 50, SpringLayout.EAST, lblstopping);
+		sl_contentPane.putConstraint(SpringLayout.EAST, keyboard, -43, SpringLayout.EAST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, keyboard, 0, SpringLayout.NORTH, lblGpr_0);
 		keyboard.setColumns(10);
 		contentPane.add(keyboard);
 		
 		printerlbl = new JLabel("Printer/Output");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, printerlbl, 3, SpringLayout.NORTH, gpr0field);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, printerlbl, 0, SpringLayout.NORTH, lblGpr_2);
 		sl_contentPane.putConstraint(SpringLayout.EAST, printerlbl, 0, SpringLayout.EAST, btnStore);
 		contentPane.add(printerlbl);
 		
 		kblbl = new JLabel("Keyboard/Input");
-		sl_contentPane.putConstraint(SpringLayout.WEST, kblbl, 0, SpringLayout.WEST, printerlbl);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, kblbl, 0, SpringLayout.SOUTH, gpr1field);
+		sl_contentPane.putConstraint(SpringLayout.EAST, kblbl, -219, SpringLayout.EAST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.WEST, keyboard, 7, SpringLayout.EAST, kblbl);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, kblbl, 4, SpringLayout.NORTH, gpr0load);
 		contentPane.add(kblbl);
 		
-		kbEnter = new JToggleButton("ENTER");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, kbEnter, 0, SpringLayout.NORTH, lblGpr_2);
-		sl_contentPane.putConstraint(SpringLayout.EAST, kbEnter, 0, SpringLayout.EAST, printer);
+		kbEnter = new JButton("ENTER"); //for sending keyboard strings to the inputBuffer
+		sl_contentPane.putConstraint(SpringLayout.NORTH, kbEnter, -4, SpringLayout.NORTH, lblGpr_1);
+		sl_contentPane.putConstraint(SpringLayout.EAST, kbEnter, -43, SpringLayout.EAST, contentPane);
+		kbEnter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (keyboard.getText() == "") {;} //If the keyboard is empty when 
+				else {
+				for (int i = 0; i < keyboard.getText().length(); i++) {
+					cpu.inputBuffer.add(keyboard.getText().charAt(i));
+				}
+				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required, just making a note.
+				keyboard.setText("");} //clears the keyboard after the value is entered
+			}
+		});
 		contentPane.add(kbEnter);
+		
+		printer = new JTextArea(); //console printer
+		printer.setEditable(false); //user is not allowed to edit this field
+		JScrollPane scrolling = new JScrollPane(printer);
+		
+		sl_contentPane.putConstraint(SpringLayout.NORTH, scrolling, 16, SpringLayout.SOUTH, printerlbl);
+		sl_contentPane.putConstraint(SpringLayout.WEST, scrolling, 100, SpringLayout.EAST, ccfield);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, scrolling, 3, SpringLayout.SOUTH, ixr2field);
+		sl_contentPane.putConstraint(SpringLayout.EAST, scrolling, -5, SpringLayout.EAST, contentPane);
+		contentPane.add(scrolling);
+
+		/*
+		sl_contentPane.putConstraint(SpringLayout.NORTH, printer, 16, SpringLayout.SOUTH, printerlbl);
+		sl_contentPane.putConstraint(SpringLayout.WEST, printer, 100, SpringLayout.EAST, ccfield);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, printer, 3, SpringLayout.SOUTH, ixr2field);
+		sl_contentPane.putConstraint(SpringLayout.EAST, printer, -5, SpringLayout.EAST, contentPane);
+		contentPane.add(printer); */
 	}
 }
