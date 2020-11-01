@@ -40,7 +40,7 @@ public class CPU extends Thread {
 	private boolean run = false;
 	protected short[] memory = new short[2048]; // # of words = 2048 => main memory size = # of words (2048) * block size (2 bytes) = 4096 bytes = 2^12 bytes => physical address = 12 bits
     protected short[] cache = new short[16]; // # of cache lines = 16 => cache size = # of cache lines (16) * block size (2 bytes) = 32 bytes = 2^5 bytes => cache address = 5 bits
-	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
+	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
 	protected String printOut = ""; //This is what appears on the printer.
 	protected Deque<Character> inputBuffer = new LinkedList<Character>();
 	
@@ -322,7 +322,7 @@ public class CPU extends Thread {
 		gui.runToggle.setSelected(false);//if the halt occurred during a running program, this resets the state of the Run button. 
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
-		if(isaConsole == true) System.out.println("01"); //Debugging tool
+		if(isaConsole == true) System.out.println("01 LDR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = memory[effectiveAddress(word)];
 			break;
@@ -336,7 +336,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void str(Word word) { //02 Load Register to Memory
-		if(isaConsole == true) System.out.println("02"); //Debugging tool
+		if(isaConsole == true) System.out.println("02 STR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: memory[effectiveAddress(word)] = gpr0;
 				break;
@@ -350,7 +350,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void lda(Word word) { //03 Load Register with Address
-		if(isaConsole == true) System.out.println("03"); //Debugging tool
+		if(isaConsole == true) System.out.println("03 LDA"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0 = effectiveAddress(word);
 				break;
@@ -364,7 +364,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void amr(Word word) {// 04 Add Memory to Register
-		if(isaConsole == true) System.out.println("04"); //Debugging tool
+		if(isaConsole == true) System.out.println("04 AMR"); //Debugging tool
 		else {
 			switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 			case 0: 
@@ -432,7 +432,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void smr(Word word) {// 05 Subtract Memory from Register
-		if(isaConsole == true) System.out.println("05"); //Debugging tool
+		if(isaConsole == true) System.out.println("05 SMR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: 
 			if ((gpr0 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
@@ -498,7 +498,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void air(Word word) {// 06 Add Immediate to Register
-		if(isaConsole == true) System.out.println("06"); //Debugging tool
+		if(isaConsole == true) System.out.println("06 AIR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: 
 			if ((gpr0 + word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
@@ -564,7 +564,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void sir(Word word) {// 07 Subtract Immediate from Register
-		if(isaConsole == true) System.out.println("07"); //Debugging tool
+		if(isaConsole == true) System.out.println("07 SIR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: 
 			if ((gpr0 - word.immed) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
@@ -630,7 +630,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void jz(Word word) { //10 Jump if Zero
-		if(isaConsole == true) System.out.println("10"); //Debugging tool
+		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: if(gpr0 == 0) pc = effectiveAddress(word);
 				break;
@@ -645,7 +645,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void jne(Word word) { //11 Jump if Not Zero
-		if(isaConsole == true) System.out.println("11"); //Debugging tool
+		if(isaConsole == true) System.out.println("11 JNE"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: if(gpr0 != 0) pc = effectiveAddress(word);
 				break;
@@ -660,7 +660,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void jcc(short condition, Word word) { //12 Jump if Condition Code
-		if(isaConsole == true) System.out.println("12"); //Debugging tool
+		if(isaConsole == true) System.out.println("12 JCC"); //Debugging tool
 		short compare;
 		switch (word.gprN) { //uses gpr field as a stand-in for determining the cc bit to check
 		case 0: compare = 0b0000000000000001; //check first bit using mask
@@ -680,21 +680,22 @@ public class CPU extends Thread {
 		}
 	}
 	public void jma(Word word) { //13 Unconditional Jump to Address
-		if(isaConsole == true) System.out.println("12"); //Debugging tool
+		if(isaConsole == true) System.out.println("13 JMA"); //Debugging tool
 		pc = effectiveAddress(word);
 	}
 	public void jsr(Word word) {// 14 Jump and Save Return Address
-		if(isaConsole == true) System.out.println("14"); //Debugging tool
+		if(isaConsole == true) System.out.println("14 JSR"); //Debugging tool
 		gpr3 = (short) (pc + 1);
 		pc = effectiveAddress(word);
 		//gpr0 should be set to pointer before this is started //TODO verify that this is what he means by " R0 should contain pointer to arguments. He means the subroutine, right?
 	}
 	public void rfs(Word word) {// 15 Return from Subroutine with Return Code as Immed portion stored in the instruction's address field.
-		if(isaConsole == true) System.out.println("15"); //Debugging tool
+		if(isaConsole == true) System.out.println("15 RFS"); //Debugging tool
 		gpr0 = word.immed;
 		pc = gpr3;
 	}
 	public void sob(Word word) {//16 Subtract One and Branch
+		if(isaConsole == true) System.out.println("16 SOB"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: gpr0--;
 				if (gpr0 > 0) pc = effectiveAddress(word); 
@@ -708,11 +709,12 @@ public class CPU extends Thread {
 		case 3: gpr3--;
 				if (gpr3 > 0) pc = effectiveAddress(word);
 				break;
-		default: gui.visualizefield.setText("JZ failed.");
+		default: gui.visualizefield.setText("SOB failed.");
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		}
 	}
 	public void jge(Word word) {//17 Jump Greater Than or Equal To
+		if(isaConsole == true) System.out.println("17 JGE"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: if (gpr0 > 0) pc = effectiveAddress(word); 
 				break;
@@ -722,12 +724,12 @@ public class CPU extends Thread {
 				break;
 		case 3: if (gpr3 > 0) pc = effectiveAddress(word);
 				break;
-		default: gui.visualizefield.setText("JZ failed.");
+		default: gui.visualizefield.setText("JGE failed.");
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		}
 	}
 	public void mlt(Word word) {// 20 Multiply Register by Register
-		if(isaConsole == true) System.out.println("20"); //Debugging tool
+		if(isaConsole == true) System.out.println("20 MLT"); //Debugging tool
 			int product;
 			short highorder, loworder;
 			switch (word.rx) { //uses rx number in the word to determine which register to use.
@@ -774,7 +776,7 @@ public class CPU extends Thread {
 		}	
 	}
 	public void dvd(Word word) {// 21 Divide Register by Register
-		if(isaConsole == true) System.out.println("21"); //Debugging tool
+		if(isaConsole == true) System.out.println("21 DVD"); //Debugging tool
 		if (word.ry == 0) {
 			cc = 2; //set divzero flag
 			hlt();
@@ -800,12 +802,12 @@ public class CPU extends Thread {
 		}
 	}
 	public void trr(Word word) {// 22 Test Equality of two Registers
-		if(isaConsole == true) System.out.println("22"); //Debugging tool
+		if(isaConsole == true) System.out.println("22 TRR"); //Debugging tool
 		if (word.rx == word.ry) cc = 1;
 		else cc = 0;
 	}
 	public void and(Word word) {// 23 Logical AND Register by Register
-		if(isaConsole == true) System.out.println("23"); //Debugging tool
+		if(isaConsole == true) System.out.println("23 AND"); //Debugging tool
 		short crx = 0, cry = 0, result = 0;
 		switch (word.rx) {
 		case 0: crx = gpr0;
@@ -840,7 +842,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void orr(Word word) {// 24 Logical OR Register by Register
-		if(isaConsole == true) System.out.println("24"); //Debugging tool
+		if(isaConsole == true) System.out.println("24 ORR"); //Debugging tool
 		short crx = 0, cry = 0, result = 0;
 		switch (word.rx) {
 		case 0: crx = gpr0;
@@ -875,7 +877,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void not(Word word) {//25 Logical NOT Register by Register
-		if(isaConsole == true) System.out.println("25"); //Debugging tool
+		if(isaConsole == true) System.out.println("25 NOT"); //Debugging tool
 		short crx =0;
 		switch (word.rx) {
 		case 0: crx = gpr0;
@@ -900,11 +902,11 @@ public class CPU extends Thread {
 		}
 	}
 	public void trap() {//30 Trap code
-		if(isaConsole == true) System.out.println("30"); //Debugging tool
+		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
 		//add content in Part III
 	}
 	public void src(Word word) {//31 Shift Register by Count
-		if(isaConsole == true) System.out.println("31"); //Debugging tool
+		if(isaConsole == true) System.out.println("31 SRC"); //Debugging tool
 		short result = 0;
 		boolean crash = false;
 		int usablecount = (int) word.count;
@@ -954,7 +956,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void rrc(Word word) {// 32 Rotate Register by Count
-		if(isaConsole == true) System.out.println("32"); //Debugging tool
+		if(isaConsole == true) System.out.println("32 RRC"); //Debugging tool
 		if (word.count == 0) ; //if Count is 0, don't move anything.
 		else {
 			short result = 0;
@@ -1001,7 +1003,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void ldx(Word word) { //41 Load Index Register from Memory
-		if(isaConsole == true) {System.out.println("41"); ////Debugging tool
+		if(isaConsole == true) {System.out.println("41 LDX"); ////Debugging tool
 		System.out.println("ldxEfAd is =" + effectiveAddress(word));}
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: ixr1 = memory[effectiveAddress(word)];
@@ -1014,7 +1016,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
-		if(isaConsole == true) {System.out.println("42"); //Debugging tool
+		if(isaConsole == true) {System.out.println("42 STX"); //Debugging tool
 		System.out.println("stxEfAd is =" + effectiveAddress(word));}
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: memory[effectiveAddress(word)] = ixr1;
@@ -1027,7 +1029,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void in(Word word) {// 61 Input character to Register from Device
-		if(isaConsole == true) System.out.println("61"); //Debugging tool
+		if(isaConsole == true) System.out.println("61 IN"); //Debugging tool
 		if (word.devID == 0) {
 			char firstCharacter = inputBuffer.remove(); //pulls only the first character of the string in the keyboard field
 			switch (word.r) { //uses gpr number in the word to determine which register to use.
@@ -1046,7 +1048,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void out(Word word) {// 62 Output character to Device from Register
-		if(isaConsole == true) System.out.println("62"); //Debugging tool
+		if(isaConsole == true) System.out.println("62 OUT"); //Debugging tool
 		if(word.devID != 1) {
 			gui.printer.setText("Wrong DevID in pgm");
 		} 
@@ -1061,11 +1063,11 @@ public class CPU extends Thread {
 			case 3: printOut += (char) gpr3;
 					break;
 			}
-			//gui.printer.setText(printOut);//for debugging. printOut is updated to the GUI along with everything else at the end of the Instruction Cycle
+			gui.printer.setText(printOut);//for debugging. printOut is updated to the GUI along with everything else at the end of the Instruction Cycle
 		}
 	}
 	public void chk(Word word) {//TODO 63 Check Device Status to Register
-		if(isaConsole == true) System.out.println("63"); //Debugging tool
+		if(isaConsole == true) System.out.println("63 CHK"); //Debugging tool
 		
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
 			if (inputBuffer.peek() != null) {
