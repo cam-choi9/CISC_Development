@@ -31,87 +31,163 @@
 0200  AC40
 # Load IXR1 with contents of 000D 3)
 0201  A44D
-#LDR char to reg (1/18)
+#LDR char to reg (1/19)
 0202  0440
 #OUT char
 0203  F801
-#LDR char to reg (2/18)
+#LDR char to reg (2/19)
 0204  0441
 #OUT char
 0205  F801
-#LDR char to reg (3/18)
+#LDR char to reg (3/19)
 0206  0442
 #OUT char
 0207  F801
-#LDR char to reg (4/18)
+#LDR char to reg (4/19)
 0208  0443
 #OUT char
 0209  F801
-#LDR char to reg (5/18)
+#LDR char to reg (5/19)
 020A  0444
 #OUT char
 020B  F801
-#LDR char to reg (6/18)
+#LDR char to reg (6/19)
 020C  0445
 #OUT char
 020D  F801
-#LDR char to reg (7/18)
+#LDR char to reg (7/19)
 020E  0446
 #OUT char
 020F  F801
-#LDR char to reg (8/18)
+#LDR char to reg (8/19)
 0210  0447
 #OUT char
 0211  F801
-#LDR char to reg (9/18)
+#LDR char to reg (9/19)
 0212  0448
 #OUT char
 0213  F801
-#LDR char to reg (10/18)
+#LDR char to reg (10/19)
 0214  0449
 #OUT char
 0215  F801
-#LDR char to reg (11/18)
+#LDR char to reg (11/19)
 0216  044A
 #OUT char
 0217  F801
-#LDR char to reg (12/18)
+#LDR char to reg (12/19)
 0218  044B
 #OUT char
 0219  F801
-#LDR char to reg (13/18)
+#LDR char to reg (13/19)
 021A  044C
 #OUT char
 021B  F801
-#LDR char to reg (14/18)
+#LDR char to reg (14/19)
 021C  044D
 #OUT char
 021D  F801
-#LDR char to reg (15/18)
+#LDR char to reg (15/19)
 021E  044E
 #OUT char
 021F  F801
-#LDR char to reg (16/18)
+#LDR char to reg (16/19)
 0220  044F
 #OUT char
 0221  F801
-#LDR char to reg (17/18)
+#LDR char to reg (17/17)
 0222  0450
 #OUT char
 0223  F801
-#LDR char to reg (18/18)
-0224  0451
-#OUT char
-0225  F801
+# SCRL
+0224  F000
+# Clear IXR1 3)
+0225  AC40
+# LDX new IXR1
+0226  
 #At the very end, jump back to the central program.
-#
+0227
 ### Print out second message
-#LDA char to reg (Do 18 times)
-#
+# Clear IXR1 3)
+0230  AC40
+# Load IXR1 with contents of 000D 3)
+0231  A44D
+#LDR char to reg (1/17)
+0232  0440
 #OUT char
-#
+0233  F801
+#LDR char to reg (2/17)
+0234  0441
+#OUT char
+0235  F801
+#LDR char to reg (3/17)
+0236  0442
+#OUT char
+0237  F801
+#LDR char to reg (4/17)
+0238  0443
+#OUT char
+0239  F801
+#LDR char to reg (5/17)
+023A  0444
+#OUT char
+023B  F801
+#LDR char to reg (6/17)
+023C  0445
+#OUT char
+023D  F801
+#LDR char to reg (7/17)
+023E  0446
+#OUT char
+023F  F801
+#LDR char to reg (8/17)
+0240  0447
+#OUT char
+0241  F801
+#LDR char to reg (9/17)
+0242  0448
+#OUT char
+0243  F801
+#LDR char to reg (10/17)
+0244  0449
+#OUT char
+0245  F801
+#LDR char to reg (11/17)
+0246  044A
+#OUT char
+0247  F801
+#LDR char to reg (12/17)
+0248  044B
+#OUT char
+0249  F801
+#LDR char to reg (13/17)
+024A  044C
+#OUT char
+024B  F801
+#LDR char to reg (14/17)
+024C  044D
+#OUT char
+024D  F801
+#LDR char to reg (15/17)
+024E  044E
+#OUT char
+024F  F801
+#LDR char to reg (16/17)
+0250  044F
+#OUT char
+0251  F801
+#LDR char to reg (17/17)
+0252  0450
+#OUT char
+0253  F801
+# SCRL
+#0254  F000
+#CLX
+#0255
+#LDX
+#0256
 #At the very end, jump back to the central program.
-#
+#0257
 ### The text of first message
 #E
 0400  0045
@@ -147,24 +223,38 @@
 040F  0052
 #S
 0410  0053
-#EndOfLine
-0411  000A
 ### The text of second message
 #E
+0411  0045
 #N
+0412  004E
 #T
+0413  0054
 #E
+0414  0045
 #R
+0415  0052
 # 
+0416  0020
 #O
+0417  004F
 #N
+0418  004E
 #E
+0419  0045
 # 
+041A  0020
 #I
+041B  0049
 #N
+041C  004E
 #T
+041D  0054
 #E
+041E  0045
 #G
+041F  0047
 #E
+0420  0045
 #R
-#EndOfLine
+0421  0052
