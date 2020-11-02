@@ -37,9 +37,15 @@ public class CPU extends Thread {
 	private short ir = 0; //(Current) Instruction Register
 	private short mfr = 0; //Machine Fault Register
 	private short cc = 0; //Condition Code
+	private short replacement = 0; //Index of the cache line that needs to be replaced when the cache memory is full and needs to be updated  
 	private boolean run = false;
-	protected short[] memory = new short[2048]; // # of words = 2048 => main memory size = # of words (2048) * block size (2 bytes) = 4096 bytes = 2^12 bytes => physical address = 12 bits
-    protected short[] cache = new short[16]; // # of cache lines = 16 => cache size = # of cache lines (16) * block size (2 bytes) = 32 bytes = 2^5 bytes => cache address = 5 bits
+	protected short[] memory = new short[2048]; // # of words = 2048 => physical address = 11 bits
+	/*	Cache Implementation
+     *  1. # of cache lines is 16
+     *  2. Each cache line holds both "memory block (16 bits)" & "memory address (11 tag bits)" => short cannot contain 27 bits, thus uses int[] for cache
+     *  3. Use a FIFO algorithm to replace the oldest cache line
+     */
+	protected int[] cache = new int[16];     
 	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
 	protected String printOut = ""; //This is what appears on the printer.
 	protected Deque<Character> inputBuffer = new LinkedList<Character>();
@@ -100,9 +106,11 @@ public class CPU extends Thread {
 		ir = 0; 
 		mfr = 0;
 		cc = 0; 
+		replacement = 0;
 		memory = new short[2048];
-		cache = new short[16];
+		cache = new int[16];
 		gui.printer.setText("");
+		
 		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
@@ -111,7 +119,7 @@ public class CPU extends Thread {
 			short content = 0;
 			int contentInt = 0;
 			boolean first = true;
-			int cacheLineNumber = 0;
+			int cacheLine = 0; // memory address (11 bits) + data in that address (16 bits)
 			String parsed = "";
 			String line;
 			while (fileReader.hasNextLine()) {
@@ -132,11 +140,13 @@ public class CPU extends Thread {
 					}
 					//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
 					memory[address] = content; //loads the line to the specified address location                         
-					cache[cacheLineNumber] = content; // loads the line to replace the first block in cache memory
-					cacheLineNumber++; // move index to point the next block to be out
-					if (cacheLineNumber == cache.length) { // if the pointer reaches the end of the cache memory, 
-						cacheLineNumber = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
-					}
+					cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits) 
+					cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits 
+					cacheLine += contentInt;	// adds content to the cache line
+	                cache[replacement++] = cacheLine; // loads the content to replace the first block in cache memory & moves index to point the next block to be out                
+	                if (replacement == cache.length) { // if the pointer reaches the end of the cache memory, 
+	                	replacement = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+	                }
 					if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
 						pc = (short) address;
 						first = false;
@@ -162,22 +172,72 @@ public class CPU extends Thread {
 				run = false;
 				break;
 			}
-			fetch(); //Performs the fetch method (see method below)
-			executable = decode(ir); //Decode the contents of the IR (see method below)
-			execute(executable); //Executes the decoded word using the opcode (see method below)
-			updateGUI(); //Refresh the gui to reflect everything that happened.
-			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
-		} 
+			//Searches through the cache memory first => if cache contains the memory address required by pc, execute the instruction 
+			if (cacheSearch()) {
+				pc++;				
+			}
+			else {
+				fetch(); //Performs the fetch method (see method below)			
+				executable = decode(ir); //Decode the contents of the IR (see method below)
+				execute(executable); //Executes the decoded word using the opcode (see method below)
+				cacheUpdate(); //Updates the cache with the new content that was used				
+			}
+			updateGUI(); //Refresh the gui to reflect everything that happened.			
+    		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.
+			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.			
+		}  
 	}
 	
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
 		Word executable;
-		fetch();
-		// cache_search(); // search cache memory first => If 'hit', execute the instruction. Else, access main memory.
-		executable = decode(ir); //Decode the contents of the IR (see method below)
-		execute(executable); //Executes the decoded word using the opcode (see method below)
+		if (cacheSearch()) {
+//			System.out.println("Cache works!");
+			pc++;
+		}
+		else {
+//			System.out.println("Normal Execution!");
+			fetch();
+			executable = decode(ir); //Decode the contents of the IR (see method below)
+			execute(executable); //Executes the decoded word using the opcode (see method below)
+			cacheUpdate(); //Updates cache memory (see method below)
+		}		
 		updateGUI(); //Refresh the gui to reflect everything that happened.
 		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.
+	}
+	
+	public boolean cacheSearch() { // search through the cache memory and execute the instruction if found in the cache memory
+		short address = 0;
+		short word = 0;
+		Word executable; 
+		String s = ""; //Empty string that will hold the cache line
+        for (int i=0; i<cache.length; i++) {        	
+            s = Integer.toBinaryString(cache[i]);
+            s = ("000000000000000000000000000" + s).substring(s.length()); //Get exact 27 bits (address(11bits) + word(16bits)) with leading zeros 
+//            System.out.println("binary string: " + s); // debug
+            
+            String a = s.substring(0, 11);
+            String w = s.substring(11, s.length());            
+            address = (short) (Integer.parseInt(a,2)); //Get the address       
+            word = (short) (Integer.parseInt(w,2)); //Get the content(word)
+//            System.out.println("cache line address: " + address); // debug
+//            System.out.println("cache line content: " + word); // debug            
+//            System.out.println("pc: "+ pc);
+        	if (address == pc) { // if address matches with pc, => "hit" case
+        		executable = decode(word); //Decodes the data stored in the address
+        		execute(executable); //Executes the instruction        		
+        		return true;
+        	}            
+        }        
+        return false;
+    }
+	
+	public void cacheUpdate() { // if the content is not in cache memory (miss case), update the cache with a new content stored in the main memory
+		int address = (int) mar; //The current memory address
+		int content = (int) ir; //The current instruction (data) in the memory address		
+		int cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits) 
+		cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits 
+		cacheLine += content;	// adds content to the cache line
+        cache[replacement++] = cacheLine; // loads the content to replace the first block in cache memory & moves index to point the next block to be out		
 	}
 	
 	public void fetch(){
@@ -189,15 +249,6 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
-	
-	public void cache_search() { // search through the cache memory and execute the instruction if found in the cache memory
-        for (int i=0; i<cache.length; i++) {                
-            if (cache[i] == ir) {     // "hit" case
-                // execute 
-                // no need to access main memory
-            }
-        }
-    }
 	
 	public Word decode(short ir){ //this is the first part of the control unit. It takes the IR and decodes it into an executable Word
 		Word executable = new Word(ir);
