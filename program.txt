@@ -30,19 +30,79 @@
 # Clear IXR1 3)
 0200  AC40
 # Load IXR1 with contents of 000D 3)
-0201  A44E
+0201  A44D
 #LDR char to reg (1/18)
-0202  0c40
+0202  0440
 #OUT char
-0203  F901
+0203  F801
 #LDR char to reg (2/18)
-0202  0c41
+0204  0441
 #OUT char
-0203  F901
+0205  F801
 #LDR char to reg (3/18)
-0202  0c42
+0206  0442
 #OUT char
-0203  F901
+0207  F801
+#LDR char to reg (4/18)
+0208  0443
+#OUT char
+0209  F801
+#LDR char to reg (5/18)
+020A  0444
+#OUT char
+020B  F801
+#LDR char to reg (6/18)
+020C  0445
+#OUT char
+020D  F801
+#LDR char to reg (7/18)
+020E  0446
+#OUT char
+0210  F801
+#LDR char to reg (8/18)
+0211  0447
+#OUT char
+0212  F801
+#LDR char to reg (9/18)
+0213  0448
+#OUT char
+0214  F801
+#LDR char to reg (10/18)
+0215  0449
+#OUT char
+0216  F801
+#LDR char to reg (11/18)
+0217  044A
+#OUT char
+0218  F801
+#LDR char to reg (12/18)
+0219  044B
+#OUT char
+021A  F801
+#LDR char to reg (13/18)
+021B  044C
+#OUT char
+021C  F801
+#LDR char to reg (14/18)
+021D  044D
+#OUT char
+021E  F801
+#LDR char to reg (15/18)
+0220  044E
+#OUT char
+0221  F801
+#LDR char to reg (16/18)
+0222  0450
+#OUT char
+0223  F801
+#LDR char to reg (17/18)
+0224  0451
+#OUT char
+0225  F801
+#LDR char to reg (18/18)
+0226  0452
+#OUT char
+0227  F801
 #At the very end, jump back to the central program.
 #
 ### Print out second message
