@@ -186,6 +186,7 @@ public class CPU extends Thread {
 		//the memory returns the data stored at the memory location indicated by PC, 
 		//and copies it to the MBR.
 		ir = mbr; //CPU copies data from the MBR to the Instruction Register
+		if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
 	
@@ -278,6 +279,7 @@ public class CPU extends Thread {
 		if (word.idb == false) {//If Indirect Bit IS NOT set
 			if (word.ixrN == 0) { //if the IXR number is 0
 				if(isaConsole == true) System.out.println("EAcase1");
+				eaHexval(word.address);
 				return word.address; //return just the Word's base address value
 			}
 			else { //if IXR number is 1-3
@@ -290,12 +292,14 @@ public class CPU extends Thread {
 				case 3: indAddress = (short) (ixr3 + word.address);
 					break;
 				}
+				eaHexval(indAddress);
 				return indAddress; //...and return that
 			}
 		}
 		else { //IF Indirect Bit IS set
 			if (word.ixrN == 0) { //if the IXR number is 0
 				if(isaConsole == true) System.out.println("EAcase3");
+				eaHexval(memory[word.address]);
 				return memory[word.address]; //return the contents at memory address that the address value is pointing to
 			}
 			else { //if IXR number is 1-3
@@ -308,8 +312,16 @@ public class CPU extends Thread {
 				case 3: indAddress = (short) (ixr3 + word.address);
 					break;
 				}
+				eaHexval(memory[indAddress]);
 				return memory[indAddress]; //...and return the contents at memory address that the new value is pointing to.
 			}
+		}
+		 //Debugging tool
+	}
+	public void eaHexval (short nothex) {//another debugging tool for seeing the Hex values of EAs being retunred.
+		if(isaConsole == true) {
+			String hexval = Integer.toHexString(nothex);
+			System.out.println("EA goes to " + hexval);
 		}
 	}
 	/*
@@ -1003,8 +1015,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void ldx(Word word) { //41 Load Index Register from Memory
-		if(isaConsole == true) {System.out.println("41 LDX"); ////Debugging tool
-		System.out.println("ldxEfAd is =" + effectiveAddress(word));}
+		if(isaConsole == true) {System.out.println("41 LDX");} ////Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: ixr1 = memory[effectiveAddress(word)];
 			break;
@@ -1016,8 +1027,7 @@ public class CPU extends Thread {
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
-		if(isaConsole == true) {System.out.println("42 STX"); //Debugging tool
-		System.out.println("stxEfAd is =" + effectiveAddress(word));}
+		if(isaConsole == true) {System.out.println("42 STX");} //Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
 		case 1: memory[effectiveAddress(word)] = ixr1;
 				break;
