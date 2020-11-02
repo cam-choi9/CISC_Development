@@ -311,6 +311,8 @@ public class CPU extends Thread {
 		case 43: clx(word);//This is an extension
 				break;
 		//50-51 reserved for floating point
+		case 60: scrl(); //This is an extension. Scrolls printer.
+				break;
 		case 61: in(word);
 				break;
 		case 62: out(word);
@@ -1106,6 +1108,10 @@ public class CPU extends Thread {
 			break;
 		default: gui.visualizefield.setText("LDR failed.");
 		}
+	}
+	public void scrl() {//THIS IS AN EXTENSION I CREATED. 60 Scrolls the printer to next line.
+		if(isaConsole == true) System.out.println("60 SCRL"); //Debugging tool
+		printOut += "\n";
 	}
 	public void in(Word word) {// 61 Input character to Register from Device
 		if(isaConsole == true) System.out.println("61 IN"); //Debugging tool
