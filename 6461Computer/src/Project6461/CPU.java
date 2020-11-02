@@ -104,6 +104,7 @@ public class CPU extends Thread {
 		mar = 0;
 		mbr = 0;
 		ir = 0; 
+		printOut = "";
 		mfr = 0;
 		cc = 0; 
 		replacement = 0;
