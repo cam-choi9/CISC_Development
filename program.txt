@@ -1,7 +1,110 @@
-0008  0C0B
-0009  0801
-000A  0501
-000B  A44B
-000C  A842
-000D  A482
-000E  0000
+###### This program is designed to:
+### 1. Prompt the User to enter 20 values
+### 2. Prompt the user to enter another value
+### 3. Return the value amongst the 20 values that is closest to the entered value.
+###### Central program.
+# 1) LDX for getting to First message
+0008  A44B
+# 2) Jump to first message printer at EA IX plus addr
+0009  3440
+# Make some IXR shortcuts for faster reference later
+000A  0100
+000B  0200
+000C  0300
+000D  0400
+000E  0500
+0010  0600
+0011  0700
+0012  0800
+0013  0900
+0014  0A00
+### NOTE, all other 000 and 001 addresses are reserved for Index Registers!
+### Rest of main program here
+# Jump to input loop //TODO
+0109
+# Jump to second message printer //TODO
+010A
+# Print out end result //TODO
+010B
+###### 200 Print out first message
+# Clear IXR1 3)
+0200  AC40
+# Load IXR1 with contents of 000D 3)
+0201  A44E
+#LDR char to reg (1/18)
+0202  0c40
+#OUT char
+0203  F901
+#LDR char to reg (2/18)
+0202  0c41
+#OUT char
+0203  F901
+#LDR char to reg (3/18)
+0202  0c42
+#OUT char
+0203  F901
+#At the very end, jump back to the central program.
+#
+### Print out second message
+#LDA char to reg (Do 18 times)
+#
+#OUT char
+#
+#At the very end, jump back to the central program.
+#
+### The text of first message
+#E
+0400  0045
+#N
+0401  004E
+#T
+0402  0054
+#E
+0403  0045
+#R
+0404  0052
+# 
+0405  0020
+#2
+0406  0032
+#0
+0407  0030
+# 
+0408  0020
+#I
+0409  0049
+#N
+040A  004E
+#T
+040B  0054
+#E
+040C  0045
+#G
+040D  0047
+#E
+040E  0045
+#R
+0410  0052
+#S
+0411  0053
+#EndOfLine
+0412  000A
+### The text of second message
+#E
+#N
+#T
+#E
+#R
+# 
+#O
+#N
+#E
+# 
+#I
+#N
+#T
+#E
+#G
+#E
+#R
+#EndOfLine
