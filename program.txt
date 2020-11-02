@@ -58,51 +58,51 @@
 #LDR char to reg (7/18)
 020E  0446
 #OUT char
-0210  F801
+020F  F801
 #LDR char to reg (8/18)
-0211  0447
+0210  0447
 #OUT char
-0212  F801
+0211  F801
 #LDR char to reg (9/18)
-0213  0448
+0212  0448
 #OUT char
-0214  F801
+0213  F801
 #LDR char to reg (10/18)
-0215  0449
+0214  0449
 #OUT char
-0216  F801
+0215  F801
 #LDR char to reg (11/18)
-0217  044A
+0216  044A
 #OUT char
-0218  F801
+0217  F801
 #LDR char to reg (12/18)
-0219  044B
+0218  044B
 #OUT char
-021A  F801
+0219  F801
 #LDR char to reg (13/18)
-021B  044C
+021A  044C
 #OUT char
-021C  F801
+021B  F801
 #LDR char to reg (14/18)
-021D  044D
+021C  044D
 #OUT char
-021E  F801
+021D  F801
 #LDR char to reg (15/18)
-0220  044E
+021E  044E
+#OUT char
+021F  F801
+#LDR char to reg (16/18)
+0220  044F
 #OUT char
 0221  F801
-#LDR char to reg (16/18)
+#LDR char to reg (17/18)
 0222  0450
 #OUT char
 0223  F801
-#LDR char to reg (17/18)
+#LDR char to reg (18/18)
 0224  0451
 #OUT char
 0225  F801
-#LDR char to reg (18/18)
-0226  0452
-#OUT char
-0227  F801
 #At the very end, jump back to the central program.
 #
 ### Print out second message
@@ -144,11 +144,11 @@
 #E
 040E  0045
 #R
-0410  0052
+040F  0052
 #S
-0411  0053
+0410  0053
 #EndOfLine
-0412  000A
+0411  000A
 ### The text of second message
 #E
 #N
