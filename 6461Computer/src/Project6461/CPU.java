@@ -188,38 +188,46 @@ public class CPU extends Thread {
 				break;
 			}
 			
-			fetch(); //Performs the fetch method & checks the cache memory first(see method below)			
-			executable = decode(ir); //Decode the contents of the IR (see method below)
-			execute(executable); //Executes the decoded word using the opcode (see method below)
-			cacheUpdate(); //Updates the cache with the new content that was used				
+			if (fetch()) {}  //Performs the fetch method & checks the cache memory first(see method below)
+			else {
+				executable = decode(ir); //Decode the contents of the IR (see method below)
+				execute(executable); //Executes the decoded word using the opcode (see method below)
+				cacheUpdate(); //Updates the cache with the new content that was used		
+			}					
 			updateGUI(); //Refresh the gui to reflect everything that happened.			
-    		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.		  
-		
+    		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.		  		
 			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
 		} 
 	}
 	
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
 		Word executable;
-		fetch(); //Performs the fetch method & checks the cache memory first(see method below)
-		executable = decode(ir); //Decode the contents of the IR (see method below)
-		execute(executable); //Executes the decoded word using the opcode (see method below)
-		cacheUpdate(); //Updates cache memory (see method below)		
+		if (fetch()) {} //Performs the fetch method & checks the cache memory first(see method below)
+		else {
+			executable = decode(ir); //Decode the contents of the IR (see method below)
+			execute(executable); //Executes the decoded word using the opcode (see method below)
+			cacheUpdate(); //Updates cache memory (see method below)		
+		}		
 		updateGUI(); //Refresh the gui to reflect everything that happened.
 		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.
 	}
 	
-	public void fetch(){
+	public boolean fetch(){
 		mar = pc; //The CPU sends the contents of the PC to the MAR
-		if (cacheSearch()) {} //If the instruction is found in the cache memory, no need to access the main memory (see the method below) 
+		if (cacheSearch()) {
+			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
+			pc++;//The PC is incremented so that it points to the next instruction.
+			return true;
+		} //If the instruction is found in the cache memory, no need to access the main memory (see the method below) 
 		else {
 			mbr = memory[mar]; //In response to the read command (with address equal to PC), 
 			//the memory returns the data stored at the memory location indicated by PC, 
 			//and copies it to the MBR.
 			ir = mbr; //CPU copies data from the MBR to the Instruction Register
 			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
-		}		
-		pc++;//The PC is incremented so that it points to the next instruction.
+			pc++;//The PC is incremented so that it points to the next instruction.
+		}				
+		return false;
 	}
 	/*  
 	 * Searches through the cache memory first => if cache contains the memory address required by pc, decode and execute the instruction ("Hit" case)
