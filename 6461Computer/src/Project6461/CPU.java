@@ -119,8 +119,7 @@ public class CPU extends Thread {
 			short content = 0;
 			int contentInt = 0;
 			int cacheLine = 0; // memory address (11 bits) + data in that address (16 bits)
-			boolean first = true;
-			int cacheLineNumber = 0;
+			boolean first = true;			
 			String parsed = "";
 			String line;
 			while (fileReader.hasNextLine()) {
@@ -139,16 +138,30 @@ public class CPU extends Thread {
 					else {
 						content = (short) contentInt;
 					}
-					//System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
+//					System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
 					memory[address] = content; //loads the line to the specified address location                         
-					cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits) 
-					cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits 
+					cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits)
+					String s = "";
+					cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits
+					if (contentInt < 0) {
+						s = Integer.toBinaryString(ir);
+						s = s.substring(16, 32);
+						contentInt = Integer.parseInt(s, 2);
+					}
 					cacheLine += contentInt;	// adds content to the cache line
 					cache[replacement++] = cacheLine; // loads the content to replace the first block in cache memory & moves index to point the next block to be out                
 					if (replacement == cache.length) { // if the pointer reaches the end of the cache memory, 
-						replacement = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+						replacement = 0; // sets it back to the head of the cache memory => first-in-first-out
+//						System.out.println("cache full!");
+//						for (int i=0; i<cache.length; i++) { //Debugging => check if the cache holds the address & the content correctly        	
+//							s = Integer.toBinaryString(cache[i]);
+//							s = ("000000000000000000000000000" + s).substring(s.length());//							
+//							String a = s.substring(0, 11);
+//							String w = s.substring(11, s.length());            
+//							System.out.println((short) (Integer.parseInt(a,2)) + "__" + (Integer.toHexString(Integer.parseInt(w,2))) + "_" + (short) (Integer.parseInt(w,2)));//for debugging.				
+//						}
 					}
-
+//					
 					if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
 						pc = (short) address;
 						first = false;
@@ -174,16 +187,11 @@ public class CPU extends Thread {
 				run = false;
 				break;
 			}
-			//Searches through the cache memory first => if cache contains the memory address required by pc, execute the instruction 
-			if (cacheSearch()) {
-				pc++;				
-			}
-			else {
-				fetch(); //Performs the fetch method (see method below)			
-				executable = decode(ir); //Decode the contents of the IR (see method below)
-				execute(executable); //Executes the decoded word using the opcode (see method below)
-				cacheUpdate(); //Updates the cache with the new content that was used				
-			}
+			
+			fetch(); //Performs the fetch method & checks the cache memory first(see method below)			
+			executable = decode(ir); //Decode the contents of the IR (see method below)
+			execute(executable); //Executes the decoded word using the opcode (see method below)
+			cacheUpdate(); //Updates the cache with the new content that was used				
 			updateGUI(); //Refresh the gui to reflect everything that happened.			
     		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.		  
 		
@@ -193,64 +201,99 @@ public class CPU extends Thread {
 	
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
 		Word executable;
-		if (cacheSearch()) {
-//			System.out.println("Cache works!");
-			pc++;
-		}
-		else {
-//			System.out.println("Normal Execution!");
-			fetch();
-			executable = decode(ir); //Decode the contents of the IR (see method below)
-			execute(executable); //Executes the decoded word using the opcode (see method below)
-			cacheUpdate(); //Updates cache memory (see method below)
-		}		
+		fetch(); //Performs the fetch method & checks the cache memory first(see method below)
+		executable = decode(ir); //Decode the contents of the IR (see method below)
+		execute(executable); //Executes the decoded word using the opcode (see method below)
+		cacheUpdate(); //Updates cache memory (see method below)		
 		updateGUI(); //Refresh the gui to reflect everything that happened.
 		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.
 	}
 	
 	public void fetch(){
 		mar = pc; //The CPU sends the contents of the PC to the MAR
-		mbr = memory[mar]; //In response to the read command (with address equal to PC), 
-		//the memory returns the data stored at the memory location indicated by PC, 
-		//and copies it to the MBR.
-		ir = mbr; //CPU copies data from the MBR to the Instruction Register
-		if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
+		if (cacheSearch()) {} //If the instruction is found in the cache memory, no need to access the main memory (see the method below) 
+		else {
+			mbr = memory[mar]; //In response to the read command (with address equal to PC), 
+			//the memory returns the data stored at the memory location indicated by PC, 
+			//and copies it to the MBR.
+			ir = mbr; //CPU copies data from the MBR to the Instruction Register
+			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
+		}		
 		pc++;//The PC is incremented so that it points to the next instruction.
 	}
-	
-	public boolean cacheSearch() { // search through the cache memory and execute the instruction if found in the cache memory
-		short address = 0;
-		short word = 0;
-		Word executable; 
-		String s = ""; //Empty string that will hold the cache line
-		for (int i=0; i<cache.length; i++) {        	
-			s = Integer.toBinaryString(cache[i]);
+	/*  
+	 * Searches through the cache memory first => if cache contains the memory address required by pc, decode and execute the instruction ("Hit" case)
+	 */
+	public boolean cacheSearch() { 
+		System.out.println("Begin Cache Search");
+		short address = 0; //Tag bits holding the address of the cache line 
+		short word = 0; //Data bits holding the word(content) of the cache line 
+		Word executable; //If the instruction is stored in the cache memory, which is a hit case, it will execute within the function before accessing the main memory
+		String s = ""; //Empty string that will hold the cache line - 27 bits of address + data
+		for (int i=0; i<cache.length; i++) { //Iterate through the cache memory        	
+			s = Integer.toBinaryString(cache[i]); //Convert integer into a binary string
 			s = ("000000000000000000000000000" + s).substring(s.length()); //Get exact 27 bits (address(11bits) + word(16bits)) with leading zeros 
-//            System.out.println("binary string: " + s); // debug
-            
-			String a = s.substring(0, 11);
-			String w = s.substring(11, s.length());            
-			address = (short) (Integer.parseInt(a,2)); //Get the address       
-			word = (short) (Integer.parseInt(w,2)); //Get the content(word)
-//            System.out.println("cache line address: " + address); // debug
-//            System.out.println("cache line content: " + word); // debug            
-//            System.out.println("pc: "+ pc);
-			if (address == pc) { // if address matches with pc, => "hit" case
+//            System.out.println("binary string: " + s); //Debug            
+			String a = s.substring(0, 11); //String 'a' contains the first 11 bits of the binary string, which is the address bits
+			String w = s.substring(11, s.length()); //String 'w' contains the rest bits of the binary string, which is the word bits 
+			address = (short) (Integer.parseInt(a,2)); //Convert the address string to a short
+			word = (short) (Integer.parseInt(w,2)); //Convert the word string to a short
+//            System.out.println("cache line address: " + address); //Debug
+//            System.out.println("cache line content: " + word); //Debug            
+//            System.out.println("pc: "+ pc); //Debug
+			if (address == mar) { //If the address of the cache line matches with the address stored inside the Memory Address Register, => "hit" case
+				System.out.println("cache HIT! "); //Debug
 				executable = decode(word); //Decodes the data stored in the address
 				execute(executable); //Executes the instruction        		
-				return true;
-				}            
+				return true; //Return true if "hit" case => indicating that there is no need to access the main memory
+			}            
 		}        
-		return false;
+		System.out.println("data not found in the cache");
+		return false; //Return false if "miss" case => indicating that the CPU needs to access the main memory 
     }
 	
-	public void cacheUpdate() { // if the content is not in cache memory (miss case), update the cache with a new content stored in the main memory
+	/*
+	 * If the content is not in cache memory (miss case), 
+	 * update the cache with a new content stored in the main memory
+	 * using a FIFO algorithm => the oldest cache line will be replaced
+	 */
+	public void cacheUpdate() { 
 		int address = (int) mar; //The current memory address
-		int content = (int) ir; //The current instruction (data) in the memory address		
-		int cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits) 
-		cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits 
+		int content = (int) ir; //The current instruction holds the data in the memory address
+		String s = "";
+		int cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits)
+//		System.out.println("address to be updated: " + address);
+//		System.out.println("content to be updated: " + content);		
+		
+		if (content < 0) { // if IR is a negative integer, converts it to a 
+			s = Integer.toBinaryString(ir);
+			s = s.substring(16, 32);
+			content = Integer.parseInt(s, 2);
+		}
+		
+//		System.out.println("content updated: " + content);
+//		System.out.println("cache line address: " + cacheLine);
+		cacheLine <<= 16;	// shifts 16 bits to the left since word has 16 bits
 		cacheLine += content;	// adds content to the cache line
-		cache[replacement++] = cacheLine; // loads the content to replace the first block in cache memory & moves index to point the next block to be out		
+//		System.out.println("cache line +content: " + cacheLine);
+//		System.out.println("replacement before: " + replacement);		
+		s = Integer.toBinaryString(cacheLine);
+		s = ("000000000000000000000000000" + s).substring(s.length()); //Get exact 27 bits (address(11bits) + word(16bits)) with leading zeros 
+//        System.out.println("binary string: " + s); // debug
+        
+		String a = s.substring(0, 11); //String 'a' contains the first 11 bits of the binary string, which is the address bits
+		String w = s.substring(11, s.length()); //String 'w' contains the rest bits of the binary string, which is the word bits           
+		address = (short) (Integer.parseInt(a,2)); //Convert the address string to a short      
+		content = (short) (Integer.parseInt(w,2)); //Convert the word string to a short
+//		System.out.println("updated address: " + address); //Debug
+//		System.out.println("updated content: " + content); //Debug
+		cache[replacement++] = cacheLine; // loads the content to replace the first block in cache memory & moves index to point the next block to be out
+		if (replacement == cache.length) { // if the pointer reaches the end of the cache memory, 
+			replacement = 0; // sets it back to the head of the cache memory => first-in-first-out                                     
+		}				
+//		System.out.println("replacement after: " + replacement);//Debug		
+		
+		System.out.println("cache updated!"); //Debug
 	}
 	
 	
