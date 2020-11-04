@@ -39,6 +39,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private short replacement = 0; //Index of the cache line that needs to be replaced when the cache memory is full and needs to be updated  
 	private boolean run = false;
+	private boolean inReady = false;
 	protected short[] memory = new short[2048]; // # of words = 2048 => physical address = 11 bits
 	/*	Cache Implementation
      *  1. # of cache lines is 16
@@ -1214,7 +1215,7 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("63 CHK"); //Debugging tool
 		
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
-			if (inputBuffer.peek() != null) {
+			if (inReady == true) {
 				switch(word.r) {
 				case 0: gpr0 = 1;
 						break;
