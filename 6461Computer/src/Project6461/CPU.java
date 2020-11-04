@@ -1226,6 +1226,7 @@ public class CPU extends Thread {
 				case 3: gpr3 = 1;
 						break;
 				}
+				inReady = false;
 			}
 			else {
 				switch(word.r) {
