@@ -39,7 +39,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private short replacement = 0; //Index of the cache line that needs to be replaced when the cache memory is full and needs to be updated  
 	private boolean run = false;
-	private boolean inReady = false;
+	protected boolean inReady = false;
 	protected short[] memory = new short[2048]; // # of words = 2048 => physical address = 11 bits
 	/*	Cache Implementation
      *  1. # of cache lines is 16
