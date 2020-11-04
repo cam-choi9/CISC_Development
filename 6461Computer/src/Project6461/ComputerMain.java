@@ -776,7 +776,8 @@ public class ComputerMain extends JFrame {
 				for (int i = 0; i < keyboard.getText().length(); i++) {
 					cpu.inputBuffer.add(keyboard.getText().charAt(i));
 				}
-				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required, just making a note.
+				cpu.inReady = true;
+				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required or implemented, just making a note.
 				keyboard.setText("");} //clears the keyboard after the value is entered
 			}
 		});
