@@ -947,7 +947,28 @@ public class CPU extends Thread {
 	}
 	public void trr(Word word) {// 22 Test Equality of two Registers
 		if(isaConsole == true) System.out.println("22 TRR"); //Debugging tool
-		if (word.rx == word.ry) cc = 1;
+		short crx = 0, cry = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		if (crx == cry) cc = 1;
 		else cc = 0;
 	}
 	public void and(Word word) {// 23 Logical AND Register by Register
@@ -1047,7 +1068,28 @@ public class CPU extends Thread {
 	}
 	public void tir(Word word) {// 26 Test Equality of two Registers. THIS IS AN EXTENSION.
 		if(isaConsole == true) System.out.println("26 TIR"); //Debugging tool
-		if (word.rx < word.ry) cc = 1;
+		short crx = 0, cry = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		if (crx < cry) cc = 1;
 		else cc = 0;
 	}
 	
