@@ -875,9 +875,30 @@ public class CPU extends Thread {
 	public void mlt(Word word) {// 20 Multiply Register by Register
 		if(isaConsole == true) System.out.println("20 MLT"); //Debugging tool
 			int product;
+			short crx = 0, cry = 0;
+			switch (word.rx) {
+			case 0: crx = gpr0;
+					break;
+			case 1: crx = gpr1;
+					break;
+			case 2: crx = gpr2;
+					break;
+			case 3: crx = gpr3;
+					break;
+			}
+			switch (word.ry) {
+			case 0: cry = gpr0;
+					break;
+			case 1: cry = gpr1;
+					break;
+			case 2: cry = gpr2;
+					break;
+			case 3: cry = gpr3;
+					break;
+			}
 			short highorder, loworder;
 			switch (word.rx) { //uses rx number in the word to determine which register to use.
-			case 0: product = word.rx * word.ry;
+			case 0: product = crx * cry;
 					if (product > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 						cc = 8; //set overflow
 						hlt();
@@ -895,7 +916,7 @@ public class CPU extends Thread {
 						gpr1 = loworder;
 						break;
 					}
-			case 2: product = word.rx * word.ry;
+			case 2: product = crx * cry;
 				if (product > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 					cc = 8; //set overflow
 					hlt();
@@ -921,6 +942,27 @@ public class CPU extends Thread {
 	}
 	public void dvd(Word word) {// 21 Divide Register by Register
 		if(isaConsole == true) System.out.println("21 DVD"); //Debugging tool
+		short crx = 0, cry = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
 		if (word.ry == 0) {
 			cc = 2; //set divzero flag
 			hlt();
@@ -928,13 +970,13 @@ public class CPU extends Thread {
 		else {
 			short quotient, remainder;
 			switch (word.rx) { //uses rx number in the word to determine which register to use.
-			case 0: quotient = (short) (word.rx / word.ry);
-					remainder = (short) (word.rx % word.ry);
+			case 0: quotient = (short) (crx / cry);
+					remainder = (short) (crx % cry);
 					gpr0 = quotient;
 					gpr1 = remainder;
 					break;
-			case 2: quotient = (short) (word.rx / word.ry);
-					remainder = (short) (word.rx % word.ry);
+			case 2: quotient = (short) (crx / cry);
+					remainder = (short) (crx % cry);
 					gpr2 = quotient;
 					gpr3 = remainder;
 					break;
