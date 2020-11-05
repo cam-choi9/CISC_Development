@@ -39,7 +39,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private short replacement = 0; //Index of the cache line that needs to be replaced when the cache memory is full and needs to be updated  
 	private boolean run = false;
-	protected boolean inReady = false;
+	public boolean inReady = false;
 	protected short[] memory = new short[2048]; // # of words = 2048 => physical address = 11 bits
 	/*	Cache Implementation
      *  1. # of cache lines is 16
@@ -329,6 +329,8 @@ public class CPU extends Thread {
 				break;
 		case 7: sir(word);
 				break;
+		case 8: clr(word); //This is an extension. Clears targeted GPR.
+				break;
 		case 10: jz(word);
 				break;
 		case 11: jne(word);
@@ -349,6 +351,8 @@ public class CPU extends Thread {
 				break;
 		case 25: not(word);
 				break;
+		case 26: tir(word);
+				break;
 		case 30: trap(); //nonfunctional, waiting for part 3
 				break;
 		case 31: src(word);
@@ -361,6 +365,8 @@ public class CPU extends Thread {
 		case 42: stx(word);
 				break;
 		case 43: clx(word);//This is an extension
+				break;
+		case 46: aix(word);//This is an extension
 				break;
 		//50-51 reserved for floating point
 		case 60: scrl(); //This is an extension. Scrolls printer.
@@ -752,6 +758,21 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("SIR failed.");
 		}
 	}
+	public void clr(Word word) { //THIS IS AN EXTENSION. 8 Clear GPR. Sets Target GPR to Zero
+		if(isaConsole == true) System.out.println("8 CLR"); //Debugging tool
+		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
+		case 0: gpr0 = 0;
+				break;
+		case 1: gpr1 = 0;
+				break;
+		case 2: gpr2 = 0;
+				break;
+		case 3: gpr3 = 0;
+				break;
+		default: gui.visualizefield.setText("CLR failed.");
+		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
+		}
+	}
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
@@ -1024,6 +1045,12 @@ public class CPU extends Thread {
 				break;
 		}
 	}
+	public void tir(Word word) {// 26 Test Equality of two Registers. THIS IS AN EXTENSION.
+		if(isaConsole == true) System.out.println("26 TIR"); //Debugging tool
+		if (word.rx < word.ry) cc = 1;
+		else cc = 0;
+	}
+	
 	public void trap() {//30 Trap code
 		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
 		//add content in Part III
@@ -1157,6 +1184,18 @@ public class CPU extends Thread {
 		case 2: ixr2 = 0;
 			break;
 		case 3: ixr3 = 0;
+			break;
+		default: gui.visualizefield.setText("LDR failed.");
+		}
+	}
+	public void aix(Word word) { //THIS IS AN EXTENSION I CREATED. 46 adds Immediate to Index Register
+		if(isaConsole == true) {System.out.println("46 AIX");} //Debugging tool
+		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
+		case 1: ixr1 += word.immed;
+			break;
+		case 2: ixr2 += word.immed;
+			break;
+		case 3: ixr3 += word.immed;
 			break;
 		default: gui.visualizefield.setText("LDR failed.");
 		}
