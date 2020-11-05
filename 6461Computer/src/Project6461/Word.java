@@ -95,7 +95,7 @@ public class Word {
 	}
 	private short getRy(short ir) {
 		short regy = ir;
-		regy = (short) (regy << 6);
+		regy = (short) (regy << 8);
 		regy = (short) (regy >> 14);
 		return regy;
 	}
