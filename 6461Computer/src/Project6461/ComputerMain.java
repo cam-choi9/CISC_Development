@@ -82,7 +82,7 @@ public class ComputerMain extends JFrame {
 	
 	//text fields for visualizing the input check boxes as Hexidecimal or Binary.
 	protected JTextField visualizefield;
-	private JTextField hexField;
+	protected JTextField hexField;
 	
 	//The console printer
 	protected JTextArea printer;
