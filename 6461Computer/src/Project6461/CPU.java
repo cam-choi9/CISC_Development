@@ -177,7 +177,7 @@ public class CPU extends Thread {
 		}
 		catch (StringIndexOutOfBoundsException e) {
 			gui.visualizefield.setText("File Format Error - EL");
-			gui.hexfield.setText(lineNo);
+			gui.hexField.setText("" + lineNo);
 			System.out.println("Problem line " + lineNo);
 		}
 		catch (NumberFormatException e) {
