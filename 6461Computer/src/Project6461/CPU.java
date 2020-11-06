@@ -329,7 +329,7 @@ public class CPU extends Thread {
 				break;
 		case 7: sir(word);
 				break;
-		case 8: clr(word); //This is an extension. Clears targeted GPR.
+		case 8: add(word); //This is an extension. Adds two GPRs and places result in another GPR.
 				break;
 		case 10: jz(word);
 				break;
@@ -363,8 +363,6 @@ public class CPU extends Thread {
 		case 41: ldx(word);
 				break;
 		case 42: stx(word);
-				break;
-		case 43: clx(word);//This is an extension
 				break;
 		case 46: aix(word);//This is an extension
 				break;
@@ -758,20 +756,43 @@ public class CPU extends Thread {
 		default: gui.visualizefield.setText("SIR failed.");
 		}
 	}
-	public void clr(Word word) { //THIS IS AN EXTENSION. 8 Clear GPR. Sets Target GPR to Zero
-		if(isaConsole == true) System.out.println("8 CLR"); //Debugging tool
-		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
-		case 0: gpr0 = 0;
+	public void add(Word word) { //THIS IS AN EXTENSION. 8 Adds two values and places in gpr0
+		if(isaConsole == true) System.out.println("8 ADD"); //Debugging tool
+		short crx = 0, cry = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
 				break;
-		case 1: gpr1 = 0;
+		case 1: crx = gpr1;
 				break;
-		case 2: gpr2 = 0;
+		case 2: crx = gpr2;
 				break;
-		case 3: gpr3 = 0;
+		case 3: crx = gpr3;
 				break;
-		default: gui.visualizefield.setText("CLR failed.");
-		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		short sum = (short) (crx + cry);
+		if (sum > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			cc = 8; //set overflow
+			hlt();
+		}
+		else if (sum < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			cc = 4; //set underflow
+			hlt();
+		}
+		else {
+			gpr0 = sum;
+		}
+		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
+		
 	}
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
@@ -1258,18 +1279,6 @@ public class CPU extends Thread {
 		case 3: memory[effectiveAddress(word)] = ixr3;
 				break;
 		default: gui.visualizefield.setText("STX failed.");
-		}
-	}
-	public void clx(Word word) { //THIS IS AN EXTENSION I CREATED. 43 Clears targeted Index Register
-		if(isaConsole == true) {System.out.println("43 CLX");} //Debugging tool
-		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
-		case 1: ixr1 = 0;
-			break;
-		case 2: ixr2 = 0;
-			break;
-		case 3: ixr3 = 0;
-			break;
-		default: gui.visualizefield.setText("LDR failed.");
 		}
 	}
 	public void aix(Word word) { //THIS IS AN EXTENSION I CREATED. 46 adds Immediate to Index Register
