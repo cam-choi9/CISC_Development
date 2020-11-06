@@ -112,6 +112,7 @@ public class CPU extends Thread {
 		memory = new short[2048];
 		cache = new int[16];
 		gui.printer.setText("");
+		int lineNo = 1; //for troubleshooting.
 		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
@@ -125,8 +126,8 @@ public class CPU extends Thread {
 			String line;
 			while (fileReader.hasNextLine()) {
 				line = fileReader.nextLine();
-				
-				if (line.charAt(0) == '#') {;}//If the first character in the line is # do nothing. This lets us add comments to the code.
+				if (line == ""|| line == " "|| line == "  ") {;} //If the line is completely empty, do nothing. This lets us ignore empty lines in text files, or lines that are just spaces masquerating as empty lines.
+				else if (line.charAt(0) == '#') {;}//If the first character in the line is # do nothing. This lets us add comments to the code.
 				else {
 					address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
 					contentInt = Integer.parseInt(line.substring((line.length() - 4)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
@@ -168,10 +169,21 @@ public class CPU extends Thread {
 						first = false;
 					}
                 }
+				lineNo++;
 			}
 			fileReader.close();
 			updateGUI();
 			gui.visualizefield.setText("Program written to Memory");
+		}
+		catch (StringIndexOutOfBoundsException e) {
+			gui.visualizefield.setText("File Format Error - EL");
+			gui.hexfield.setText(lineNo);
+			System.out.println("Problem line " + lineNo);
+		}
+		catch (NumberFormatException e) {
+			gui.visualizefield.setText("File Format Error - SPC");
+			System.out.println("Problem line " + lineNo);
+			e.printStackTrace();
 		}
 		catch (FileNotFoundException e) {
 			gui.visualizefield.setText("IPL File Not Found");
