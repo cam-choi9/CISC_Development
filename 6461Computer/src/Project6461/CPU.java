@@ -182,6 +182,7 @@ public class CPU extends Thread {
 		}
 		catch (NumberFormatException e) {
 			gui.visualizefield.setText("File Format Error - SPC");
+			gui.hexField.setText("" + lineNo);
 			System.out.println("Problem line " + lineNo);
 			e.printStackTrace();
 		}
@@ -448,7 +449,7 @@ public class CPU extends Thread {
 	public void eaHexval (short nothex) {//another debugging tool for seeing the Hex values of EAs being retunred.
 		if(isaConsole == true) {
 			String hexval = Integer.toHexString(nothex);
-			System.out.println("EA goes to " + hexval);
+			System.out.println("EA is " + hexval);
 		}
 	}
 	/*
@@ -1272,12 +1273,15 @@ public class CPU extends Thread {
 	public void ldx(Word word) { //41 Load Index Register from Memory
 		if(isaConsole == true) {System.out.println("41 LDX");} ////Debugging tool
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
-		case 1: ixr1 = memory[effectiveAddress(word)];
-			break;
-		case 2: ixr2 = memory[effectiveAddress(word)];
-			break;
-		case 3: ixr3 = memory[effectiveAddress(word)];
-			break;
+		case 1: ixr1 = 0;
+				ixr1 = memory[effectiveAddress(word)];
+				break;
+		case 2: ixr2 = 0;
+				ixr2 = memory[effectiveAddress(word)];
+				break;
+		case 3: ixr3 = 0;
+				ixr3 = memory[effectiveAddress(word)];
+				break;
 		default: gui.visualizefield.setText("LDR failed.");
 		}
 	}
