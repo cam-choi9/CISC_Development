@@ -778,7 +778,8 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, kbEnter, -43, SpringLayout.EAST, contentPane);
 		kbEnter.addActionListener(new ActionListener() {
 			public synchronized void actionPerformed(ActionEvent e) {
-				if (keyboard.getText() == "") {;} //If the keyboard is empty when 
+				if (keyboard.getText() == "") {;} //If the keyboard is empty when
+				else if(cpu.inputBuffer.peekFirst() != null) {;} //Prevents new strings from being entered while the input buffer is still being processed.
 				else {
 				for (int i = 0; i < keyboard.getText().length(); i++) {
 					cpu.inputBuffer.add(keyboard.getText().charAt(i));
