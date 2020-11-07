@@ -152,7 +152,7 @@
 ############################################
 ###### 200 Print out first message - By Michael Ashery
 # Clear IXR1 3)
-0200  A403
+0200  A443
 # Load IXR1 with contents of 000D 3)
 0201  A44D
 #LDR char to reg (1/19)
