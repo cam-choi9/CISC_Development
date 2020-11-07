@@ -5,7 +5,7 @@
 ###### Central program.
 # 1) LDX for getting to First message
 0008  A44B
-# 2) Jump to first message printer at EA IX plus addr
+# 2) JMA to first message printer at EA IX plus addr
 0009  3440
 # Make some IXR shortcuts for faster reference later Reserved 0A-2F
 000A  0100
@@ -15,65 +15,101 @@
 000E  0500
 0010  0600
 0011  0700
-0012  0800
-0013  0900
+0012  0230
+0013  0000
 0014  0A00
 0015  0040
 0016  00A4
-# Pointer to 1 int:
+## Shortcut to incrementing digit location - Jae
+001D  0600
+001E  0800
+001F  0900
+# Start of 1 int:
 0040  0000
-# Pointer to 2 int:
+# Start of 2 int:
 0045  0000
-# Pointer to 3 int:
+# Start of 3 int:
 004A  0000
-# Pointer to 4 int:
+# Start of 4 int:
 004F  0000
-# Pointer to 5 int:
+# Start of 5 int:
 0054  0000
-# Pointer to 6 int:
+# Start of 6 int:
 0059  0000
-# Pointer to 7 int:
+# Start of 7 int:
 005E  0000
-# Pointer to 8 int:
+# Start of 8 int:
 0063  0000
-# Pointer to 9 int:
+# Start of 9 int:
 0068  0000
-# Pointer to 10 int:
+# Start of 10 int:
 006D  0000
-# Pointer to 11 int:
+# Start of 11 int:
 0072  0000
-# Pointer to 12 int:
+# Start of 12 int:
 0077  0000
-# Pointer to 13 int:
+# Start of 13 int:
 007C  0000
-# Pointer to 14 int:
+# Start of 14 int:
 0081  0000
-# Pointer to 15 int:
+# Start of 15 int:
 0086  0000
-# Pointer to 16 int:
+# Start of 16 int:
 008B  0000
-# Pointer to 17 int:
+# Start of 17 int:
 0090  0000
-# Pointer to 18 int:
+# Start of 18 int:
 0095  0000
-# Pointer to 19 int:
+# Start of 19 int:
 009A  0000
-# Pointer to 20 int:
+# Start of 20 int:
 009F  0000
-# Pointer to USER INT
+# Start of USER INT
 00A4  0000
-#
+##### Storage locations for Jae's part of the program.
+## Store "difference" (initially 0)
+00B0  0000
+## Store "bestDifference" (initially 0)
+00B5  0000
+## Store "digitPosition" (initially 0)
+00BA  0030
+## Store "bestDigitPosition" (initially B)
+00BB  0042
+## Store "bestIntegerPointer" (initially 0)
+00BC  0000
+## Store "currentIntegerPointer" (initially 0)
+00BD  0000
+## Store "intListNumber" (initially 1)
+00BE  0031
 ### NOTE, all other 000 and 001 addresses are reserved for Index Registers!
-### Rest of main program here
+############################################
+##### 100 Value storage loop - By Michael Ashery
+#100-107 are reserved for storing variables.
+#COUNTER - Counts number of integers
+0100  0000
+#DIGIT - Identify which digit of the int is being entered
+0101  0000
+#POINTER - Points to address of current digit
+0102  0040
+###The Check KB status loop. <===
+# Ensure Reg 1 empty
+0108  0403
+# Check Device status. If on, set gpr0 to 1
+0109  FC00
+# If gpr0 is 0, jump back to 109. Otherwise proceed.
+010A  2849
+###
+# 
 # Jump to input loop //TODO
-0109
+#  
 # Jump to second message printer //TODO
-010A
+#010A
 # Print out end result //TODO
-010B
-###### 200 Print out first message
+#010B
+############################################
+###### 200 Print out first message - By Michael Ashery
 # Clear IXR1 3)
-0200  AC40
+0200  A403
 # Load IXR1 with contents of 000D 3)
 0201  A44D
 #LDR char to reg (1/19)
@@ -147,14 +183,15 @@
 # SCRL
 0224  F000
 # Clear IXR1 3)
-0225  AC40
-# LDX new IXR1
-0226  
-#At the very end, jump back to the central program.
-0227
+0225  A403
+# LDX 100 to IXR1
+0226  A44A
+#At the very end, jump back to the value storage loop at 108.
+0227  3448
+##########################################################
 ### Print out second message
 # Clear IXR1 3)
-0230  AC40
+0230  0403
 # Load IXR1 with contents of 000D 3)
 0231  A44D
 #LDR char to reg (1/17)
@@ -227,10 +264,10 @@
 0253  F801
 # SCRL
 #0254  F000
-#CLX
-#0255
 #LDX
-#0256
+#0255  A443
+#LDX
+#0256  
 #At the very end, jump back to the central program.
 #0257
 ### The text of first message
@@ -303,3 +340,186 @@
 0420  0045
 #R
 0421  0052
+#####################
+##################### - JAE'S CODE BELOW HERE
+#####################
+#
+## Clear all the GPR's (CLR)
+0500  0403
+0501  0503
+0502  0603
+0503  0703
+## Clear all the IXR's (CLX)
+0504  A443
+0505  A483
+0506  A4C3
+#####
+##### 1. Store the address of the first integer digit to currentIntegerPointer - DONE.
+#####
+# 1) Load IXR1 with the address of the first integer digit (Address: 0015 => Content: 0040) (LDX) 
+0507  A455
+# 2) Load GPR0 with IXR1 = the address of the first integer digit (0040) (LDA)
+0508  0C40
+# 3) Load IXR2 with the content of 001B = the address of currentIntegerPointer (Address: 001B => Content: 00BD) (LDX)
+0509  A49B
+# 4) Store GPR0 to memory[content of IXR2] => currentIntegerPointer holds the address of the first integer digit (STR)
+050A  0880
+#####
+##### 2. Load the first digit of the first integer into a register - DONE.
+#####
+# 1) Load IXR1 with the address of the first integer digit (Address: 0015 => Content: 0040) (LDX)
+050B  A455
+# 2) Load GPR0 with memory[content of IXR1] = the first integer digit (LDR)
+050C  0440
+#####
+##### 3. Load the first digit of the user value into a register - DONE.
+#####
+# 1) Load IXR2 with the address of the first user input digit (Address: 0016 => Content: 00A4) (LDX)
+050D  A496
+# 2) Load GPR1 with memory[content of IXR2] = the first user value digit (LDR)
+050E  0580
+#####
+##### 4. Compare each digits of integer and user value - DONE.
+#####
+# 1) Compare GPR0 and GPR1 (TRR)
+050F  5840
+# 2) Load IXR3 with the address of incrementing digit location (Address: 001D => Content: 0600) (LDX)
+0510  A4DD
+# 3) Jump to incrementing digit part if digits match (cc == 1) (JCC)
+0511  30C0
+#
+#####
+#####
+##### 5. If digits don't match (cc == 0), compare integer to user value and store the difference in "difference"
+#####
+#####
+0512
+#
+#####
+#####
+##### 6. Compare digitPosition and bestDigitPosition - DONE.
+#####
+#####
+# 1) Load IXR1 with the address of bestDigitPosition (Address: 0019 => Content: 00BB) (LDX)
+0520  A459
+# 2) Load IXR2 with the address of digitPosition (Address: 0018 => Content: 00BA) (LDX)
+0521  A498
+# 3) Load bestDigitPosition to GPR0 (LDR)
+0522  0440
+# 4) Load digitPosition to GPR1 (LDR)
+0523  0580
+# 5) Check if digitPosition > bestDigitPosition (TIR)
+0524  6840
+# 6) Load IXR3 with the address of "DIGIT POSITION > BEST DIGIT POSITION CASE" location (Address: 001E => Content: 0800) (LDX)
+0525  A4DE
+# 7) Jump to "DIGIT POSITION > BEST DIGIT POSITION CASE" location if cc == 1 (JCC)
+0526  30C0
+# 8) Check if digitPosition == bestDigitPosition (TRR)
+0527  5840
+# 9) Load IXR3 with the address of "DIGIT POSITION == BEST DIGIT POSITION CASE" location (Address: 001F => Content: 0900) (LDX)
+0528  A4DF
+# 10) Jump to "DIGIT POSITION == BEST DIGIT POSITION" location 
+0529  30C0
+#####
+#####
+##### DIGIT POSITION > BEST DIGIT POSITION CASE
+#####
+#####
+#0800
+#####
+#####
+##### DIGIT POSITION == BEST DIGIT POSITION CASE
+#####
+#####
+#0900
+##### DIGITS MATCHING CASE
+##### 
+##### Increment digit position by 1
+#####
+# 1) Load IXR1 with the address of digitPosition (Address: 0018 => Content: 00BA)
+0600  A458
+# 2) Load GPR1 with memory[content of IXR1] = digitPosition (LDR)
+0601  0540
+# 3) Add 1 to GPR1 (GPR1 = digitPosition) (AIR)
+0602  1901
+# 4) Update digitPosition on memory (STR)
+0603  0940
+#####
+##### JUMP BACK TO DIGIT COMPARISON
+#####
+##### Replace the integer with the next digit value
+##### UNDONE BELOW HERE
+# 1) Load IXR1 with the content of 001B = address of currentIntegerPointer (Address: 001B => Content: 00BD) (LDX)
+0603  A45B
+# 2) Load GPR0 with the content of IXR1 = currentIntegerPointer value = first integer digit address (LDA)
+0604  0C40
+# 3) Add GPR0 with GPR1 and update GPR0 with the result
+0605  2040
+# 4) Store 
+#####
+##### Replace the user value with the next digit value
+#####
+# 1) Load GPR0 with the content of 0016 = address of user value (Address: 0016 => Content: 00A4) (LDA)
+0606  0C16
+# 2) Add GPR0 with GPR1 and update GPR0 with the result
+0607  2040
+# bestIntegerPointer = currentIntegerPointer
+# bestDifference = difference
+# bestDigitPosition = digitPosition
+# Load GPR1 with the 
+0530
+# Check if digitPosition == bestDigitPosition (TRR)
+0511  5840
+# bestIntegerPointer = currentIntegerPointer
+# bestDifference = difference
+#####
+##### 
+##### 7. Reset digitPosition and Difference to 0 - DONE
+#####
+#####
+# 1) Load IXR1 with the address of digitPosition (Address: 0018 => Content: 00BA) (LDX)
+0700  A458
+# 2) Load IXR2 with the address of Difference (Address: 0017 => Content: 00B0) (LDX)
+0701  A497
+# 3) Clear GPR0 => set to 0 (LDR)
+0702  0403
+# 4) Set digitPosition to 0 (STR)
+0703  0840
+# 5) Set difference to 0 (STR)
+0704  0880
+#####
+#####
+##### 8. Increment intListNumber by 1 - DONE
+#####
+#####
+# 1) Load IXR1 with the address of intListNumber (Address: 001C => Content: 00BE) (LDX)
+0705  A45C
+# 2) Load GPR0 with memory[content of IXR1]= intListNumber (LDR)
+0706  0440
+# 3) Add 1 to GPR0 (GPR0 = intListNumber) (AIR)
+0707  1801
+# 4) Update intListNumber on memory (STR)
+0708  0840
+#####
+#####
+##### 9. CHECK IF INT LIST NUMBER HAS REACHED THE END - ALMOST DONE 
+#####  
+#####
+# 1) Load IXR1 with the address of intListNumber (Address: 001C => Content: 00BE) (LDX)
+0709  A45C
+# 2) Load GPR0 with memory[content of IXR1]= intListNumber (LDR)
+070A  0440
+# 3) Set GPR1 to 0 (LDR)
+070B  0503
+# 4) Add 20 to GPR1 (AIR)
+070C  1914
+# 5) Check if GPR0 > GPR1 (TIR)
+070D  6900
+# 6) Load IXR1 with the ending subroutine address (LDX) => gotta know the address
+070E
+# 7) If GPR0 > GPR1 (cc == 1), jump to the ending subroutine address (JCC)
+070F  3040
+# 8) Load IXR1 with the comparison address (LDX) => gotta know the address
+0710
+# 9) If not, jump back to comparison address (JMA)
+0711  3440
