@@ -39,7 +39,7 @@ public class CPU extends Thread {
 	private short cc = 0; //Condition Code
 	private short replacement = 0; //Index of the cache line that needs to be replaced when the cache memory is full and needs to be updated  
 	private boolean run = false;
-	public boolean inReady = false;
+	protected boolean automatic = true; //the automatic variable is used in the CHK instruction.
 	protected short[] memory = new short[2048]; // # of words = 2048 => physical address = 11 bits
 	/*	Cache Implementation
      *  1. # of cache lines is 16
@@ -865,7 +865,7 @@ public class CPU extends Thread {
 		if(isaConsole == true) System.out.println("14 JSR"); //Debugging tool
 		gpr3 = (short) (pc + 1);
 		pc = effectiveAddress(word);
-		//gpr0 should be set to pointer before this is started //TODO verify that this is what he means by " R0 should contain pointer to arguments. He means the subroutine, right?
+		//gpr0 should be set to pointer before this is started
 	}
 	public void rfs(Word word) {// 15 Return from Subroutine with Return Code as Immed portion stored in the instruction's address field.
 		if(isaConsole == true) System.out.println("15 RFS"); //Debugging tool
@@ -1359,11 +1359,24 @@ public class CPU extends Thread {
 			gui.printer.setText(printOut);//for debugging. printOut is updated to the GUI along with everything else at the end of the Instruction Cycle
 		}
 	}
-	public void chk(Word word) {//TODO 63 Check Device Status to Register
+	public synchronized void chk(Word word) {//TODO 63 Check Device Status to Register
 		if(isaConsole == true) System.out.println("63 CHK"); //Debugging tool
-		
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
-			if (inReady == true) {
+			if (automatic == true) {  
+			//In automatic mode, hitting a loop will lock up the GUI because Java Swing is single-threaded.
+			//This try-catch block suspends the thread in Automatic Mode while the user enters an input.
+			//This is a fault of Java Swing and there's nothing we can do about it.
+			//But if you are worried about authenticity, run the program in Single-Instruction mode.
+			//That will disable this block. You will notice that because it has time to wait for 
+			//user input between instructions, the program runs just fine.
+				try {
+					if(isaConsole == true) System.out.println("Waiting!");
+					wait();}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (gui.inReady == true) {
 				switch(word.r) {
 				case 0: gpr0 = 1;
 						break;
@@ -1374,7 +1387,8 @@ public class CPU extends Thread {
 				case 3: gpr3 = 1;
 						break;
 				}
-				inReady = false;
+				System.out.println("Check Passed");
+				gui.inReady = false;
 			}
 			else {
 				switch(word.r) {
@@ -1387,7 +1401,9 @@ public class CPU extends Thread {
 				case 3: gpr3 = 0;
 						break;
 				}
+				System.out.println("Check Failed");
 			}
 		}
+		else {printOut += "WRONG INPUT ID";}
 	}
 }
