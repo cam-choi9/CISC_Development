@@ -226,7 +226,7 @@
 # SCRL
 0224  F000
 # Clear IXR1 3)
-0225  A403
+0225  A443
 # LDX 100 to IXR1
 0226  A44A
 #At the very end, jump back to the value storage loop at 108.
