@@ -17,7 +17,7 @@
 0011  0700
 0012  0230
 0013  0000
-0014  0A00
+0014  0000
 # Pointer address used in input loops at 0100
 0015  0040
 0016  00A4
@@ -114,21 +114,41 @@
 0112  060F
 0113  1A01
 0114  0A0F
-# Jump to next part if DIGIT==5. <===
-0115  LDR
-0116  AIR
-0117  TRR
-0118  JCC
+# Jump to next part if DIGIT==5. LDR 0003,AIR 5,TRR,AIX x1 26,JCC
+0115  0703
+0116  1B05
+0117  59C0
+0118  B85A
+0119  3040
 # Otherwise jump back to start of the Input Int Loop
-0119  3448
-### Integer Number controlls.
-
-# Jump to input loop //TODO
-#  
-# Jump to second message printer //TODO
-#010A
+011A  3448
+### Integer Number controls.
+# Scroll Printer
+011B  F000
+# Compare Pointer to 00A8, jump to comparison alg if true. LDR 0016,AIR 4,TRR,LDX 000E,JCC,LDX 000A
+011C  0716
+011D  1B04
+011E  59C0
+011F  A44E
+0120  3440
+0121  A44A
+#Compare COUNTER to immed 19. Jump to 230 if true. Cntr LDR r1, LDR r3 0, AIR r3, TRR r1r3, LDX r1 JCC
+0122  0500
+0123  0703
+0124  1B13
+0125  59C0
+0126  A452
+0127  3040
+# Increment COUNTER. AIR, LDX 000A, STR
+0128  1901
+0129  A44A
+012A  0900
+# Set Digit 0 LDA0003, JMA to 0108
+0127  0703
+0128  0841
+0129  3448
 # Print out end result //TODO
-#010B
+#
 ############################################
 ###### 200 Print out first message - By Michael Ashery
 # Clear IXR1 3)
