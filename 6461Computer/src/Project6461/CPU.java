@@ -229,8 +229,7 @@ public class CPU extends Thread {
 	public boolean fetch(){
 		mar = pc; //The CPU sends the contents of the PC to the MAR
 		if (cacheSearch()) {
-			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
-			pc++;//The PC is incremented so that it points to the next instruction.
+			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool			
 			return true;
 		} //If the instruction is found in the cache memory, no need to access the main memory (see the method below) 
 		else {
@@ -264,6 +263,7 @@ public class CPU extends Thread {
 //            System.out.println("cache line content: " + word); //Debug            
 //            System.out.println("pc: "+ pc); //Debug
 			if (address == mar) { //If the address of the cache line matches with the address stored inside the Memory Address Register, => "hit" case
+				pc++;//The PC is incremented so that it points to the next instruction.
 				System.out.println("cache HIT! "); //Debug
 				executable = decode(word); //Decodes the data stored in the address
 				execute(executable); //Executes the instruction        		
