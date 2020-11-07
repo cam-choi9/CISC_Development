@@ -229,7 +229,7 @@ public class CPU extends Thread {
 	public boolean fetch(){
 		mar = pc; //The CPU sends the contents of the PC to the MAR
 		if (cacheSearch()) {
-			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool			
+			if(isaConsole == true) System.out.println("Running Instruction at " + Integer.toHexString(pc)); //Debugging tool
 			return true;
 		} //If the instruction is found in the cache memory, no need to access the main memory (see the method below) 
 		else {
@@ -246,7 +246,7 @@ public class CPU extends Thread {
 	 * Searches through the cache memory first => if cache contains the memory address required by pc, decode and execute the instruction ("Hit" case)
 	 */
 	public boolean cacheSearch() { 
-		System.out.println("Begin Cache Search");
+		System.out.println("Begin Cache Search"); /* REENABLE ONCE FIXED
 		short address = 0; //Tag bits holding the address of the cache line 
 		short word = 0; //Data bits holding the word(content) of the cache line 
 		Word executable; //If the instruction is stored in the cache memory, which is a hit case, it will execute within the function before accessing the main memory
@@ -269,7 +269,7 @@ public class CPU extends Thread {
 				execute(executable); //Executes the instruction        		
 				return true; //Return true if "hit" case => indicating that there is no need to access the main memory
 			}            
-		}        
+		}  */      
 		System.out.println("data not found in the cache");
 		return false; //Return false if "miss" case => indicating that the CPU needs to access the main memory 
     }
@@ -480,7 +480,7 @@ public class CPU extends Thread {
 			break;
 		case 3: gpr3 = memory[effectiveAddress(word)];
 			break;
-		default: gui.visualizefield.setText("LDR failed.");
+		default: gui.visualizefield.setText("LDR failed @ " + Integer.toHexString(pc));
 		}
 	}
 	public void str(Word word) { //02 Load Register to Memory
@@ -828,6 +828,7 @@ public class CPU extends Thread {
 				break;
 		default: gui.visualizefield.setText("JZ failed.");
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
+		if(isaConsole == true && cc !=0) {System.out.println("Jumping to " + Integer.toHexString(effectiveAddress(word)));} //Debugging tool
 		}
 	}
 	public void jne(Word word) { //11 Jump if Not Zero
@@ -862,12 +863,14 @@ public class CPU extends Thread {
 				if((cc & compare) == compare) pc = effectiveAddress(word);
 				break;
 		default: gui.visualizefield.setText("JCC failed.");
+		if(isaConsole == true && cc !=0) {System.out.println("Jumping to " + Integer.toHexString(effectiveAddress(word)));} //Debugging tool
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		}
 	}
 	public void jma(Word word) { //13 Unconditional Jump to Address
 		if(isaConsole == true) System.out.println("13 JMA"); //Debugging tool
 		pc = effectiveAddress(word);
+		if(isaConsole == true) {System.out.println("Jumping to " + Integer.toHexString(effectiveAddress(word)));} //Debugging tool
 	}
 	public void jsr(Word word) {// 14 Jump and Save Return Address
 		if(isaConsole == true) System.out.println("14 JSR"); //Debugging tool
@@ -1052,8 +1055,13 @@ public class CPU extends Thread {
 		case 3: cry = gpr3;
 				break;
 		}
-		if (crx == cry) cc = 1;
-		else cc = 0;
+		if (crx == cry) {
+			if(isaConsole == true) {System.out.println("TRR passed");} //Debugging tool
+			cc = 1;}
+		else {
+			cc = 0;
+			if(isaConsole == true) {System.out.println("TRR failed");} //Debugging tool
+		}
 	}
 	public void and(Word word) {// 23 Logical AND Register by Register
 		if(isaConsole == true) System.out.println("23 AND"); //Debugging tool
@@ -1290,7 +1298,7 @@ public class CPU extends Thread {
 		case 3: ixr3 = 0;
 				ixr3 = memory[effectiveAddress(word)];
 				break;
-		default: gui.visualizefield.setText("LDR failed.");
+		default: gui.visualizefield.setText("LDX failed @ " + Integer.toHexString(pc) + "X=" + word.ixrN);
 		}
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
@@ -1412,6 +1420,6 @@ public class CPU extends Thread {
 				System.out.println("Check Failed");
 			}
 		}
-		else {printOut += "WRONG INPUT ID";}
+		else {printOut += "WRONG INPUT ID = " + word.devID + " ";}
 	}
 }
