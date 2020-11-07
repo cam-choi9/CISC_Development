@@ -18,6 +18,7 @@
 0012  0230
 0013  0000
 0014  0A00
+# Pointer address used in input loops at 0100
 0015  0040
 0016  00A4
 ## Shortcut to incrementing digit location - Jae
@@ -89,17 +90,39 @@
 0100  0000
 #DIGIT - Identify which digit of the int is being entered
 0101  0000
-#POINTER - Points to address of current digit
-0102  0040
-###The Check KB status loop. <===
+###The Check KB status loop. 
 # Ensure Reg 1 empty
 0108  0403
 # Check Device status. If on, set gpr0 to 1
 0109  FC00
 # If gpr0 is 0, jump back to 109. Otherwise proceed.
 010A  2849
-###
-# 
+### Input Int Loop.
+# LDX Pointer to X2
+010B  A48F
+# Input single char from buffer
+010C  F400
+# Store char at pointer addr using IXR2
+010D  0880
+# Print char to printer
+010E  FC01
+# Increment DIGIT variable in gpr1 LDR,AIR,STR
+010F  0541
+0110  1901
+0111  0941
+# Increment Pointer variable in gpr2 LDR,AIR,STR
+0112  060F
+0113  1A01
+0114  0A0F
+# Jump to next part if DIGIT==5. <===
+0115  LDR
+0116  AIR
+0117  TRR
+0118  JCC
+# Otherwise jump back to start of the Input Int Loop
+0119  3448
+### Integer Number controlls.
+
 # Jump to input loop //TODO
 #  
 # Jump to second message printer //TODO
