@@ -352,6 +352,14 @@ public class CPU extends Thread {
 				break;
 		case 13: jma(word);
 				break;
+		case 14: jsr(word);
+				break;
+		case 15: rfs(word);
+				break;
+		case 16: sob(word);
+				break;
+		case 17: jge(word);
+				break;
 		case 20: mlt(word);
 				break;
 		case 21: dvd(word);
