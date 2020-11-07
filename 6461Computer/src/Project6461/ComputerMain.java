@@ -81,11 +81,14 @@ public class ComputerMain extends JFrame {
 	private JButton btnIPL;
 	
 	//text fields for visualizing the input check boxes as Hexidecimal or Binary.
+	JButton btnVisualizeInput;
 	protected JTextField visualizefield;
 	protected JTextField hexField;
 	
 	//The console printer
 	protected JTextArea printer;
+	
+	protected boolean inReady; //Used for the keyboard to determine CHK status.
 
 	/**
 	 * Launch the application.
@@ -629,6 +632,7 @@ public class ComputerMain extends JFrame {
 						btnLoad.setEnabled(false);
 						btnIPL.setEnabled(false);
 						tglExeSingleInstruction.setEnabled(false);
+						btnVisualizeInput.setEnabled(false);
 						runToggle.setText("STOP"); //The Run button label is changed to STOP for user clarity.
 						cpu.runInstructionCycle(); //launches the instruction cycle method
 					}
@@ -649,6 +653,7 @@ public class ComputerMain extends JFrame {
 						btnLoad.setEnabled(true);
 						btnIPL.setEnabled(true);
 						tglExeSingleInstruction.setEnabled(true);
+						btnVisualizeInput.setEnabled(true);
 						runToggle.setText("RUN"); //RUN button label changed back to "RUN"
 					}
 				}
@@ -694,12 +699,14 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.WEST, tglExeSingleInstruction, 0, SpringLayout.WEST, pcload);
 		sl_contentPane.putConstraint(SpringLayout.EAST, tglExeSingleInstruction, 186, SpringLayout.WEST, pcload);
 		tglExeSingleInstruction.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public synchronized void actionPerformed(ActionEvent e) {
 				if(tglExeSingleInstruction.isSelected()) {
 					lblstopping.setText("WAITING - Single Instruction");
+					cpu.automatic = false;
 				}
 				if(!tglExeSingleInstruction.isSelected()) {
 					lblstopping.setText("WAITING - Automatic");
+					cpu.automatic = true;
 				}
 			}
 		});
@@ -714,7 +721,7 @@ public class ComputerMain extends JFrame {
 		visualizefield.setColumns(10);
 		contentPane.add(visualizefield);
 		
-		JButton btnVisualizeInput = new JButton("Visualize Input as Binary/Hex"); //visualize input button
+		btnVisualizeInput = new JButton("Visualize Input as Binary/Hex"); //visualize input button
 		btnVisualizeInput.addActionListener(new ActionListener() { //when the button is pressed, it translates the checkboxes to binary and prints it out in the visualizefield
 			public void actionPerformed(ActionEvent e) {
 				String inputBinary = getInput();
@@ -770,13 +777,16 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.NORTH, kbEnter, -4, SpringLayout.NORTH, lblGpr_1);
 		sl_contentPane.putConstraint(SpringLayout.EAST, kbEnter, -43, SpringLayout.EAST, contentPane);
 		kbEnter.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public synchronized void actionPerformed(ActionEvent e) {
 				if (keyboard.getText() == "") {;} //If the keyboard is empty when 
 				else {
 				for (int i = 0; i < keyboard.getText().length(); i++) {
 					cpu.inputBuffer.add(keyboard.getText().charAt(i));
 				}
-				cpu.inReady = true;
+				inReady = true;
+				if (!tglExeSingleInstruction.isSelected()) { //for dealing with Swing's Single-thread issues during loops.
+					notifyAll();
+				}
 				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required or implemented, just making a note.
 				keyboard.setText("");} //clears the keyboard after the value is entered
 			}
