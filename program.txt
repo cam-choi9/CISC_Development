@@ -105,7 +105,7 @@
 # Store char at pointer addr using IXR2
 010D  0880
 # Print char to printer
-010E  FC01
+010E  F801
 # Increment DIGIT variable in gpr1 LDR,AIR,STR
 010F  0541
 0110  1901
