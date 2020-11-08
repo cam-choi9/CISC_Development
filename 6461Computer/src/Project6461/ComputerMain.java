@@ -634,11 +634,23 @@ public class ComputerMain extends JFrame {
 						tglExeSingleInstruction.setEnabled(false);
 						btnVisualizeInput.setEnabled(false);
 						runToggle.setText("STOP"); //The Run button label is changed to STOP for user clarity.
-						cpu.runInstructionCycle(); //launches the instruction cycle method
+						final class CpuRunnable implements Runnable{ //runinstructionCyle MUST be run as a separate thread, otherwise GUI will lock up in Automatic mode.
+							private CPU myCpu;
+							public CpuRunnable(CPU cpu) {
+								myCpu = cpu;
+							}
+							@Override
+							public void run() {
+								myCpu.runInstructionCycle();
+							}
+						}
+						Runnable r = new CpuRunnable(cpu);
+						Thread t = new Thread(r);
+						t.start();
 					}
 					if(!runToggle.isSelected()) { //if RUN (now labled as 'stop') is clicked again to stop the loop...				
 						cpu.setRunning(false); //breaks the instruction cycle method after the current cycle completes.
-						lblstopping.setText("WAITING - Automatic"); //sets the state label in the bottomr right corner to WAITING
+						lblstopping.setText("WAITING - Automatic"); //sets the state label in the bottom right corner to WAITING
 						gpr0load.setEnabled(true); //other buttons are reenabled.
 						gpr1load.setEnabled(true);
 						gpr2load.setEnabled(true);
@@ -785,9 +797,9 @@ public class ComputerMain extends JFrame {
 					cpu.inputBuffer.add(keyboard.getText().charAt(i));
 				}
 				inReady = true;
-				if (!tglExeSingleInstruction.isSelected()) { //for dealing with Swing's Single-thread issues during loops.
-					notifyAll();
-				}
+				//if (!tglExeSingleInstruction.isSelected()) { //for dealing with Swing's Single-thread issues during loops.
+				//	notifyAll();
+				//}
 				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required or implemented, just making a note.
 				keyboard.setText("");} //clears the keyboard after the value is entered
 			}
