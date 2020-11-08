@@ -17,12 +17,13 @@ import java.io.FileNotFoundException;
  * uses them to execute the appropriate instruction.
  * Because ComputerMain.java's GUI and CPU.java must run concurrently, this object runs in a separate thread.
  * 
- * Part 1 written by Michael Ashery, reviewed by Jaeseok Choi and Daniel Brewer.
- * Part 2 Cache by Jaeseok Choi
- * Part 2 ISA by Michael Ashery
+ * Part 1 written by Michael Ashery, reviewed by Jaeseok Choi
+ * Part 2 Cache by Jaeseok Choi reviewed by Michael Ashery
+ * Part 2 ISA by Michael Ashery reviewed by Jaeseok Choi
  * */
 
-public class CPU extends Thread {
+//public class CPU extends Thread {
+public class CPU {
 	private ComputerMain gui; //used by the CPU to reference the GUI where necessary
 	protected short gpr0 = 0; //gpr0-3 are general-purpose registers
 	protected short gpr1 = 0; 
@@ -53,10 +54,9 @@ public class CPU extends Thread {
 	
 	public CPU(ComputerMain gui) { //on creation of the class, imports the GUI class location and updates the GUI.
 		this.gui = gui;
-		this.start();
+		//this.start();
 		updateGUI();
 	}
-	
 	public String shortToBinaryString(short val, int size) { //Java doesn't provide a short to Binary string method or leading zeroes, just Integers to Binary. This method does that.
 		String binary = "";
 		String firstConversion = Integer.toBinaryString(val); //performs the initial conversion
@@ -195,13 +195,13 @@ public class CPU extends Thread {
 	public void runInstructionCycle() { //This is the instruction cycle
 		Word executable; //The executable word... defined shortly!
 		while (true) {
+		//for (int i = 0; i < 10; i++) {
 			if (pc >= 2048) { //this if-branch is for Part III, but it's being placed in here early as a precaution to stop the pc from running past the end of the memory array.
 				mfr = 8;
 				gui.mfrfield.setText("1000");
 				run = false;
 				break;
 			}
-			
 			if (fetch()) {}  //Performs the fetch method & checks the cache memory first(see method below)
 			else {
 				executable = decode(ir); //Decode the contents of the IR (see method below)
@@ -211,7 +211,8 @@ public class CPU extends Thread {
 			updateGUI(); //Refresh the gui to reflect everything that happened.			
     		gui.runToggle.setSelected(false);//ensures the Run button is deselected at the end.		  		
 			if (run == false) break; //During Execute Single Instructions or when Run is set to OFF, the loop stops here.
-		} 
+			}
+		//System.out.println("i is at = " + i);	
 	}
 	
 	public void executeSingleInstruction() {//When the Execute Single Instruction button is enabled, this runs instead of the instruction cycle.
@@ -398,6 +399,9 @@ public class CPU extends Thread {
 				break;
 		default: gui.visualizefield.setText("Failed to get opcode.");
 		}
+		if(isaConsole == true) System.out.println("DIGITval = " + memory[257]);
+		if(isaConsole == true) System.out.println("COUNTERval = " + memory[256]);
+		if(isaConsole == true) System.out.println("POINTERval = " + Integer.toHexString(memory[21]));
 	}
 	
 	public void storeMemAtMARtoMBR() { //GUI button, stores memory at MAR address to MBR
@@ -1332,7 +1336,7 @@ public class CPU extends Thread {
 	public void in(Word word) {// 61 Input character to Register from Device
 		if(isaConsole == true) System.out.println("61 IN"); //Debugging tool
 		if (word.devID == 0) {
-			char firstCharacter = inputBuffer.remove(); //pulls only the first character of the string in the keyboard field
+			char firstCharacter = inputBuffer.removeFirst(); //pulls only the first character of the string in the keyboard field
 			switch (word.r) { //uses gpr number in the word to determine which register to use.
 			case 0: gpr0 = (short) firstCharacter;
 					break;
@@ -1378,20 +1382,6 @@ public class CPU extends Thread {
 	public synchronized void chk(Word word) {//TODO 63 Check Device Status to Register
 		if(isaConsole == true) System.out.println("63 CHK"); //Debugging tool
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
-			if (automatic == true) {  
-			//In automatic mode, hitting a loop will lock up the GUI because Java Swing is single-threaded.
-			//This try-catch block suspends the thread in Automatic Mode while the user enters an input.
-			//This is a fault of Java Swing and there's nothing we can do about it.
-			//But if you are worried about authenticity, run the program in Single-Instruction mode.
-			//That will disable this block. You will notice that because it has time to wait for 
-			//user input between instructions, the program runs just fine.
-				try {
-					if(isaConsole == true) System.out.println("Waiting!");
-					wait();}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
 			if (gui.inReady == true) {
 				switch(word.r) {
 				case 0: gpr0 = 1;
