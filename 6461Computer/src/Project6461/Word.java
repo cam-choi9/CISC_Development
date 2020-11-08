@@ -11,7 +11,7 @@ import java.lang.Math;
  * by CPU.java's Instruction Set Architecture.
  * 
  * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
- * Part 2 Modifications for new ISA by Michael Ashery
+ * Part 2 Modifications for new ISA by Michael Ashery, reviewed by Jaeseock Choi.
  * */
 
 public class Word {
@@ -27,7 +27,7 @@ public class Word {
 	protected boolean al, lr;
 	protected short count;
 	protected short devID;
-	private boolean debug = false; //set to true to enable console debugging
+	private boolean debug = true; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
 		opcode = getOpcode(ir);
@@ -83,8 +83,7 @@ public class Word {
 	}
 	private short getAddress(short ir) { //performs bit shifting to isolate and find address
 		short addr = ir;
-		addr = (short) (addr << 11); //remove leading bits
-		addr = (short) Math.abs((addr >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		addr = (short) (addr & 0b0000000000011111); //isolate last five bits.
 		return addr;
 	}
 	private short getRx(short ir) {
@@ -99,12 +98,12 @@ public class Word {
 		regy = (short) (regy >> 14);
 		return regy;
 	}
-	private boolean getAL(short ir) { //determines if the indirect bit is set
+	private boolean getAL(short ir) { //determines if the AL bit is set
 		short idbN = ir;
 		if ((idbN & 0b0000000010000000) == 0b0000000010000000) {return true;}
 		else return false;
 	}
-	private boolean getLR(short ir) { //determines if the indirect bit is set
+	private boolean getLR(short ir) { //determines if the LR bit is set
 		short idbN = ir;
 		if ((idbN & 0b0000000001000000) == 0b0000000001000000) {return true;}
 		else return false;
@@ -112,8 +111,7 @@ public class Word {
 	
 	private short count(short ir) {
 		short countVal = ir;
-		countVal = (short) (countVal << 11); //remove leading bits
-		countVal = (short) Math.abs((countVal >> 11)); //Shift back to starting position. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		countVal = (short) (countVal & 0b0000000000001111);//isolate last four bits.
 		return countVal;
 	}
 	
@@ -127,6 +125,5 @@ public class Word {
 		System.out.println("Rx, r=" + rx);
 		System.out.println("Ry=" + ry);
 		System.out.println("Count=" + count);
-	}
-	
+	}	
 }
