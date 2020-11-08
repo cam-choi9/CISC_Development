@@ -844,7 +844,7 @@ public class CPU {
 		case 3: cry = gpr3;
 				break;
 		}
-		short rem = (short) (crx + cry);
+		short rem = (short) (crx - cry);
 		if (rem > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 			cc = 8; //set overflow
 			hlt();
