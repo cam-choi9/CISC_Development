@@ -345,6 +345,8 @@ public class CPU {
 				break;
 		case 8: add(word); //This is an extension. Adds two GPRs and places result in another GPR.
 				break;
+		case 9: sub(word); //This is an extension. Subtract one GPR from another and places result in another GPR.
+				break;
 		case 10: jz(word);
 				break;
 		case 11: jne(word);
@@ -818,6 +820,43 @@ public class CPU {
 		}
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 		
+	}
+	public void sub(Word word) { //THIS IS AN EXTENSION. 8 Subtracts one reg from another and places in gpr0
+		if(isaConsole == true) System.out.println("9 SUB"); //Debugging tool
+		short crx = 0, cry = 0;
+		switch (word.rx) {
+		case 0: crx = gpr0;
+				break;
+		case 1: crx = gpr1;
+				break;
+		case 2: crx = gpr2;
+				break;
+		case 3: crx = gpr3;
+				break;
+		}
+		switch (word.ry) {
+		case 0: cry = gpr0;
+				break;
+		case 1: cry = gpr1;
+				break;
+		case 2: cry = gpr2;
+				break;
+		case 3: cry = gpr3;
+				break;
+		}
+		short rem = (short) (crx + cry);
+		if (rem > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			cc = 8; //set overflow
+			hlt();
+		}
+		else if (rem < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			cc = 4; //set underflow
+			hlt();
+		}
+		else {
+			gpr0 = rem;
+		}
+		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 	}
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
