@@ -89,6 +89,8 @@ public class ComputerMain extends JFrame {
 	protected JTextArea printer;
 	
 	protected boolean inReady; //Used for the keyboard to determine CHK status.
+	private JTextField enterHexFld;
+	private JTextField outMemfld;
 
 	/**
 	 * Launch the application.
@@ -170,7 +172,7 @@ public class ComputerMain extends JFrame {
 	 */
 	public ComputerMain() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //this group of items sets up the GUI window.
-		setBounds(100, 100, 1050, 500);
+		setBounds(100, 100, 1052, 559);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -815,6 +817,34 @@ public class ComputerMain extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, scrolling, 3, SpringLayout.SOUTH, ixr2field);
 		sl_contentPane.putConstraint(SpringLayout.EAST, scrolling, -5, SpringLayout.EAST, contentPane);
 		contentPane.add(scrolling);
+		
+		JButton btnNewButton = new JButton("MemAtHexAddr");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = Integer.parseInt(enterHexFld.getText(),16);
+				outMemfld.setText(Integer.toHexString(cpu.memory[index]));
+			}
+		});
+		sl_contentPane.putConstraint(SpringLayout.NORTH, btnNewButton, 13, SpringLayout.NORTH, runToggle);
+		sl_contentPane.putConstraint(SpringLayout.WEST, btnNewButton, 0, SpringLayout.WEST, gpr0);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, btnNewButton, -43, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, btnNewButton, -35, SpringLayout.EAST, lblPC);
+		contentPane.add(btnNewButton);
+		
+		enterHexFld = new JTextField();
+		sl_contentPane.putConstraint(SpringLayout.NORTH, enterHexFld, 0, SpringLayout.NORTH, btnNewButton);
+		sl_contentPane.putConstraint(SpringLayout.WEST, enterHexFld, -142, SpringLayout.EAST, visualizefield);
+		sl_contentPane.putConstraint(SpringLayout.EAST, enterHexFld, 0, SpringLayout.EAST, visualizefield);
+		enterHexFld.setText("Input Hex here");
+		enterHexFld.setColumns(10);
+		contentPane.add(enterHexFld);
+		
+		outMemfld = new JTextField();
+		sl_contentPane.putConstraint(SpringLayout.NORTH, outMemfld, 0, SpringLayout.NORTH, btnNewButton);
+		sl_contentPane.putConstraint(SpringLayout.WEST, outMemfld, 6, SpringLayout.EAST, btnNewButton);
+		contentPane.add(outMemfld);
+		outMemfld.setEditable(false);
+		outMemfld.setColumns(10);
 
 		/*
 		sl_contentPane.putConstraint(SpringLayout.NORTH, printer, 16, SpringLayout.SOUTH, printerlbl);
