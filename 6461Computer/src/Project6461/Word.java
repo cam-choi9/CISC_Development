@@ -34,11 +34,11 @@ public class Word {
 		gprN = getGprN(ir);
 		ixrN = getIxrN(ir);
 		idb = getIndirectBit(ir);
-		rx = getRx(ir);
-		ry = getRy(ir);
+		rx = gprN;
+		ry = ixrN;
 		address = getAddress(ir);
 		immed = address; //yes, we technically don't need to do this, but it makes the code in CPU easier to understand.
-		r = rx;
+		r = gprN;
 		al = getAL(ir);
 		lr = getLR(ir);
 		count = count(ir);
@@ -60,20 +60,21 @@ public class Word {
 			operationcode = Short.parseShort(parsed, 2);
 		}
 		else {
-			operationcode = (short) (operationcode >> 10);//remove everything else from the word to get the opcode
+			operationcode = (short) (operationcode >>> 10);//remove everything else from the word to get the opcode
 		} 
 		return operationcode;
 	}
 	private short getGprN(short ir) { //performs bit shifting to isolate and find gpr value
 		short gprN = ir;
-		gprN = (short) (gprN << 6); //remove leading bits.
-		gprN = (short) Math.abs((gprN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		gprN = (short) (gprN & 0b0000001100000000);
+		gprN = (short) (gprN >>> 8);
+		
 		return gprN;
 	}
 	private short getIxrN(short ir) { //performs bit shifting to isolate and find ixr value
 		short ixrN = ir;
-		ixrN = (short) (ixrN << 8); //remove leading bits.
-		ixrN = (short) Math.abs((ixrN >> 14)); //Remove trailing bits. Java's casting leaves this in negative for some reason. Taking the absolute value fixes it.
+		ixrN = (short) (ixrN & 0b0000000011000000);
+		ixrN = (short) (ixrN >>> 6);
 		return ixrN;
 	}
 	private boolean getIndirectBit(short ir) { //determines if the indirect bit is set
@@ -86,18 +87,6 @@ public class Word {
 		addr = (short) (addr & 0b0000000000011111); //isolate last five bits.
 		return addr;
 	}
-	private short getRx(short ir) {
-		short regx = ir;
-		regx = (short) (regx << 6);
-		regx = (short) (regx >> 14);
-		return regx;
-	}
-	private short getRy(short ir) {
-		short regy = ir;
-		regy = (short) (regy << 8);
-		regy = (short) (regy >> 14);
-		return regy;
-	}
 	private boolean getAL(short ir) { //determines if the AL bit is set
 		short idbN = ir;
 		if ((idbN & 0b0000000010000000) == 0b0000000010000000) {return true;}
@@ -108,22 +97,18 @@ public class Word {
 		if ((idbN & 0b0000000001000000) == 0b0000000001000000) {return true;}
 		else return false;
 	}
-	
 	private short count(short ir) {
 		short countVal = ir;
 		countVal = (short) (countVal & 0b0000000000001111);//isolate last four bits.
 		return countVal;
 	}
-	
 	private void debugging() { //Troubleshooting tool for checking the contents of the word. Disabled otherwise
 		
 		System.out.println("opcode=" + opcode);
-		System.out.println("gprN=" + gprN);
-		System.out.println("ixrN=" + ixrN);
+		System.out.println("gprN, Rx, r=" + gprN);
+		System.out.println("ixrN, Ry=" + ixrN);
 		System.out.println("idb=" + idb);
 		System.out.println("Addr, Immed, devID=" + address);
-		System.out.println("Rx, r=" + rx);
-		System.out.println("Ry=" + ry);
 		System.out.println("Count=" + count);
-	}	
+	}
 }
