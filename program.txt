@@ -145,11 +145,11 @@
 011F  0703
 # Store r3 at Digit to make it 0 (store 013C) #
 0120  0B41
-### Compare Pointer to 00A8, jump to comparison alg if true. LDR 0016 to r3,AIR 4,TRR,LDX 000E,JCC,LDX 000A
+### Compare Pointer to 00A9, jump to comparison alg if true. LDR 0016 to r3,AIR 4,TRR,LDX 000E,JCC,LDX 000A
 # LDR 0016 to r3  #
 0121  0716
-# AIR 4 to r3 #
-0122  1B04
+# AIR 5 to r3 #
+0122  1B05
 # TRR r2 to r3 #
 0123  5AC0
 # LDX 000E # (LDX to 500)
@@ -344,13 +344,11 @@
 #OUT char
 0254  F801
 # SCRL
-#0255  F000
-#LDX
-#0256  A443
-#LDX
-#0257  
-#At the very end, jump back to the central program.
-#0258
+0255  F000
+#LDX 100
+0256  A44A
+#JMA to input loop 
+0257  3448
 ### The text of first message
 #E
 0400  0045
