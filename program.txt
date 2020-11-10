@@ -25,8 +25,12 @@
 001D  0600
 001E  0800
 001F  0900
-# Start of 1 int:
-0040  0000
+# Start of 1 int at addr 0040: # uncomment to debug.
+0040  0031
+0041  0032
+0042  0033
+0043  0034
+0044  0035
 # Start of 2 int:
 0045  0000
 # Start of 3 int:
@@ -88,65 +92,97 @@
 #100-107 are reserved for storing variables.
 #COUNTER - Counts number of integers
 0100  0000
-#DIGIT - Identify which digit of the int is being entered
+#DIGIT - Identify which digit of the int is being entered <<SET TO ZERO BEFORE TESTING FINAL
 0101  0000
 ###The Check KB status loop. 
-# Ensure Reg 1 empty
+# Ensure Reg 1 empty #
 0108  0403
-# Check Device status. If on, set gpr0 to 1
+# Check Device status. If on, set gpr0 to 1 #
 0109  FC00
-# If gpr0 is 0, jump back to 109. Otherwise proceed.
+# If gpr0 is 0, jump back to 109. Otherwise proceed. #
 010A  2849
-### Input Int Loop.
-# LDX Pointer to X2
+##### Input Int Loop.
+# LDX Pointer to X2 #
 010B  A48F
-# Input single char from buffer
+# Input single char from buffer #
 010C  F400
-# Store char at pointer addr using IXR2
+# Store char at pointer addr using IXR2 #
 010D  0880
-# Print char to printer
+# Print char to printer #
 010E  F801
-# Increment DIGIT variable in gpr1 LDR,AIR,STR
+# Increment DIGIT variable in gpr1 LDR,AIR,STR #
 010F  0541
 0110  1901
 0111  0941
-# Increment Pointer variable in gpr2 LDR,AIR,STR
-0112  060F
+# Increment Pointer variable in gpr2 LDR,AIR,STR #
+0112  0615
 0113  1A01
-0114  0A0F
-# Jump to next part if DIGIT==5. LDR 0003,AIR 5,TRR,AIX x1 26,JCC
-0115  0703
-0116  1B05
-0117  59C0
-0118  B85A
-0119  3040
-# Otherwise jump back to start of the Input Int Loop
-011A  3448
-### Integer Number controls.
-# Scroll Printer
-011B  F000
-# Compare Pointer to 00A8, jump to comparison alg if true. LDR 0016,AIR 4,TRR,LDX 000E,JCC,LDX 000A
-011C  0716
-011D  1B04
-011E  59C0
-011F  A44E
-0120  3440
-0121  A44A
-#Compare COUNTER to immed 19. Jump to 230 if true. Cntr LDR r1, LDR r3 0, AIR r3, TRR r1r3, LDX r1 JCC
-0122  0500
-0123  0703
-0124  1B13
-0125  59C0
-0126  A452
-0127  3040
-# Increment COUNTER. AIR, LDX 000A, STR
-0128  1901
-0129  A44A
-012A  0900
-# Set Digit 0 LDA0003, JMA to 0108
-0127  0703
-0128  0841
-0129  3448
+0114  0A15
+### Jump to next part if DIGIT==5. LDR DIGIT, LDR 0003,AIR 5,TRR,AIX x1 26,JCC
+# LDR int r1 add101 (EA + 1) #
+0115  0541
+# LDR into r3 add0003 (3) CLEAR REG #
+0116  0703
+# AIR to r3 val 5  #
+0117  1B05
+#TRR r1 and r3 #
+0118  59C0
+#AIX x1 val 27 (1B in hex) #
+0119  B85D
+#JCC to 011D #
+011A  3040
+### Otherwise jump back to start of the Input Int Loop
+#LDX with x100 from addr 000A #
+011B  A44A
+# JMA to 010B #
+011C  344B
+########## Integer Number controls.
+# Scroll Printer #
+011D  F000
+# Set IXR1 to 100 #
+011E  A44A
+# Clear r3 #
+011F  0703
+# Store r3 at Digit to make it 0 (store 013C) #
+0120  0B41
+### Compare Pointer to 00A8, jump to comparison alg if true. LDR 0016 to r3,AIR 4,TRR,LDX 000E,JCC,LDX 000A
+# LDR 0016 to r3  #
+0121  0716
+# AIR 4 to r3 #
+0122  1B04
+# TRR r2 to r3 #
+0123  5AC0
+# LDX 000E # (LDX to 500)
+0124  A44E
+# JCC to Jae's part (0500)
+0125  3040
+# LDX 000A
+0126  A44A
+###Compare COUNTER to immed 19. Jump to 230 if true. Cntr LDR r1, LDR r3 0, AIR r3, TRR r1r3, LDX r1, JCC
+# LDR r1 addr0 #
+0127  0540
+# LDR r3 0 #
+0128  0703
+# AIR 19 to r3 #
+0129  1B13
+# TRR r1r3 #
+012A  59C0
+# LDX x1 addr 0012 #
+012B  A452
+# JCC #
+012C  3040
+### Increment COUNTER. AIR, LDX 000A, STR
+#AIR r1 1 #
+012D  1901
+# LDX x1 val 0100 #
+012E  A44A
+# STR at addr 100 #
+012F  0940
+# Set Digit 0 LDA0003, JMA to 0108 #
+#0130  0703
+#0131  0841
+0130  A44A
+0131  3448
 # Print out end result //TODO
 #
 ############################################
@@ -237,82 +273,84 @@
 0230  0403
 # Load IXR1 with contents of 000D 3)
 0231  A44D
+# Add 17 to IXR1
+0232  B851
 #LDR char to reg (1/17)
-0232  0440
+0233  0440
 #OUT char
-0233  F801
+0234  F801
 #LDR char to reg (2/17)
-0234  0441
+0235  0441
 #OUT char
-0235  F801
+0236  F801
 #LDR char to reg (3/17)
-0236  0442
+0237  0442
 #OUT char
-0237  F801
+0238  F801
 #LDR char to reg (4/17)
-0238  0443
+0239  0443
 #OUT char
-0239  F801
+023A  F801
 #LDR char to reg (5/17)
-023A  0444
+023B  0444
 #OUT char
-023B  F801
+023C  F801
 #LDR char to reg (6/17)
-023C  0445
+023D  0445
 #OUT char
-023D  F801
+023E  F801
 #LDR char to reg (7/17)
-023E  0446
+023F  0446
 #OUT char
-023F  F801
+0240  F801
 #LDR char to reg (8/17)
-0240  0447
+0241  0447
 #OUT char
-0241  F801
+0242  F801
 #LDR char to reg (9/17)
-0242  0448
+0243  0448
 #OUT char
-0243  F801
+0244  F801
 #LDR char to reg (10/17)
-0244  0449
+0245  0449
 #OUT char
-0245  F801
+0246  F801
 #LDR char to reg (11/17)
-0246  044A
+0247  044A
 #OUT char
-0247  F801
+0248  F801
 #LDR char to reg (12/17)
-0248  044B
+0249  044B
 #OUT char
-0249  F801
+024A  F801
 #LDR char to reg (13/17)
-024A  044C
+024B  044C
 #OUT char
-024B  F801
+024C  F801
 #LDR char to reg (14/17)
-024C  044D
+024D  044D
 #OUT char
-024D  F801
+024E  F801
 #LDR char to reg (15/17)
-024E  044E
+024F  044E
 #OUT char
-024F  F801
+0250  F801
 #LDR char to reg (16/17)
-0250  044F
+0251  044F
 #OUT char
-0251  F801
+0252  F801
 #LDR char to reg (17/17)
-0252  0450
+0253  0450
 #OUT char
-0253  F801
+0254  F801
 # SCRL
-#0254  F000
+#0255  F000
 #LDX
-#0255  A443
+#0256  A443
 #LDX
-#0256  
+#0257  
 #At the very end, jump back to the central program.
-#0257
+#0258
 ### The text of first message
 #E
 0400  0045
