@@ -388,6 +388,8 @@ public class CPU {
 				break;
 		case 42: stx(word);
 				break;
+		case 43: cop(word);
+				break;
 		case 46: aix(word);//This is an extension
 				break;
 		//50-51 reserved for floating point
@@ -816,10 +818,18 @@ public class CPU {
 			hlt();
 		}
 		else {
-			gpr0 = sum;
+			switch (word.rx) {
+			case 0: gpr0 = sum;
+					break;
+			case 1: gpr1 = sum;
+					break;
+			case 2: gpr2 = sum;
+					break;
+			case 3: gpr3 = sum;
+					break;
+			}			
 		}
-		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
-		
+		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.		
 	}
 	public void sub(Word word) { //THIS IS AN EXTENSION. 8 Subtracts one reg from another and places in gpr0
 		if(isaConsole == true) System.out.println("9 SUB"); //Debugging tool
@@ -854,10 +864,20 @@ public class CPU {
 			hlt();
 		}
 		else {
-			gpr0 = rem;
+			switch (word.rx) {
+			case 0: gpr0 = rem;
+					break;
+			case 1: gpr1 = rem;
+					break;
+			case 2: gpr2 = rem;
+					break;
+			case 3: gpr3 = rem;
+					break;
+			}			
 		}
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 	}
+	
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
@@ -1354,6 +1374,30 @@ public class CPU {
 		case 3: memory[effectiveAddress(word)] = ixr3;
 				break;
 		default: gui.visualizefield.setText("STX failed.");
+		}
+	}
+	public void cop(Word word) { //43 Copy GPR content to IXR
+		if(isaConsole == true) {System.out.println("43 COP");} //Debugging tool
+		short content = 0;
+		switch (word.gprN) { //uses ixr number in the word to determine which register to use.
+		case 0: content = gpr0; 				
+				break;
+		case 1: content = gpr1;
+				break;
+		case 2: content = gpr2;
+				break;
+		case 3: content = gpr3;
+				break;
+		default: gui.visualizefield.setText("COP failed.");
+		} 
+		switch (word.ixrN) {
+		case 1: ixr1 = content;
+				break;
+		case 2: ixr2 = content;
+				break;
+		case 3: ixr3 = content;
+				break;
+		default: gui.visualizefield.setText("COP failed.");
 		}
 	}
 	public void aix(Word word) { //THIS IS AN EXTENSION I CREATED. 46 adds Immediate to Index Register
