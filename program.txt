@@ -133,7 +133,7 @@
 010A  2849
 ##### Input Int Loop.
 # LDX Pointer to X2 #
-010B  A48F
+010B  A495
 # Input single char from buffer #
 010C  F400
 # Store char at pointer addr using IXR2 #
