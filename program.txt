@@ -690,7 +690,7 @@
 # 1-1) Load GPR2 with 0 (LDR)
 0541  0603
 # 1-2) Add 10 to GPR2 (AIR) 
-0542  188A
+0542  1A0A
 # 2) Multiply digit value by 10 and store it to GPR0
 # 2-1) Multiply digit value (GPR0) by 10 (GPR2) => GPR0 = high order bits, GPR1 = low order bits (MLT GPR0 GPR2) 
 0543  5080
