@@ -1282,33 +1282,35 @@
 ##### GPR0 = intListNumber 
 #####
 #####
+# 1) Clear GPR1
+0761  0503
 # 2) Add 20 to GPR1 (AIR)
-0761  1914
-# 3) Check if intListN8mber(GPR0) == 20(GPR1) (TRR)
-0762  5840
+0762  1914
+# 3) Check if intListNumber(GPR0) == 20(GPR1) (TRR)
+0763  5840
 # 4) If GPR0 == GPR1 (cc == 1), jump to "PRINT OUT THE BEST INTEGER" (Step 10) (0780)
 # 4-1) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX) 
-0763  A451
+0764  A451
 # 4-2) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
-0764  B85F
-# 4-3) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
 0765  B85F
-# 4-4) Add 31(1F hex) to IXR1 (073E + 001F) (AIX)
+# 4-3) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
 0766  B85F
-# 4-5) Add 31(1F hex) to IXR1 (075D + 001F) (AIX)
+# 4-4) Add 31(1F hex) to IXR1 (073E + 001F) (AIX)
 0767  B85F
+# 4-5) Add 31(1F hex) to IXR1 (075D + 001F) (AIX)
+0768  B85F
 # 4-5) Add 31(1F hex) to IXR1 (077C + 0004) (AIX)
-0768  B844
+0769  B844
 # 4-6) Jump to Step 10 (JCC)
-0769  3040
+076A  3040
 # 7) If not, jump back to "UPDATE CURRENT INTEGER" (Step 1) (050B) 
 # Falls short of the shortcut address => Get the address of 0500 and add until 050B
 # 7-1) Load IXR1 with the address of 0500 (Address: 000E => Content: 0500) (LDX)
-076A  A44E
+076B  A44E
 # 7-2) Add 11(0B hex) to IXR1 (AIX)
-076B  B84B
+076C  B84B
 # 7-3) Jump to Step 1 (JMA)
-076C  3440
+076D  3440
 #####
 #####
 ##### 10. "PRINT OUT THE BEST INTEGER"
