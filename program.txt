@@ -224,10 +224,10 @@
 # If gpr0 is 0, jump back to 109. Otherwise proceed. #
 010A  2849
 ##### Input Int Loop.
-# LDX Pointer to X2 #
-010B  A48F
-# Input single char from buffer #
+# LDX Pointer to X2 #A48F
 010B  A495
+# Input single char from buffer #
+010C  F400
 # Store char at pointer addr using IXR2 #
 010D  0880
 # Print char to printer #
