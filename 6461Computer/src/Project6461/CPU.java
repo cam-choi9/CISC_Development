@@ -18,8 +18,8 @@ import java.io.FileNotFoundException;
  * Because ComputerMain.java's GUI and CPU.java must run concurrently, this object runs in a separate thread.
  * 
  * Part 1 written by Michael Ashery, reviewed by Jaeseok Choi
- * Part 2 Cache by Jaeseok Choi reviewed by Michael Ashery
- * Part 2 ISA by Michael Ashery reviewed by Jaeseok Choi
+ * Part 2 Cache and OPCodes for ADD, SUB, and COP by Jaeseok Choi reviewed by Michael Ashery
+ * Part 2 All other ISA by Michael Ashery reviewed by Jaeseok Choi
  * */
 
 //public class CPU extends Thread {
@@ -112,7 +112,8 @@ public class CPU {
 		memory = new short[2048];
 		cache = new int[16];
 		gui.printer.setText("");
-		int lineNo = 1; //for troubleshooting.
+		inputBuffer = new LinkedList<Character>();
+		int lineNo = 1; //keep track of line number in text file for troubleshooting.
 		//read from the text file
 		try {
 			File initialProgram = new File("program.txt"); //program.txt is the ROM.
@@ -247,7 +248,7 @@ public class CPU {
 	 * Searches through the cache memory first => if cache contains the memory address required by pc, decode and execute the instruction ("Hit" case)
 	 */
 	public boolean cacheSearch() { 
-		System.out.println("Begin Cache Search"); /* REENABLE ONCE FIXED
+		System.out.println("Begin Cache Search"); // REENABLE ONCE FIXED
 		short address = 0; //Tag bits holding the address of the cache line 
 		short word = 0; //Data bits holding the word(content) of the cache line 
 		Word executable; //If the instruction is stored in the cache memory, which is a hit case, it will execute within the function before accessing the main memory
@@ -270,7 +271,7 @@ public class CPU {
 				execute(executable); //Executes the instruction        		
 				return true; //Return true if "hit" case => indicating that there is no need to access the main memory
 			}            
-		}  */      
+		}  //*/      
 		System.out.println("data not found in the cache");
 		return false; //Return false if "miss" case => indicating that the CPU needs to access the main memory 
     }
@@ -388,7 +389,7 @@ public class CPU {
 				break;
 		case 42: stx(word);
 				break;
-		case 43: cop(word);
+		case 43: cop(word);//This is an extension. Loads a GPR into IXR
 				break;
 		case 46: aix(word);//This is an extension
 				break;
@@ -403,9 +404,19 @@ public class CPU {
 				break;
 		default: gui.visualizefield.setText("Failed to get opcode.");
 		}
-		if(isaConsole == true) System.out.println("DIGITval = " + memory[257]);
-		if(isaConsole == true) System.out.println("COUNTERval = " + memory[256]);
-		if(isaConsole == true) System.out.println("POINTERval = " + Integer.toHexString(memory[21]));
+		//if(isaConsole == true) System.out.println("DIGITval = " + memory[257]);
+		//if(isaConsole == true) System.out.println("COUNTERval = " + memory[256]);
+		//if(isaConsole == true) System.out.println("POINTERval = " + Integer.toHexString(memory[21]));
+		
+		if(isaConsole == true) System.out.println("currentIntegerPointer = " + Integer.toHexString(memory[176]));
+		if(isaConsole == true) System.out.println("bestIntegerPointer = " + Integer.toHexString(memory[177]));
+		if(isaConsole == true) System.out.println("digitPosition = " + memory[178]);
+		if(isaConsole == true) System.out.println("difference = " + memory[179]);
+		if(isaConsole == true) System.out.println("bestDifference = " + memory[180]);
+		if(isaConsole == true) System.out.println("intListNumber = " + memory[181]);
+		if(isaConsole == true) System.out.println("integerShort = " + memory[182]);
+		if(isaConsole == true) System.out.println("userValueShort = " + memory[183]);
+		
 	}
 	
 	public void storeMemAtMARtoMBR() { //GUI button, stores memory at MAR address to MBR
@@ -476,6 +487,7 @@ public class CPU {
 		run = false; //stops the fetch cycle loop.
 		pc--; //cancels out the PC increment in the fetch method.
 		gui.runToggle.setSelected(false);//if the halt occurred during a running program, this resets the state of the Run button. 
+		gui.runToggle.setText("RUN");
 	}
 	public void ldr(Word word) { // 01 Load Register from Memory
 		if(isaConsole == true) System.out.println("01 LDR"); //Debugging tool
@@ -490,6 +502,7 @@ public class CPU {
 			break;
 		default: gui.visualizefield.setText("LDR failed @ " + Integer.toHexString(pc));
 		}
+		if(isaConsole == true) System.out.println("Loaded value " + Integer.toHexString(memory[effectiveAddress(word)])); //Debugging tool
 	}
 	public void str(Word word) { //02 Load Register to Memory
 		if(isaConsole == true) System.out.println("02 STR"); //Debugging tool
@@ -504,6 +517,7 @@ public class CPU {
 				break;
 		default: gui.visualizefield.setText("STR failed.");
 		}
+		if(isaConsole == true) System.out.println("Stored to " + Integer.toHexString(effectiveAddress(word))); //Debugging tool
 	}
 	public void lda(Word word) { //03 Load Register with Address
 		if(isaConsole == true) System.out.println("03 LDA"); //Debugging tool
@@ -785,7 +799,7 @@ public class CPU {
 		default: gui.visualizefield.setText("SIR failed.");
 		}
 	}
-	public void add(Word word) { //THIS IS AN EXTENSION. 8 Adds two values and places in gpr0
+	public void add(Word word) { //THIS IS AN EXTENSION. 8 Adds two values and places sum in Rx
 		if(isaConsole == true) System.out.println("8 ADD"); //Debugging tool
 		short crx = 0, cry = 0;
 		switch (word.rx) {
@@ -827,11 +841,12 @@ public class CPU {
 					break;
 			case 3: gpr3 = sum;
 					break;
-			}			
+			}	
 		}
-		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.		
+		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
+		
 	}
-	public void sub(Word word) { //THIS IS AN EXTENSION. 8 Subtracts one reg from another and places in gpr0
+	public void sub(Word word) { //THIS IS AN EXTENSION. 8 Subtracts one GPR from another and places in Rx
 		if(isaConsole == true) System.out.println("9 SUB"); //Debugging tool
 		short crx = 0, cry = 0;
 		switch (word.rx) {
@@ -873,11 +888,10 @@ public class CPU {
 					break;
 			case 3: gpr3 = rem;
 					break;
-			}			
+			}	
 		}
 		//note, PC+1 happens automatically as part of fetch method. This overrides that if triggered.
 	}
-	
 	public void jz(Word word) { //10 Jump if Zero
 		if(isaConsole == true) System.out.println("10 JZ"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
@@ -987,21 +1001,19 @@ public class CPU {
 			switch (word.rx) {
 			case 0: crx = gpr0;
 					break;
-			case 1: crx = gpr1;
-					break;
 			case 2: crx = gpr2;
 					break;
-			case 3: crx = gpr3;
+			default: System.out.println("Wrong register for MLT");
+					hlt();
 					break;
 			}
 			switch (word.ry) {
 			case 0: cry = gpr0;
 					break;
-			case 1: cry = gpr1;
-					break;
 			case 2: cry = gpr2;
 					break;
-			case 3: cry = gpr3;
+			default: System.out.println("Wrong register for MLT");
+					hlt();
 					break;
 			}
 			short highorder, loworder;
@@ -1019,7 +1031,7 @@ public class CPU {
 					}
 					else {
 						highorder = (short) (product >> 16);
-						loworder = (short) ((product << 16) >> 16);
+						loworder = (short) ((product << 16) >>> 16);
 						gpr0 = highorder;
 						gpr1 = loworder;
 						break;
@@ -1037,7 +1049,7 @@ public class CPU {
 				}
 				else {
 					highorder = (short) (product >> 16);
-					loworder = (short) ((product << 16) >> 16);
+					loworder = (short) ((product << 16) >>> 16);
 					gpr2 = highorder;
 					gpr3 = loworder;
 					break;
@@ -1119,11 +1131,11 @@ public class CPU {
 				break;
 		}
 		if (crx == cry) {
-			if(isaConsole == true) {System.out.println("TRR passed");} //Debugging tool
+			if(isaConsole == true) {System.out.println("TRR passed, x:y = " + crx + ":" + cry);} //Debugging tool
 			cc = 1;}
 		else {
 			cc = 0;
-			if(isaConsole == true) {System.out.println("TRR failed");} //Debugging tool
+			if(isaConsole == true) {System.out.println("TRR failed, x:y = " + crx + ":" + cry);} //Debugging tool
 		}
 	}
 	public void and(Word word) {// 23 Logical AND Register by Register
@@ -1221,7 +1233,7 @@ public class CPU {
 				break;
 		}
 	}
-	public void tir(Word word) {// 26 Test Equality of two Registers. THIS IS AN EXTENSION.
+	public void tir(Word word) {// 26 Test INequality of two Registers. THIS IS AN EXTENSION.
 		if(isaConsole == true) System.out.println("26 TIR"); //Debugging tool
 		short crx = 0, cry = 0;
 		switch (word.rx) {
@@ -1379,7 +1391,7 @@ public class CPU {
 	public void cop(Word word) { //43 Copy GPR content to IXR
 		if(isaConsole == true) {System.out.println("43 COP");} //Debugging tool
 		short content = 0;
-		switch (word.gprN) { //uses ixr number in the word to determine which register to use.
+		switch (word.gprN) { //uses GPR number in the word to determine source.
 		case 0: content = gpr0; 				
 				break;
 		case 1: content = gpr1;
@@ -1390,7 +1402,7 @@ public class CPU {
 				break;
 		default: gui.visualizefield.setText("COP failed.");
 		} 
-		switch (word.ixrN) {
+		switch (word.ixrN) { //uses IXR number to determine destination.
 		case 1: ixr1 = content;
 				break;
 		case 2: ixr2 = content;
@@ -1462,10 +1474,10 @@ public class CPU {
 			gui.printer.setText(printOut);//for debugging. printOut is updated to the GUI along with everything else at the end of the Instruction Cycle
 		}
 	}
-	public synchronized void chk(Word word) {//TODO 63 Check Device Status to Register
+	public synchronized void chk(Word word) {// 63 Check Device Status to Register
 		if(isaConsole == true) System.out.println("63 CHK"); //Debugging tool
 		if (word.devID == 0) {//this is for reading from the kb on the UI.
-			if (gui.inReady == true) {
+			if (gui.inReady == true) { //tests the inReady boolean on ComputerMain.java. This boolean is set when the user hits the Enter button with content in the keyboard field.
 				switch(word.r) {
 				case 0: gpr0 = 1;
 						break;
