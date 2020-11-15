@@ -188,8 +188,8 @@
 00A4  0030
 00A5  0030
 00A6  0030
-00A7  0030
-00A8  0038
+00A7  0031
+00A8  0037
 ##### Storage locations for Jae's part of the program.
 ##### Storage locations for Jae's part of the program.
 ## Store "currentIntegerPointer" (initially 0)
@@ -1102,59 +1102,54 @@
 0721  B887
 # 4-3) Load GPR1 with "userValueShort" (LDR) => GPR1 = "userValueShort" => GPR1 = userValueShort
 0722  0580
-# 5) Subtract "userValueShort"(=GPR1) from "integerShort"(GPR0) and store the result to GPR0 (SUB) => GPR0 = difference
-0723  2440
-# 6) Check if result (GPR0) < 0 (GPR3),  (TIR) 
-0724  68C0
-# 7) If result < 0, Jump to "ABSOLUTE PART"  
-# 7-1) Load IXR1 with the the address of "ABSOLUTE PART" (0730)
+# 5) Check if "userValueShort"(GPR1) > "integerShort"(GPR0) (TIR)
+0723  6840
+# 7) If UserValueShort > integerShort, Jump to "UserValueShort > integerShort"  
+# 7-1) Load IXR1 with the the address of "UserValueShort > integerShort" (0730)
 # 7-2) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX)
-0725  A451
+0724  A451
 # 7-3) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
-0726  B85F
+0725  B85F
 # 7-4) Add 18(12 hex) to IXR1 (071F + 0011) (AIX)
-0727  B851
-# 7-5) Jump to "ABSOLUTE PART" (JCC)
-0728  3040
-# 8) Else if difference is positive or 0, save the result to "difference"
-# 8-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
+0726  B851
+# 7-5) Jump to "UserValueShort > integerShort" (JCC)
+0727  3040
+# 8) Else if integerShort ≥ userValueShort, do integerShort - userValueShort, and save the result to "difference"
+# 8-1) Do integerShort(GPR0) - userValueShort(GPR1) and save the result to GPR0 (SUB) => GPR0 = difference
+0728  2440
+# 8-2) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
 0729  A453
 # 8-2) Add 3 to IXR1 (AIX) => IXR1 = 00B3
 072A  B843
 # 8-3) Store the "difference"(GPR0) to memory[IXR1] (STR)
 072B  0840
-# 9) Jump to "Compare Difference and BestDifference" (0737) (JMA)
+# 9) Jump to "Compare Difference and BestDifference" (0734) (JMA)
 # 9-1) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX)
 072C  A451
 # 9-2) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
 072D  B85F
-# 9-3) Add 28(1F hex) to IXR1 (071F + 0018) (AIX)
-072E  B858
+# 9-3) Add 21(15 hex) to IXR1 (071F + 0015) (AIX)
+072E  B855
 # 9-5) Jump to "COMPARE DIFFERENCE AND BESTDIFFERENCE" (JMA)
 072F  3440
 #####
 #####
-##### 5-3-1. "ABSOLUTE PART"
-##### 1) multiply difference by -1
+##### 5-3-1. "UserValueShort > integerShort"
+##### 1) Do UserValueShort - integerShort
 ##### 2) Store the result to "difference"
 ##### 3) Jump to "COMPARE DIFFERENCE AND BESTDIFFERENCE"
-##### GPR0 = difference
+##### GPR0 = integerShort
+##### GPR1 = userValueShort
 ##### 
-##### 
-# 1) Load IXR1 with the address of "difference" (00B3)
-# 1-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
-0730  A453
-# 1-2) Add 3 to IXR1 (AIX) => IXR1 = the address of "difference"
-0731  B843
-# 2) Load GPR2 with '-1'
-# 2-1) Clear GPR2 (LDR) => GPR2 = '0' 
-0732  0603
-# 2-2) Subtract 1 from GPR2 (SIR) => GPR2 = '-1'
-0733  1E01
-# 3) Multiply difference (GPR0) by '-1' (GPR2) (MLT GPR0 GPR2) => GPR1 = product
-0734  5080
-# 5) Store the "difference"(GPR1) to memory[IXR1] (STR)
-0735  0940
+# 1) Do UserValueShort(GPR1) - integerShort(GPR0) and store the result to GPR1 (SUB)
+0730  2500
+# 2) Load IXR1 with the address of "difference" (00B3)
+# 2-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
+0731  A453
+# 2-2) Add 3 to IXR1 (AIX) => IXR1 = the address of "difference"
+0732  B843
+# 3) Store the "difference"(GPR1) to memory[IXR1] (STR)
+0733  0940
 # 6) Move onto "Compare Difference and BestDifference"
 #####
 #####
@@ -1163,46 +1158,46 @@
 ##### 1) If difference < bestDifference: jump to "UPDATE BEST CASE"
 ##### 2) Else, jump to "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT"
 #####
-# 1) Load GPR0 with "difference" (00B3)
+# 1) Load GPR0 with "bestDifference" (00B4)
 # 1-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
-0736  A453
-# 1-2) Add 3 to IXR1 (AIX) => IXR1 = the address of "difference"
-0737  B843
-# 1-3) Load GPR0 with memory[IXR1] (LDR) => GPR0 = "difference"
-0738  0440
-# 2) Load GPR1 with the address of "bestDifference" (00B4)
+0734  A453
+# 1-2) Add 4 to IXR1 (AIX) => IXR1 = the address of "bestDifference"
+0735  B844
+# 1-3) Load GPR0 with memory[IXR1] (LDR) => GPR0 = "bestDifference"
+0736  0440
+# 2) Load GPR1 with the address of "difference" (00B3)
 # 2-1) Load IXR2 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR2 = 00B0
-0739  A493
-# 2-2) Add 4 to IXR2 (AIX) => IXR2 = the address of "bestDifference" 
-073A  B884
-# 2-3) Load GPR1 with memory[IXR2] (LDR) => GPR1 = "bestDifference"
-073B  0580
-# 3) Compare "difference" and "bestDifference" (TIR GPR0 GPR1)
-073C  6840
+0737  A493
+# 2-2) Add 3 to IXR2 (AIX) => IXR2 = the address of "difference" 
+0738  B883
+# 2-3) Load GPR1 with memory[IXR2] (LDR) => GPR1 = "difference"
+0739  0580
+# 3) Compare "difference" and "bestDifference" (TIR GPR1 GPR0)
+073A  6900
 # 4) If "difference" < "bestDifference", cc = 1, jump to "UPDATE BEST CASE"
 # 4-1) Load IXR1 with the address of "UPDATE BEST CASE" (0747) (LDX)
 # 4-2) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX)
-073D  A451
+073B  A451
 # 4-3) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
-073E  B85F
+073C  B85F
 # 4-4) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
-073F  B85F
+073D  B85F
 # 4-5) Add 31(1F hex) to IXR1 (073E + 0009) (AIX)
-0740  B849
+073E  B849
 # 4-6) jump to "UPDATE BEST CASE" (JCC)
-0741  3040
+073F  3040
 # 5) If "difference" >= "bestDifference", jump to step 7 (JMA)
 # 5-1) Load IXR1 with the address of "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT" (0752)
 # 5-2) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX)
-0742  A451
+0740  A451
 # 5-3) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
-0743  B85F
+0741  B85F
 # 5-4) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
-0744  B85F
+0742  B85F
 # 5-5) Add 20(1F hex) to IXR1 (073E + 0014) (AIX)
-0745  B854
+0743  B854
 # 5-6) Jump to "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT" (JMA)
-0746  3440
+0744  3440
 #####
 #####
 ##### 6-1. UPDATE BEST CASE
@@ -1342,7 +1337,7 @@
 # 1-4) Copy GPR0 to IXR1 (COP) => IXR1 = the address of the best integer's first digit
 0783  AC40
 # 1-5) Load GPR0 with memory[IXR1] (LDR) => GPR0 = the best integer's first digit
-0784  0550
+0784  0440
 # 1-6) Print out the first digit
 0785  F801
 # 2) Print out the second digit
