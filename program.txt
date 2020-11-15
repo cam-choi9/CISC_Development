@@ -199,9 +199,9 @@
 ## Store "digitPosition" (initially 0)
 00B2  0000
 ## Store "difference" (initially 0)
-00B3  0000
+00B3  0500
 ## Store "bestDifference" (initially 0)
-00B4  0000
+00B4  0500
 ## Store "intListNumber" (initially 0)
 00B5  0000
 ## Store "integerShort" (initially 0)
@@ -759,18 +759,18 @@
 0536  20C0
 # 2-4) Copy GPR0 to IXR1 (COP) => IXR1 = the address of current integer's digit at digitPosition
 0537  AC40
-# 2-5) Load GPR0 with the current integer's digit at digitPosition (LDR) => GPR0 = the current integer's digit at digitPosition (ascii value)
-0538  0440
-# 2-6) Subtract 0030 from GPR0 to get Number value 
+# 2-5) Load GPR1 with the current integer's digit at digitPosition (LDR) => GPR1 = the current integer's digit at digitPosition (ascii value)
+0538  0540
+# 2-6) Subtract 0030 from GPR1 to get Number value 
 # 2-6-1) Load IXR1 with the address of 001A (Address: 001A => Content: 0030) (LDX)
 0539  A45A
-# 2-6-2) Subtract 0030 from GPR0 (SMR GPR0 IXR1) => GPR0 = the current integer's digit at digitPosition (number value)
-053A  1440
+# 2-6-2) Subtract 0030 from GPR1 (SMR GPR1 IXR1) => GPR0 = the current integer's digit at digitPosition (number value)
+053A  1540
 # 3) Check if current integer's digit at digitPosition == 0 
 # 3-1) Load GPR2 with '0' (LDR)
 053B  0603
-# 3-2) Compare GPR0 with GPR2 (TRR GPR0 GPR2)
-053C  5880
+# 3-2) Compare GPR1 with GPR2 (TRR GPR1 GPR2)
+053C  5980
 # 4) If digit == 0, cc = 1, skip the Multiplication Loop and jump to "ADD TO INTEGER SHORT" section
 # 4-1) Load IXR1 with the address of "ADD TO INTEGER SHORT" section (Address: 0010 => Content: 0600) (LDX)
 053D  A450
@@ -788,9 +788,9 @@
 # 6) Else, if digit != 0 and digitPosition != 4, do multiplication and add to "integerShort"
 #####
 #####
-##### 5-1-2. MULTIPLICATION LOOP - INTEGER (0541) - DONE.
+##### 5-1-2. MULTIPLICATION LOOP - INTEGER (0543) - DONE.
 ##### : multiply the digit value by 10 to the power of (4 - digitPosition)
-##### GPR0 = digit value, GPR3 = digitPosition
+##### GPR1 = digit value, GPR3 = digitPosition
 #####
 #####
 # 1) Set GPR2 to 10
@@ -798,34 +798,38 @@
 0543  0603
 # 1-2) Add 10 to GPR2 (AIR) => GPR2 = 10
 0544  1A0A
+# 2) Copy GPR1 to IXR1 (COP)
+0545  AD40
+# 2-1) Copy IXR1 to GPR0 (LDA)
+0546  0C40
 # 2) Multiply digit value by 10 and store it to GPR1
 # 2-1) Multiply digit value (GPR0) by 10 (GPR2) (MLT GPR0 GPR2) => GPR1 = product  
-0545  5080
+0547  5080
 # 3) Increment digitPosition (AIR GPR3 1) 
-0546  1B01
+0548  1B01
 # 4) If digitPosition == 4, jump to "ADD TO INTEGER SHORT"
 # 4-1) Load GPR2 with 0 (LDR)
-0547  0603
+0549  0603
 # 4-2) Add 4 to GPR2 (AIR) => GPR2 = 4
-0548  1A04
+054A  1A04
 # 4-3) Check if digitPosition == 4 (TRR GPR2 GPR3)
-0549  5AC0
+054B  5AC0
 # 4-4) Load IXR1 with the address of "ADD TO INTEGER SHORT" section (Address: 0010 => Content: 0600) (LDX)
-054A  A450
+054C  A450
 # 4-5) If digitPosition == 4, cc == 1, jump to "ADD TO INTEGER SHORT" section (JCC GPR0 IXR1)
-054B  3040
+054D  3040
 # 5) Else, jump back to the start of "MULTIPLICATION LOOP" (0543)
 # Falls short of the shortcut address => Get the address of 0500 and add until 0543
 # 5-1) Load IXR1 with the address of 0500 (Address: 000E => Content: 0500) (LDX)
-054C  A44E
+054E  A44E
 # 5-2) Add 31(1F hex) to IXR1 (0500 + 001F) (AIX) 
-054D  B85F
+054F  B85F
 # 5-3) Add 31(1F hex) to IXR1 (051F + 001F) (AIX) 
-054E  B85F
+0550  B85F
 # 5-4) Add 5(05 hex) to IXR1 (053E + 0005) (AIX)
-054F  B845
+0551  B845
 # 5-5) Jump back to the start of "MULTIPLICATION LOOP" (JMA IXR1)
-0550  3440
+0552  3440
 #####
 #####
 ##### 5-1-3. "ADD TO INTEGER SHORT" (0600)
@@ -919,26 +923,26 @@
 056D  B842
 # 1-3) Load GPR3 with digitPosition (LDR GPR3 IXR1) => GPR3 = digitPosition
 056E  0740
-# 2) Load GPR0 with the user value's digit at digitPosition 
+# 2) Load GPR1 with the user value's digit at digitPosition 
 # 2-1) Load IXR1 with the address of the user value (Address: 0016 => Content: 00A4) (LDX) => IXR1 = 00A4
 056F  A456
-# 2-2) Load GPR0 with the address of the user value's first digit (LDA) => GPR0 = the address of the user value's first digit (00A4)
-0570  0C40
-# 2-3) Add GPR0 and GPR3 and store the result to GPR0 (ADD) => GPR0 = the address of the user value's digit at digitPosition
-0571  20C0
-# 2-4) Copy GPR0 to IXR1 (COP) => IXR1 = the address of the user value's digit at digitPosition
-0572  AC40
-# 2-5) Load GPR0 with the user value's digit at digitPosition (LDR) GPR0 = the user value's digit at digitPosition (ascii value)
-0573  0440
+# 2-2) Load GPR1 with the address of the user value's first digit (LDA) => GPR0 = the address of the user value's first digit (00A4)
+0570  0D40
+# 2-3) Add GPR1 and GPR3 and store the result to GPR1 (ADD) => GPR1 = the address of the user value's digit at digitPosition
+0571  21C0
+# 2-4) Copy GPR1 to IXR1 (COP) => IXR1 = the address of the user value's digit at digitPosition
+0572  AD40
+# 2-5) Load GPR1 with the user value's digit at digitPosition (LDR) GPR0 = the user value's digit at digitPosition (ascii value)
+0573  0540
 # 2-6-1) Load IXR1 with the address of 001A (Address: 001A => Content: 0030) (LDX)
 0574  A45A
-# 2-6-2) Subtract 0030 from GPR0 (SMR GPR0 IXR1) => GPR0 = the user value's digit at digitPosition (number value)
-0575  1440
+# 2-6-2) Subtract 0030 from GPR1 (SMR GPR1 IXR1) => GPR1 = the user value's digit at digitPosition (number value)
+0575  1540
 # 3) Check if the user value's digit at digitPosition == 0 
 # 3-1) Load GPR2 with '0' (LDR)
 0576  0603
-# 3-2) Compare GPR0 with GPR2 (TRR GPR0 GPR2)
-0577  5880
+# 3-2) Compare GPR1 with GPR2 (TRR GPR1 GPR2)
+0577  5980
 # 4) If digit == 0, cc = 1, skip the Multiplication Loop and jump to "ADD TO USER VALUE SHORT" section
 # 4-1) Load IXR1 with the address of "ADD TO USER VALUE SHORT" section (Address: 0011 => Content: 0700) (LDX)
 0578  A451
@@ -958,46 +962,51 @@
 #####
 ##### 5-2-2. "MULTIPLICATION LOOP - USER" (0535) - DONE.
 ##### : multiply the difference by 10 to the power of (4 - digitPosition)
-##### GPR0 = digit value, GPR3 = digitPosition
+##### GPR1 = digit value, GPR3 = digitPosition
 #####
 #####
+# 0) Copy GPR1 to GPR0
+# 0-1) Copy GPR1 to IXR1 (COP)
+057E  AD40
+# 0-2) Copy IXR1 to GPR0 (LDA)
+057F  0C40
 # 1) Set GPR2 to 10
 # 1-1) Load GPR2 with 0 (LDR)
-057E  0603
+0580  0603
 # 1-2) Add 10 to GPR2 (AIR) => GPR2 = 10
-057F  1A0A
+0581  1A0A
 # 2) Multiply digit value by 10 and store it to GPR1
-# 2-1) Multiply digit value (GPR0) by 10 (GPR2) => GPR1 = product
-0580  5080
+# 2-1) Multiply digit value (GPR1) by 10 (GPR2) => GPR1 = product
+0582  5080
 # 3) Increment digitPosition (AIR GPR3 1) 
-0581  1B01
+0583  1B01
 # 4) Set GPR2 to 4
 # 4-1) Load GPR2 with 0 (LDR)
-0582  0603
+0584  0603
 # 4-2) Add 4 to GPR2 (AIR) => GPR2 = 4
-0583  1A04
+0585  1A04
 # 5) Check if digitPosition == 4 (TRR GPR2 GPR3)
-0584  5AC0
+0586  5AC0
 # 5-1) Load IXR1 with the address of "ADD TO USER VALUE SHORT" section (Address: 0011 => Content: 0700) (LDX)
-0585  A451
+0587  A451
 # 5-2) If digitPosition == 4, cc == 1, jump to "ADD TO USER VALUE SHORT" section (JCC GPR0 IXR1)
-0586  3040
+0588  3040
 # 6) Else, jump back to the start of "MULTIPLICATION LOOP - USER" (057E)
 # Falls short of the shortcut address => Get the address of 0500 and add until 057E
 # 6-1) Load IXR1 with the address of 0500 (Address: 000E => Content: 0500) (LDX)
-0587  A44E
+0589  A44E
 # 6-2) Add 31(1F hex) to IXR1 (0500 + 001F = 051F) (AIX) 
-0588  B85F
-# 6-3) Add 31(1F hex) to IXR1 (051F + 001F = 053E) (AIX) 
-0589  B85F
-# 6-3) Add 31(1F hex) to IXR1 (053E + 001F = 055D) (AIX) 
 058A  B85F
-# 6-4) Add 31(1F hex) to IXR1 (055D + 001F = 057C) (AIX) 
+# 6-3) Add 31(1F hex) to IXR1 (051F + 001F = 053E) (AIX) 
 058B  B85F
+# 6-3) Add 31(1F hex) to IXR1 (053E + 001F = 055D) (AIX) 
+058C  B85F
+# 6-4) Add 31(1F hex) to IXR1 (055D + 001F = 057C) (AIX) 
+058D  B85F
 # 6-5) Add 2(02 hex) to IXR1 (057C + 0002 = 057E) (AIX) 
-058C  B842
+058E  B842
 # 6-4) Jump back to the start of "MULTIPLICATION LOOP - USER" (JMA IXR1)
-058D  3440
+058F  3440
 #####
 #####
 ##### 5-2-3. "ADD TO USER VALUE SHORT" (0700)
@@ -1121,8 +1130,8 @@
 072D  B85F
 # 9-3) Add 28(1F hex) to IXR1 (071F + 0018) (AIX)
 072E  B858
-# 9-5) Jump to "COMPARE DIFFERENCE AND BESTDIFFERENCE" (JCC)
-072F  3040
+# 9-5) Jump to "COMPARE DIFFERENCE AND BESTDIFFERENCE" (JMA)
+072F  3440
 #####
 #####
 ##### 5-3-1. "ABSOLUTE PART"
@@ -1135,8 +1144,8 @@
 # 1) Load IXR1 with the address of "difference" (00B3)
 # 1-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
 0730  A453
-# 1-2) Add 4 to IXR1 (AIX) => IXR1 = the address of "difference"
-0731  B844
+# 1-2) Add 3 to IXR1 (AIX) => IXR1 = the address of "difference"
+0731  B843
 # 2) Load GPR2 with '-1'
 # 2-1) Clear GPR2 (LDR) => GPR2 = '0' 
 0732  0603
@@ -1154,7 +1163,7 @@
 ##### 1) If difference < bestDifference: jump to "UPDATE BEST CASE"
 ##### 2) Else, jump to "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT"
 #####
-# 1) Load GPR0 with "difference" (00B4)
+# 1) Load GPR0 with "difference" (00B3)
 # 1-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
 0736  A453
 # 1-2) Add 3 to IXR1 (AIX) => IXR1 = the address of "difference"
@@ -1162,11 +1171,11 @@
 # 1-3) Load GPR0 with memory[IXR1] (LDR) => GPR0 = "difference"
 0738  0440
 # 2) Load GPR1 with the address of "bestDifference" (00B4)
-# 2-1) Load IXR2 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR1 = 00B0
+# 2-1) Load IXR2 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX) => IXR2 = 00B0
 0739  A493
 # 2-2) Add 4 to IXR2 (AIX) => IXR2 = the address of "bestDifference" 
 073A  B884
-# 2-3) Load GPR2 with memory[IXR2] (LDR) => GPR1 = "bestDifference"
+# 2-3) Load GPR1 with memory[IXR2] (LDR) => GPR1 = "bestDifference"
 073B  0580
 # 3) Compare "difference" and "bestDifference" (TIR GPR0 GPR1)
 073C  6840
@@ -1192,8 +1201,8 @@
 0744  B85F
 # 5-5) Add 20(1F hex) to IXR1 (073E + 0014) (AIX)
 0745  B854
-# 5-6) Jump to "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT" (JCC)
-0746  3040
+# 5-6) Jump to "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT" (JMA)
+0746  3440
 #####
 #####
 ##### 6-1. UPDATE BEST CASE
@@ -1233,7 +1242,7 @@
 # 4) Move on to step 7
 #####
 ##### 
-##### 7. "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT TO 0" - DONE
+##### 7. "RESET DIGITPOSITION, DIFFERENCE, INTEGERSHORT, USERVALUESHORT TO 0" - DONE
 #####
 #####
 # 1) Store 0 to digitPosition
@@ -1259,6 +1268,13 @@
 075A  B846
 # 3-3) Store GPR0 to memory[IXR1] => IntegerShort = 0 
 075B  0840
+# 4) Store 0 to UserValueShort
+# 4-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX)
+075C  A453
+# 4-2) Load IXR1 with 00B7 where userValueShort is located (IXR1=00B0 + Address=0007) (AIX)
+075D  B847
+# 4-3) Store GPR0 to memory[IXR1] => userValueShort = 0 
+075E  0840
 # 3) Move on to step 8
 #####
 #####
@@ -1267,15 +1283,15 @@
 #####
 # 1) Increment intListNumber by 1
 # 1-1) Load IXR1 with 00B0 where variables are located (Address: 0013 => Content: 00B0) (LDX)
-075C  A453
+075F  A453
 # 1-2) Load IXR1 with 00B5 where intListNumber is located (IXR1=00B0 + Address=0005) (AIX) => IXR1 = the address of intListNumber
-075D  B845
+0760  B845
 # 1-3) Load GPR0 with memory[IXR1]= intListNumber (LDR)
-075E  0440
+0761  0440
 # 3) Add 1 to GPR0 (GPR0 = intListNumber) (AIR)
-075F  1801
+0762  1801
 # 4) Update intListNumber on memory (STR) => intListNumber updated.
-0760  0840
+0763  0840
 #####
 #####
 ##### 9. CHECK IF INT LIST NUMBER HAS REACHED THE END (intListNumber == 20) 
@@ -1283,34 +1299,34 @@
 #####
 #####
 # 1) Clear GPR1
-0761  0503
+0764  0503
 # 2) Add 20 to GPR1 (AIR)
-0762  1914
+0765  1914
 # 3) Check if intListNumber(GPR0) == 20(GPR1) (TRR)
-0763  5840
+0766  5840
 # 4) If GPR0 == GPR1 (cc == 1), jump to "PRINT OUT THE BEST INTEGER" (Step 10) (0780)
 # 4-1) Load IXR1 with the address of 0700 (Address: 0011 => Content: 0700) (LDX) 
-0764  A451
+0767  A451
 # 4-2) Add 31(1F hex) to IXR1 (0700 + 001F) (AIX)
-0765  B85F
-# 4-3) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
-0766  B85F
-# 4-4) Add 31(1F hex) to IXR1 (073E + 001F) (AIX)
-0767  B85F
-# 4-5) Add 31(1F hex) to IXR1 (075D + 001F) (AIX)
 0768  B85F
+# 4-3) Add 31(1F hex) to IXR1 (071F + 001F) (AIX)
+0769  B85F
+# 4-4) Add 31(1F hex) to IXR1 (073E + 001F) (AIX)
+076A  B85F
+# 4-5) Add 31(1F hex) to IXR1 (075D + 001F) (AIX)
+076B  B85F
 # 4-5) Add 31(1F hex) to IXR1 (077C + 0004) (AIX)
-0769  B844
+076C  B844
 # 4-6) Jump to Step 10 (JCC)
-076A  3040
+076D  3040
 # 7) If not, jump back to "UPDATE CURRENT INTEGER" (Step 1) (050B) 
 # Falls short of the shortcut address => Get the address of 0500 and add until 050B
 # 7-1) Load IXR1 with the address of 0500 (Address: 000E => Content: 0500) (LDX)
-076B  A44E
+076E  A44E
 # 7-2) Add 11(0B hex) to IXR1 (AIX)
-076C  B84B
+076F  B84B
 # 7-3) Jump to Step 1 (JMA)
-076D  3440
+0770  3440
 #####
 #####
 ##### 10. "PRINT OUT THE BEST INTEGER"
