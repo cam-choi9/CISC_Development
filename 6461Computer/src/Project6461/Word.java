@@ -1,7 +1,5 @@
 package Project6461;
 
-import java.lang.Math;
-
 //Run ComputerMain.java , this is NOT the Main file!
 
 /*
@@ -12,6 +10,7 @@ import java.lang.Math;
  * 
  * Part 1 Written by Michael Ashery, reviewed by Jaeseock Choi and Daniel Brewer.
  * Part 2 Modifications for new ISA by Michael Ashery, reviewed by Jaeseock Choi.
+ * Part 3 Modifications for TRAP code by Michael Ashery
  * */
 
 public class Word {
@@ -26,8 +25,9 @@ public class Word {
 	protected short r;
 	protected boolean al, lr;
 	protected short count;
+	protected short trapCode;
 	protected short devID;
-	private boolean debug = true; //set to true to enable console debugging
+	private boolean debug = false; //set to true to enable console debugging
 	
 	public Word(short ir) { //when the word is first created, all possible values for operations are calculated.
 		opcode = getOpcode(ir);
@@ -42,6 +42,7 @@ public class Word {
 		al = getAL(ir);
 		lr = getLR(ir);
 		count = count(ir);
+		trapCode = count;
 		devID = address;
 		if (debug == true) {
 			System.out.println("IR passed " + ir + " in binary " + Integer.toBinaryString(ir));
@@ -64,14 +65,14 @@ public class Word {
 		} 
 		return operationcode;
 	}
-	private short getGprN(short ir) { //performs bit shifting to isolate and find gpr value
+	private short getGprN(short ir) { //performs bit masking and shifting to isolate and find gpr value
 		short gprN = ir;
 		gprN = (short) (gprN & 0b0000001100000000);
 		gprN = (short) (gprN >>> 8);
 		
 		return gprN;
 	}
-	private short getIxrN(short ir) { //performs bit shifting to isolate and find ixr value
+	private short getIxrN(short ir) { //performs bit masking and shifting to isolate and find ixr value
 		short ixrN = ir;
 		ixrN = (short) (ixrN & 0b0000000011000000);
 		ixrN = (short) (ixrN >>> 6);
