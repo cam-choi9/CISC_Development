@@ -48,7 +48,7 @@ public class CPU {
      *  3. Use a FIFO algorithm to replace the oldest cache line
      */
 	protected int[] cache = new int[16];     
-	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
+	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
 	protected String printOut = ""; //This is what appears on the printer.
 	protected Deque<Character> inputBuffer = new LinkedList<Character>();
 	
@@ -189,6 +189,27 @@ public class CPU {
 		}
 		catch (FileNotFoundException e) {
 			gui.visualizefield.setText("IPL File Not Found");
+			e.printStackTrace();
+		}
+	}
+	
+	public void scanner() {
+		try {
+			File initialScan = new File("paragraph.txt"); //program.txt is the ROM.
+			Scanner fileScanner = new Scanner(initialScan);
+			String line;
+			while (fileScanner.hasNextLine()) {
+				line = fileScanner.nextLine();
+				for (int i = 0; i < line.length(); i++) {
+					inputBuffer.add(line.charAt(i));
+				}
+			}	
+			fileScanner.close();
+			updateGUI();
+			gui.visualizefield.setText("Scan Successful");
+		}
+		catch (FileNotFoundException e) {
+			gui.visualizefield.setText("Scanner File Not Found");
 			e.printStackTrace();
 		}
 	}
@@ -378,7 +399,7 @@ public class CPU {
 				break;
 		case 26: tir(word);
 				break;
-		case 30: trap(); //nonfunctional, waiting for part 3
+		case 30: trap(word); //nonfunctional, waiting for part 3
 				break;
 		case 31: src(word);
 				break;
@@ -404,18 +425,20 @@ public class CPU {
 				break;
 		default: gui.visualizefield.setText("Failed to get opcode.");
 		}
+		//These lines are all for debugging variables.
+		//For Michael's Part
 		//if(isaConsole == true) System.out.println("DIGITval = " + memory[257]);
 		//if(isaConsole == true) System.out.println("COUNTERval = " + memory[256]);
 		//if(isaConsole == true) System.out.println("POINTERval = " + Integer.toHexString(memory[21]));
-		
-		if(isaConsole == true) System.out.println("currentIntegerPointer = " + Integer.toHexString(memory[176]));
-		if(isaConsole == true) System.out.println("bestIntegerPointer = " + Integer.toHexString(memory[177]));
-		if(isaConsole == true) System.out.println("digitPosition = " + memory[178]);
-		if(isaConsole == true) System.out.println("difference = " + memory[179]);
-		if(isaConsole == true) System.out.println("bestDifference = " + memory[180]);
-		if(isaConsole == true) System.out.println("intListNumber = " + memory[181]);
-		if(isaConsole == true) System.out.println("integerShort = " + memory[182]);
-		if(isaConsole == true) System.out.println("userValueShort = " + memory[183]);
+		//For Jae's part.
+		//if(isaConsole == true) System.out.println("currentIntegerPointer = " + Integer.toHexString(memory[176]));
+		//if(isaConsole == true) System.out.println("bestIntegerPointer = " + Integer.toHexString(memory[177]));
+		//if(isaConsole == true) System.out.println("digitPosition = " + memory[178]);
+		//if(isaConsole == true) System.out.println("difference = " + memory[179]);
+		//if(isaConsole == true) System.out.println("bestDifference = " + memory[180]);
+		//if(isaConsole == true) System.out.println("intListNumber = " + memory[181]);
+		//if(isaConsole == true) System.out.println("integerShort = " + memory[182]);
+		//if(isaConsole == true) System.out.println("userValueShort = " + memory[183]);
 		
 	}
 	
@@ -1130,7 +1153,7 @@ public class CPU {
 		case 3: cry = gpr3;
 				break;
 		}
-		if (crx == cry) {
+		if (crx == cry) { //compare the registers
 			if(isaConsole == true) {System.out.println("TRR passed, x:y = " + crx + ":" + cry);} //Debugging tool
 			cc = 1;}
 		else {
@@ -1221,7 +1244,7 @@ public class CPU {
 		case 3: crx = gpr3;
 				break;
 		}
-		crx = (short) (~crx);
+		crx = (short) (~crx); //performs a logical not operation on the value.
 		switch (word.rx) {
 		case 0: gpr0 = crx;
 				break;
@@ -1256,13 +1279,20 @@ public class CPU {
 		case 3: cry = gpr3;
 				break;
 		}
-		if (crx < cry) cc = 1;
-		else cc = 0;
+		if (crx < cry) { //if Rx < Ry, sets CC.
+			if(isaConsole == true) {System.out.println("TIR passed, x:y = " + crx + "<" + cry);} //Debugging tool
+			cc = 1;}
+		else {
+			if(isaConsole == true) {System.out.println("TIR passed, x:y = " + crx + "<" + cry);} //Debugging tool
+			cc = 0;
+		}
 	}
 	
-	public void trap() {//30 Trap code
+	public void trap(Word word) {//30 Trap code
 		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
-		//add content in Part III
+		memory[2] = (short)(pc + 1);
+		pc = (short)(memory[0] + word.trapCode);
+		
 	}
 	public void src(Word word) {//31 Shift Register by Count
 		if(isaConsole == true) System.out.println("31 SRC"); //Debugging tool
