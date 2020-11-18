@@ -799,9 +799,6 @@ public class ComputerMain extends JFrame {
 					cpu.inputBuffer.add(keyboard.getText().charAt(i));
 				}
 				inReady = true;
-				//if (!tglExeSingleInstruction.isSelected()) { //for dealing with Swing's Single-thread issues during loops.
-				//	notifyAll();
-				//}
 				//if you wanted to add a separator character or wanted to denote End-of-Line, it would happen here. Not required or implemented, just making a note.
 				keyboard.setText("");} //clears the keyboard after the value is entered
 			}
@@ -845,12 +842,19 @@ public class ComputerMain extends JFrame {
 		contentPane.add(outMemfld);
 		outMemfld.setEditable(false);
 		outMemfld.setColumns(10);
-
-		/*
-		sl_contentPane.putConstraint(SpringLayout.NORTH, printer, 16, SpringLayout.SOUTH, printerlbl);
-		sl_contentPane.putConstraint(SpringLayout.WEST, printer, 100, SpringLayout.EAST, ccfield);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, printer, 3, SpringLayout.SOUTH, ixr2field);
-		sl_contentPane.putConstraint(SpringLayout.EAST, printer, -5, SpringLayout.EAST, contentPane);
-		contentPane.add(printer); */
+		
+		JButton scannerBtn = new JButton("Scan In File"); //this button engages the file scanner
+		sl_contentPane.putConstraint(SpringLayout.NORTH, scannerBtn, -4, SpringLayout.NORTH, lblGpr_1);
+		sl_contentPane.putConstraint(SpringLayout.WEST, scannerBtn, 0, SpringLayout.WEST, printerlbl);
+		scannerBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(cpu.inputBuffer.peekFirst() != null) {;} //Prevents new strings from being entered while the input buffer is still being processed.
+				else {
+					cpu.scanner();
+				}
+				inReady = true;
+			}
+		});
+		contentPane.add(scannerBtn);
 	}
 }
