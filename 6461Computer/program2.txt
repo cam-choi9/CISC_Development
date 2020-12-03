@@ -1,0 +1,24 @@
+#Program2
+#Print the paragraph
+
+#11 contains base address of paragraph
+LDA 0,0,100
+LDA 2,0,11
+MLT 0,2
+STR 0,0,11
+
+PARAGRAPH_PRINT:
+#Paragraph indx is stored in temp
+STR 0,0,10 
+#Character loaded into R1
+LDR 1,0,10,1
+#Checking for EOL
+LDA 2,0,4 
+TRR 1,2
+JMP 0,PARAGRAPH_PRINT_END
+
+#Print the char
+OUT 1,1
+#Inc paragraph indx
+AIR 0,1
+JMP 0, PARAGRAPH_PRINT
