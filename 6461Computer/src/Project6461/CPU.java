@@ -219,9 +219,7 @@ public class CPU {
 		while (true) {
 		//for (int i = 0; i < 10; i++) {
 			if (pc >= 2048) { //this if-branch is for Part III, but it's being placed in here early as a precaution to stop the pc from running past the end of the memory array.
-				mfr = 8;
-				gui.mfrfield.setText("1000");
-				run = false;
+				machineFault(3);
 				break;
 			}
 			if (fetch()) {}  //Performs the fetch method & checks the cache memory first(see method below)
@@ -424,6 +422,7 @@ public class CPU {
 		case 63: chk(word);
 				break;
 		default: gui.visualizefield.setText("Failed to get opcode.");
+				machineFault(2);
 		}
 		//These lines are all for debugging variables.
 		//For Michael's Part
@@ -471,6 +470,7 @@ public class CPU {
 					break;
 				}
 				eaHexval(indAddress);
+				checkReserved(indAddress);
 				return indAddress; //...and return that
 			}
 		}
@@ -478,6 +478,7 @@ public class CPU {
 			if (word.ixrN == 0) { //if the IXR number is 0
 				if(isaConsole == true) System.out.println("EAcase3");
 				eaHexval(memory[word.address]);
+				checkReserved(indAddress);
 				return memory[word.address]; //return the contents at memory address that the address value is pointing to
 			}
 			else { //if IXR number is 1-3
@@ -491,6 +492,7 @@ public class CPU {
 					break;
 				}
 				eaHexval(memory[indAddress]);
+				checkReserved(indAddress);
 				return memory[indAddress]; //...and return the contents at memory address that the new value is pointing to.
 			}
 		}
@@ -502,6 +504,34 @@ public class CPU {
 			System.out.println("EA is " + hexval);
 		}
 	}
+	
+	public void machineFault (int faultID) {
+		memory[4] = pc;
+		switch (faultID) {
+		case 0: mfr = 1; //Illegal memory address to reserved location
+			trap();
+			break;
+		case 1: mfr = 2; //Illegal TRAP code
+			trap();
+			break;
+		case 2: mfr = 4; //Illegal OPCode
+			trap();
+			break;
+		case 3: mfr = 8; //Memory address beyond max value
+			trap();
+			break; 
+		}
+	}
+	
+	public void checkReserved (short address) { //checks to see if a value is being stored to a reserved address
+		if (address < 6 && address != 3) { //we've been using LDR/LDX 3 as an alternative to clearing a register. Since the packet claims that it isn't used, and nothing is actually being stored here, it shouldn't be a problem, right?
+			machineFault(1);
+		}
+		if (address > 2047) {
+			machineFault(3);
+		}
+	}
+	
 	/*
 	 * All of the instruction methods will be placed below here, in numerical order
 	 * */
@@ -1294,6 +1324,11 @@ public class CPU {
 		pc = (short)(memory[0] + word.trapCode);
 		
 	}
+	public void trap() { //alternative trap code with no arguments
+		hlt();
+	}
+	
+	
 	public void src(Word word) {//31 Shift Register by Count
 		if(isaConsole == true) System.out.println("31 SRC"); //Debugging tool
 		short result = 0;
