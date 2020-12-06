@@ -48,7 +48,8 @@ public class CPU {
      *  3. Use a FIFO algorithm to replace the oldest cache line
      */
 	protected int[] cache = new int[16];     
-	private boolean isaConsole = false; //for debugging. If set to true during testing, ISA will list in IDE console
+	private boolean isaConsole = true; //for debugging. If set to true during testing, ISA will list in IDE console
+	private boolean iplConsole = false; //for debugging the IPL in particular.
 	protected String printOut = ""; //This is what appears on the printer.
 	protected Deque<Character> inputBuffer = new LinkedList<Character>();
 	
@@ -94,6 +95,7 @@ public class CPU {
 	
 	public void iPL() {//initial program load from text file. Basically, the ROM loader
 		//clear all registers and memory
+		//Important warning!!!: IPL comments will fail to read if there is a " in it. Please leave those out!
 		gpr0 = 0;
 		gpr1 = 0; 
 		gpr2 = 0;
@@ -125,23 +127,33 @@ public class CPU {
 			boolean first = true;			
 			String parsed = "";
 			String line;
+			if(iplConsole == true) {
+				System.out.println("Initialized");
+				if (fileReader.hasNextLine() == false)System.out.println("Start Line missing");
+			}// Works to here.
 			while (fileReader.hasNextLine()) {
+				//if(iplConsole == true) {System.out.println("LineNo=" + lineNo);}
 				line = fileReader.nextLine();
-				if (line == ""|| line == " "|| line == "  ") {;} //If the line is completely empty, do nothing. This lets us ignore empty lines in text files, or lines that are just spaces masquerating as empty lines.
-				else if (line.charAt(0) == '#') {;}//If the first character in the line is # do nothing. This lets us add comments to the code.
+				if (line == ""|| line == " "|| line == "  ") { //If the line is completely empty, do nothing. This lets us ignore empty lines in text files, or lines that are just spaces masquerating as empty lines.
+					//if(iplConsole == true) {System.out.println("EmptyLine");}
+				} 
+				else if (line.charAt(0) == '#') { //If the first character in the line is # do nothing. This lets us add comments to the code.
+					//if(iplConsole == true) {System.out.println("CommentedLine");}
+				}
 				else {
+					//if(iplConsole == true) {System.out.println("RegularLine");}
 					address = Integer.parseInt(line.substring(0, 4), 16); //takes the first four characters of the line and parses them as hexidecimal digits into an integer
 					contentInt = Integer.parseInt(line.substring((line.length() - 4)), 16); //takes the last four characters of the line and parses them as hexidecimal digits into an integer
 					parsed = Integer.toBinaryString(contentInt);
 					if (parsed.length() > 16) { //Java keeps turning the short into a 32 bit value and storing that in the array. This prevents that.
 						parsed = parsed.substring(16);
-						//System.out.println("try2 " + parsed);
+						//if(iplConsole == true) {System.out.println("try2 " + parsed);}
 						content = Short.parseShort(parsed, 2);
 					}
 					else {
 						content = (short) contentInt;
 					}
-//					System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);//for debugging.
+					//if(iplConsole == true) {System.out.println(address + "__" + (Integer.toHexString(content)) + "_" + content);} //Debugging tool
 					memory[address] = content; //loads the line to the specified address location                         
 					cacheLine = address; // each cache line holds both the address & the data => cacheLine = address(11 bits) + content(16 bits)
 					String s = "";
@@ -165,8 +177,8 @@ public class CPU {
 //						}
 					}
 //					
-					if (first == true) { //for the first line of the program, set the PC and MAR to the first line. 
-						pc = (short) address;
+					if (first == true) { //for the first line of the program, set the PC and MAR to the first non-reserved address. 
+						pc = 8;
 						first = false;
 					}
                 }
@@ -189,6 +201,10 @@ public class CPU {
 		}
 		catch (FileNotFoundException e) {
 			gui.visualizefield.setText("IPL File Not Found");
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			gui.visualizefield.setText("IPL other error");
 			e.printStackTrace();
 		}
 	}
