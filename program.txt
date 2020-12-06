@@ -1,0 +1,99 @@
+###### This program is designed to:
+### 1. Print out and store six sentences.
+### 2. Prompt the user to enter a word.
+### 3. Return the value amongst the 20 values that is closest to the entered value.
+###### Central program.
+# 1) LDX 0100 for getting to First Read-in subroutine
+0008  A44A
+# 2) JMA to first message printer at EA IX plus addr
+0009  3448
+# Make some IXR shortcuts for faster reference later Reserved 0A-2F
+000A  0100
+000B  0200
+000C  0300
+000D  0400
+000E  0500
+0010  0600
+0011  0700
+0012  0230
+0013  00B0
+0014  0650
+############################################
+##### 100 Value storage loop - By Michael Ashery
+#100-107 are reserved for storing variables.
+#COUNTER - Counts number of periods until six sentences.
+0100  0006
+#ASCII value of .
+0101  002E
+# LDX IXR2 with paragraph location
+0108  A491
+# LDR reg 3 with variable at 100 (should be 6)
+0109  0740
+# LDR Reg 2 with period 0x2E
+010A  0641
+# IN char from buffer to reg 1
+010B  F500
+# OUT char in reg 1
+010C  F901
+# STR char in reg 1 to IXR 2
+010D  0980
+# AIX +1 to IXR2
+010E  B881
+# TRR reg1 & 2
+010F  5980
+# JCC to value counter (# 9)
+0110  3052
+# JMA to #4
+0111  344B
+###Value counter
+# SOB reg 3 (jump back to #4 if >0, else proceed)
+0112  434B
+###Prompt user
+# SCRL
+0113  F000
+# AIR Reg 2 amt dec23 (sets value to 0x45 - E)
+0114  1A17
+# Out Reg 2
+0115  FA01
+# AIR Reg 2 amt dec9 (sets value to 0x4E - N)
+0116  1A09
+# Out Reg 2
+0117  FA01
+# AIR Reg 2 amt dec6 (sets value to 0x54 - T)
+0118  1A06
+# Out Reg 2
+0119  FA01
+# SCRL
+011A  F000
+# LDR 3 into Reg 2 (CLR)
+011B  0603
+#####################
+# Accepting a value from the user - by Michael Ashery
+
+
+###Keyboard loop
+#
+###The Check KB status loop. 
+# Ensure Reg 1 empty #
+0208  0403
+# Check Device status. If on, set gpr0 to 1 #w
+0209  FC00
+# If gpr0 is 0, jump back to 109. Otherwise proceed. #
+020A  2849
+##### Input Int Loop.
+# LDX Pointer to X2
+020B  A495
+# Input single char from buffer #
+020C  F400
+# Store char at pointer addr using IXR2 #
+020D  0880
+# Print char to printer #
+020E  F801
+#
+### The sentences are stored at 0700 and down.
+#
+##### 
+##### 
+##### END OF THE PROGRAM 2 #####
+##### 
+#####
