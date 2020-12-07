@@ -1459,12 +1459,22 @@ public class CPU {
 	}
 	public void stx(Word word) { //42 Store Index Register to Memory
 		if(isaConsole == true) {System.out.println("42 STX");} //Debugging tool
+		short holdvalue;
 		switch (word.ixrN) { //uses ixr number in the word to determine which register to use.
-		case 1: memory[effectiveAddress(word)] = ixr1;
+		case 1: holdvalue=ixr1;
+				ixr1 = 0;
+				memory[effectiveAddress(word)] = holdvalue;
+				ixr1= holdvalue;
 				break;
-		case 2: memory[effectiveAddress(word)] = ixr2;
+		case 2: holdvalue = ixr2;
+				ixr2 = 0;
+				memory[effectiveAddress(word)] = holdvalue;
+				ixr2 = holdvalue;
 				break;
-		case 3: memory[effectiveAddress(word)] = ixr3;
+		case 3: holdvalue = ixr3;
+				ixr3 = 0;
+				memory[effectiveAddress(word)] = holdvalue;
+				ixr3 = holdvalue;
 				break;
 		default: gui.visualizefield.setText("STX failed.");
 		}
@@ -1512,6 +1522,7 @@ public class CPU {
 	public void in(Word word) {// 61 Input character to Register from Device
 		if(isaConsole == true) System.out.println("61 IN"); //Debugging tool
 		if (word.devID == 0) {
+			try {
 			char firstCharacter = inputBuffer.removeFirst(); //pulls only the first character of the string in the keyboard field
 			switch (word.r) { //uses gpr number in the word to determine which register to use.
 			case 0: gpr0 = (short) firstCharacter;
@@ -1522,6 +1533,11 @@ public class CPU {
 					break;
 			case 3: gpr3 = (short) firstCharacter;
 					break;
+			}
+			}
+			catch (Exception e) {
+				gui.visualizefield.setText("Input Buffer error");
+				hlt();
 			}
 		}
 		else {
