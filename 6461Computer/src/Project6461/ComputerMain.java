@@ -852,7 +852,7 @@ public class ComputerMain extends JFrame {
 				else {
 					cpu.scanner();
 				}
-				inReady = true;
+				inReady = false;
 			}
 		});
 		contentPane.add(scannerBtn);
