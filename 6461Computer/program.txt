@@ -110,7 +110,7 @@
 #OUT Reg 1
 0127  F901
 #AIX IXR3 +1
-0128  B861
+0128  B8C1
 #JMA to start of loop (208?)
 0129  3440
 # LDX for next part
