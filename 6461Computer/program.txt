@@ -2,6 +2,15 @@
 ### 1. Print out and store six sentences.
 ### 2. Prompt the user to enter a word.
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
+###### Reserved values
+# Trap table space
+# MFR table space
+# Trap store PC
+# 0003 NOT USED
+# MFR store PC
+# 0005 NOT USED
+0006  0000
+0007  0000
 ###### Central program.
 # 1) LDX 0100 for getting to First Read-in subroutine
 0008  A44A
@@ -15,9 +24,11 @@
 000E  0500
 0010  0600
 0011  0700
-0012  0230
-0013  00B0
-0014  0650
+0012  0000
+0013  0123
+0014  05D0
+#EOW character is an @
+0015  0040
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
 #100-107 are reserved for storing variables.
@@ -25,8 +36,9 @@
 0100  0006
 #ASCII value of .
 0101  002E
+#ASCII value of end 
 # LDX IXR2 with paragraph location
-0108  A491
+0108  A490
 # LDR reg 3 with variable at 100 (should be 6)
 0109  0740
 # LDR Reg 2 with period 0x2E
@@ -65,32 +77,50 @@
 0119  FA01
 # SCRL
 011A  F000
-# LDR 3 into Reg 2 (CLR)
-011B  0603
 #####################
 # Accepting a value from the user - by Michael Ashery
-
-
-###Keyboard loop
-#
 ###The Check KB status loop. 
-# Ensure Reg 1 empty #
-0208  0403
 # Check Device status. If on, set gpr0 to 1 #w
-0209  FC00
-# If gpr0 is 0, jump back to 109. Otherwise proceed. #
-020A  2849
-##### Input Int Loop.
-# LDX Pointer to X2
-020B  A495
-# Input single char from buffer #
-020C  F400
-# Store char at pointer addr using IXR2 #
-020D  0880
-# Print char to printer #
-020E  F801
-#
-### The sentences are stored at 0700 and down.
+011B  FC00
+# If gpr0 is 0, jump back to 11B. Otherwise proceed. #
+011C  285B
+########## Input Loop.
+###Setup
+#LDX IXR 3 -> 5D0 (x14)
+011D  A4D4
+#LDR gpr0 addr 3
+011E  0403
+#LDR gpr1 addr 3
+011F  0503
+#LDR gpr2 the EOW character 
+0120  0615
+#LDR gpr3 addr 3
+0121  0703
+#LDX IXR 1 -> 123 (x13)
+0122  A453
+###Loop
+#IN gpr1
+0123  F500
+#STR gpr1 at IXR 3
+0124  09C0
+#TRR reg 1 and reg 2
+0125  5980
+#JCC if true to 28
+0126  3047
+#OUT Reg 1
+0127  F901
+#AIX IXR3 +1
+0128  B861
+#JMA to start of loop (208?)
+0129  3440
+# LDX for next part
+012A  A44B
+# JMA to next part
+012B  3448
+############ The checking subroutine
+0208  0000
+### The word is stored at 5E0 and down
+### The sentences are stored at 0600 and down.
 #
 ##### 
 ##### 
