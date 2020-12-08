@@ -22,3 +22,35 @@ OUT 1,1
 #Inc paragraph indx
 AIR 0,1
 JMP 0, PARAGRAPH_PRINT
+
+#Prompts the user for the search word
+PARAGRAPH_PRINT_END:
+
+LDA 0,0,11		
+OUT 0,1		
+LDA 0,0,11	
+OUT 0,1		
+LDA 0,0,83
+OUT 0,1	
+LDA 0,0,101
+OUT 0,1
+LDA 0,0,97
+OUT 0,1
+LDA 0,0,114
+OUT 0,1
+LDA 0,0,99
+OUT 0,1
+LDA 0,0,104
+OUT 0,1	
+LDA 0,0,58
+OUT 0,1
+LDA 0,0,32
+OUT 0,1
+
+LDR 1,0,10
+#Search term stored in 900
+SIR 1,100
+LDA 2,0,32
+STR 1,0,10
+STR 2,0,10,1
+AIR 1,1
