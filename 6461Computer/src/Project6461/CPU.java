@@ -438,7 +438,7 @@ public class CPU {
 		case 63: chk(word);
 				break;
 		default: gui.visualizefield.setText("Failed to get opcode.");
-				machineFault(2);
+				machineFault(2); // Illegal operation code 
 		}
 		//These lines are all for debugging variables.
 		//For Michael's Part
@@ -522,29 +522,29 @@ public class CPU {
 	}
 	
 	public void machineFault (int faultID) {
-		memory[4] = pc;
+		memory[4] = pc; //Stores PC for Machine Fault
 		switch (faultID) {
 		case 0: mfr = 1; //Illegal memory address to reserved location
-			trap();
+			trap(faultID);
 			break;
 		case 1: mfr = 2; //Illegal TRAP code
-			trap();
+			trap(faultID);
 			break;
 		case 2: mfr = 4; //Illegal OPCode
-			trap();
+			trap(faultID);
 			break;
 		case 3: mfr = 8; //Memory address beyond max value
-			trap();
+			trap(faultID);
 			break; 
 		}
 	}
 	
 	public void checkReserved (short address) { //checks to see if a value is being stored to a reserved address
 		if (address < 6 && address != 3) { //we've been using LDR/LDX 3 as an alternative to clearing a register. Since the packet claims that it isn't used, and nothing is actually being stored here, it shouldn't be a problem, right?
-			machineFault(1);
+			machineFault(1); // Illegal trap code
 		}
-		if (address > 2047) {
-			machineFault(3);
+		if (address > 2047) { // beyond the memory size
+			machineFault(3); // Illegal memory address beyond 2048
 		}
 	}
 	
@@ -1336,11 +1336,22 @@ public class CPU {
 	
 	public void trap(Word word) {//30 Trap code
 		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
-		memory[2] = (short)(pc + 1);
-		pc = (short)(memory[0] + word.trapCode);
-		
+		memory[2] = (short)(pc + 1); // Store the PC+1 in memory location 2
+		pc = (short)(memory[0] + word.trapCode); // Traps to memory address 0 				
+		if(isaConsole == true) {System.out.println("Jumping to " + Integer.toHexString(pc));} //Debugging tool		
 	}
-	public void trap() { //alternative trap code with no arguments
+	public void trap(int mfr) { //alternative trap code with no arguments
+		switch (mfr) {
+		case 0: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal memory address to reserved locations");  
+			break; 
+		case 1: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal trap code"); 
+			break;
+		case 2: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal operation code");
+			break;
+		case 3: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal memory address to reserved locations");
+			break;
+		default: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal command");	
+		}
 		hlt();
 	}
 	

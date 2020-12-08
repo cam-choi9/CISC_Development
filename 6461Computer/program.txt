@@ -4,10 +4,14 @@
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
 ###### Reserved values
 # Trap table space
+0000  
 # MFR table space
+0001  0400
 # Trap store PC
+0002  0400
 # 0003 NOT USED
 # MFR store PC
+0004  
 # 0005 NOT USED
 0006  0000
 0007  0000
@@ -120,6 +124,27 @@
 ############ The checking subroutine
 0208  0000
 ### The word is stored at 5E0 and down
+#
+#
+#
+############ Trap entries of 16 entries from 0 to 15
+0400  7800
+0401  7801
+0402  7802
+0403  7803
+0404  7804
+0405  7805
+0406  7806
+0407  7807
+0408  7808
+0409  7809
+040A  780A
+040B  780B
+040C  780C
+040D  780D
+040E  780E
+040F  780F
+############ Trap subroutines end
 ### The sentences are stored at 0600 and down.
 #
 ##### 
