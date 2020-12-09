@@ -204,12 +204,48 @@
 # JMA to top
 0248  3440
 ### Period Checker's address
-0250
+0250  0260
 ### Space Checker's address
 0251
+# Fail Printer address
+0252
 ########## Period and Space checker codes by Michael Ashery
-0260
-########## This is the part of the code where the word and sentence counting takes place.
+# LDR gpr3 linecount. If it’s a period, start from here
+0260  071E
+# AIR gpr3 +1
+0261  1B01
+# LDR gpr0 raw value 7
+0262  0419
+# TRR 0,3
+0263  58C0
+# JCC to Failure End
+0264  3052
+# STR gpr3 at linecount
+0265  0B1E
+# AIX ixr2 +1
+0266  B881
+# LDR gpr3 wordcount reset value(0) addr3
+0267  0703
+# STR gpr3 wordcount location
+0268  0B1F
+# LDR gpr3 wordcount. If it’s just a space, start from here.
+0269  071F
+# AIR gpr3 +1
+026A  1B01
+# STR gpr3 wordcount location
+026B  0B1F
+# AIX IXR2 +1
+026C  B881
+# LDX ixr3 start of word (5D0 = x0014)
+026D  A4D4
+# LDX ixr1 compariosn loop
+026E  A44B
+# JMA to comparison loop
+026F  3440
+########## Failure Printout
+0280
+########## Success Printout
+02A0
 ### The word is stored at 5E0 and down
 #
 #
