@@ -161,15 +161,15 @@
 # JCC back to top
 020D  3050
 # JZ gpr 3 to space check (#10)
-020E  2B43
+020E  2B63
 # JMA to word scroller
-020F  3444
+020F  3460
 # LDR ascii space to gpr0
 0210  0418
 # TRR r0 r1
 0211  5840
 # JCC End Printer if true (put at start?)
-0212  3042
+0212  3062
 # Otherwise LDR asci comma to gpr0
 0213  0417
 # TRR r0 r1
@@ -203,7 +203,7 @@
 # AIX IXR 2 +1
 0247  B881
 # JMA to top
-0248  3440
+0248  3460
 ### Period Checker's address
 0250  0260
 ### Space Checker's address
@@ -242,7 +242,7 @@
 # LDX ixr1 compariosn loop
 026E  A44B
 # JMA to comparison loop
-026F  3440
+026F  3448
 ########## Failure Printout
 0280
 ########## Success Printout
