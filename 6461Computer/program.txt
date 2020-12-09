@@ -32,16 +32,18 @@
 #ASCII value of .
 0016  002E
 #ASCII value of ,
-0017
+0017  002C
 #ASCII value of spc
-0018
+0018  0020
 #More IXR jump values
 0019
 001A
 001B
 001C
 001D
+# Sentence Count
 001E
+# Word Count
 001F
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
