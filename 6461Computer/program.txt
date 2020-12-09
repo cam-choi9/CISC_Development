@@ -4,14 +4,10 @@
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
 ###### Reserved values
 # Trap table space
-0000  
 # MFR table space
-0001  0400
 # Trap store PC
-0002  0400
 # 0003 NOT USED
 # MFR store PC
-0004  
 # 0005 NOT USED
 0006  0000
 0007  0000
@@ -33,6 +29,20 @@
 0014  05D0
 #EOW character is an @
 0015  0040
+#ASCII value of .
+0016  002E
+#ASCII value of ,
+0017
+#ASCII value of spc
+0018
+#More IXR jump values
+0019
+001A
+001B
+001C
+001D
+001E
+001F
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
 #100-107 are reserved for storing variables.
@@ -109,20 +119,81 @@
 0124  09C0
 #TRR reg 1 and reg 2
 0125  5980
-#JCC if true to 28
+#JCC if true to 012A
 0126  3047
 #OUT Reg 1
 0127  F901
 #AIX IXR3 +1
 0128  B8C1
-#JMA to start of loop (208?)
+#JMA to start of loop (123)
 0129  3440
-# LDX for next part
+# LDX ixr1 for next part
 012A  A44B
+# LDX ixr 2 to start of paragraph
+012B  A490
+# Reset IXR 3 to start of word (x14)
+012C  A4D4
 # JMA to next part
-012B  3448
-############ The checking subroutine
-0208  0000
+012D  344A
+############ The Comparison Loop - by Michael Ashery
+############ Checks to see if the words match.
+# Address for Word Scroller
+0200  0240
+# Address for Period incrementer 
+0201
+# Address for End Printer
+0202
+# Address for Space Incrementer (space incrementer is period + x000D)
+0203
+# AIX ixr2 +1
+0208  B881
+# AIX ixr3 +1
+0209  B8C1
+# START HERE LDR gpr 1 with pgh letter (ixr2)
+020A  0580
+# LDR gpr 2 with word letter (ixr3)
+020B  06C0
+# TRR r1,r2
+020C  5980
+# JCC back to top
+020D  3050
+# JZ gpr 3 to space check (#10)
+020E  2B43
+# JMA to word scroller
+020F  3440
+# LDR ascii space to gpr0
+0210  0418
+# TRR r0 r1
+0211  5840
+# JCC End Printer if true (put at start?)
+0212  3042
+# Otherwise LDR asci comma to gpr0
+0213  0417
+# TRR r0 r1
+0214  5840
+# JCC to End printer if true
+0215  3040
+# Otherwise LDR asci period to gpr0
+0216  0416
+# TRR r0 r1
+0217  5840
+# JCC to End printer if true
+0218  3042
+# JMA to word scroller
+0219  3440
+######### Word Scroller code by Michael Ashery
+######### scrolls through characters that aren't space or period, and aren't part of the matched word.
+# Period Checker's address
+0240
+# Space Checker's address
+0241
+# Reserved
+0242
+0243
+# LDR gpr1 pgph letter (IXR2)
+0244
+########## Period and Space checker codes by Michael Ashery
+########## This is the part of the code where the word and sentence counting takes place.
 ### The word is stored at 5E0 and down
 #
 #
