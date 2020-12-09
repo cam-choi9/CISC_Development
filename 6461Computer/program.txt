@@ -23,7 +23,7 @@
 000D  0400
 000E  0500
 0010  0600
-0011  0700
+0011  0000
 0012  0000
 0013  0123
 0014  05D0
@@ -35,16 +35,17 @@
 0017  002C
 #ASCII value of spc
 0018  0020
+#Raw value 7
+0019  0007
 #More IXR jump values
-0019
 001A
 001B
 001C
 001D
 # Sentence Count
-001E
+001E  0001
 # Word Count
-001F
+001F  0001
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
 #100-107 are reserved for storing variables.
@@ -142,11 +143,11 @@
 # Address for Word Scroller
 0200  0240
 # Address for Period incrementer 
-0201
+0201  0260
 # Address for End Printer
-0202
+0202  02A0
 # Address for Space Incrementer (space incrementer is period + x000D)
-0203
+0203  0269
 # AIX ixr2 +1
 0208  B881
 # AIX ixr3 +1
@@ -162,7 +163,7 @@
 # JZ gpr 3 to space check (#10)
 020E  2B43
 # JMA to word scroller
-020F  3440
+020F  3444
 # LDR ascii space to gpr0
 0210  0418
 # TRR r0 r1
@@ -182,7 +183,7 @@
 # JCC to End printer if true
 0218  3042
 # JMA to word scroller
-0219  3440
+0219  3444
 ######### Word Scroller code by Michael Ashery
 ######### scrolls through characters that aren't space or period, and aren't part of the matched word.
 # LDR gpr1 pgph letter (IXR2)
@@ -206,9 +207,9 @@
 ### Period Checker's address
 0250  0260
 ### Space Checker's address
-0251
+0251  0269
 # Fail Printer address
-0252
+0252  0280
 ########## Period and Space checker codes by Michael Ashery
 # LDR gpr3 linecount. If it’s a period, start from here
 0260  071E
