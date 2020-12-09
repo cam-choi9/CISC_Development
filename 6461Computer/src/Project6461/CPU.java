@@ -1337,7 +1337,7 @@ public class CPU {
 	public void trap(Word word) {//30 Trap code
 		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
 		memory[2] = (short)(pc + 1); // Store the PC+1 in memory location 2
-		pc = (short)(memory[0] + word.trapCode); // Traps to memory address 0 				
+		pc = (short)(memory[memory[0] + word.trapCode]); // Traps to memory address 0 				
 		if(isaConsole == true) {System.out.println("Jumping to " + Integer.toHexString(pc));} //Debugging tool		
 	}
 	public void trap(int mfr) { //alternative trap code with no arguments

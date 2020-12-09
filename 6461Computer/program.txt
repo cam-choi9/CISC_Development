@@ -4,10 +4,14 @@
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
 ###### Reserved values
 # Trap table space
+0000  0030
 # MFR table space
+0001  0030
 # Trap store PC
+0002  0000
 # 0003 NOT USED
 # MFR store PC
+0004  0000
 # 0005 NOT USED
 0006  0000
 0007  0000
@@ -37,15 +41,179 @@
 0018  0020
 #Raw value 7
 0019  0007
-#More IXR jump values
-001A
-001B
-001C
-001D
+############### Prompts location Trap[0] and Trap[2]
+001A  0040
+001B  0059
+############### More IXR shortcuts available to use
+001C  0000
+001D  0000
 # Sentence Count
 001E  0001
 # Word Count
 001F  0001
+###############
+###############
+###############
+############### trap table (0030~003F) & MFR table (0030~0033)
+############### NOTE: trap[0~3] = MFR[0~3] (trap[4~15] unassigned yet)
+############### 
+############### : jumps to the corresponding trap subroutine
+###############
+###############
+# 1) Jump to Trap Subroutine 0
+0030  0400
+# 2) Jump to Trap Subroutine 1
+0031  0420
+# 3) Jump to Trap Subroutine 2
+0032  0440
+# 4) Jump to Trap Subroutine 3
+0033  0460
+# 5) Jump to Trap Subroutine 4
+0034  0480
+# 6) Jump to Trap Subroutine 5
+0035  04A0
+# 7) Jump to Trap Subroutine 6
+0036  04C0
+# 8) Jump to Trap Subroutine 7
+0037  04E0
+# 9) Jump to Trap Subroutine 8
+0038  04F0
+# 10) Jump to Trap Subroutine 9
+0039  04F1
+# 11) Jump to Trap Subroutine 10
+003A  04F2
+# 12) Jump to Trap Subroutine 11
+003B  04F3
+# 13) Jump to Trap Subroutine 12
+003C  04F4
+# 14) Jump to Trap Subroutine 13
+003D  04F5
+# 15) Jump to Trap Subroutine 14
+003E  04F6
+# 16) Jump to Trap Subroutine 15
+003F  04F7
+###############
+###############
+############### Prompt for Machine Fault ID 0 = Trap[0] 
+############### 
+############### "ERR RESERVED"
+###############
+###############
+#E
+0040  0045
+#R
+0041  0052
+#R
+0042  0052
+#
+0043  0020
+#R
+0044  0052
+#E 
+0045  0045
+#S
+0046  0053
+#E 
+0047  0045
+#R
+0048  0052
+#V
+0049  0056
+#E
+004A  0045
+#D
+004B  0044
+###############
+###############
+############### Prompt for Machine Fault ID 1 = Trap[1] 
+############### 
+############### "ERR TRAP CODE"
+###############
+###############
+#E
+004C  0045
+#R
+004D  0052
+#R
+004E  0052
+#
+004F  0020
+#T
+0050  0054
+#R
+0051  0052
+#A
+0052  0041
+#P
+0053  0050
+#
+0054  0020
+#C
+0055  0043
+#O
+0056  004F
+#D
+0057  0044
+#E
+0058  0045
+###############
+###############
+############### Prompt for Machine Fault ID 2 = Trap[2] 
+############### 
+############### "ERR OPCODE"
+###############
+###############
+#E
+0059  0045
+#R
+005A  0052
+#R
+005B  0052
+#
+005C  0020
+#O
+005D  004F
+#P
+005E  0050
+#C
+005F  0043
+#O
+0060  004F
+#D
+0061  0044
+#E
+0062  0045
+###############
+###############
+############### Prompt for Machine Fault ID 3 = Trap[3] 
+############### 
+############### "ERR MEM ADDR"
+###############
+###############
+#E
+0063  0045
+#R
+0064  0052
+#R
+0065  0052
+#
+0066  0020
+#M
+0067  004D
+#E
+0068  0045
+#M
+0069  004D
+#
+006A  0020
+#A
+006B  0041
+#D
+006C  0044
+#D
+006D  0044
+#R
+006E  0052
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
 #100-107 are reserved for storing variables.
@@ -251,23 +419,72 @@
 #
 #
 #
-############ Trap entries of 16 entries from 0 to 15
-0400  7800
-0401  7801
-0402  7802
-0403  7803
-0404  7804
-0405  7805
-0406  7806
-0407  7807
-0408  7808
-0409  7809
-040A  780A
-040B  780B
-040C  780C
-040D  780D
-040E  780E
-040F  780F
+###############
+###############
+###### 0400 Execute trap subroutines - By Jaeseok Choi
+###############
+###############
+############### Machine Fault ID 0
+############### Trap[0] 
+############### Print "ERR RESERVED"
+###############
+###############
+# Clear IXR1 
+0400  A443
+# Load IXR1 with contents of 001A 
+0401  A45A
+#LDR char to reg (1/12)
+0402  0440
+#OUT char
+0403  F801
+#LDR char to reg (2/12)
+0404  0441
+#OUT char
+0405  F801
+#LDR char to reg (3/12)
+0406  0442
+#OUT char
+0407  F801
+#LDR char to reg (4/12)
+0408  0443
+#OUT char
+0409  F801
+#LDR char to reg (5/12)
+040A  0444
+#OUT char
+040B  F801
+#LDR char to reg (6/12)
+040C  0445
+#OUT char
+040D  F801
+#LDR char to reg (7/12)
+040E  0446
+#OUT char
+040F  F801
+#LDR char to reg (8/12)
+0410  0447
+#OUT char
+0411  F801
+#LDR char to reg (9/12)
+0412  0448
+#OUT char
+0413  F801
+#LDR char to reg (10/12)
+0414  0449
+#OUT char
+0415  F801
+#LDR char to reg (11/12)
+0416  044A
+#OUT char
+0417  F801
+#LDR char to reg (12/12)
+0418  044B
+#OUT char
+0419  F801
+# SCRL
+041A  F000
+# After printing out the prompt, halts the program
+041B  0000
 ############ Trap subroutines end
 ### The sentences are stored at 0600 and down.
 #
