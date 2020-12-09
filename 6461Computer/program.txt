@@ -183,16 +183,30 @@
 0219  3440
 ######### Word Scroller code by Michael Ashery
 ######### scrolls through characters that aren't space or period, and aren't part of the matched word.
-# Period Checker's address
-0240
-# Space Checker's address
-0241
-# Reserved
-0242
-0243
 # LDR gpr1 pgph letter (IXR2)
-0244
+0240  0580
+# LDR gpr0 space char
+0241  0418
+# TRR 0,1
+0242  5840
+# JCC to Space checker
+0243  3051
+# LDR gpr0 period char
+0244  0416
+# TRR 0,1
+0245  5840
+# JCC to Period checker
+0246  3050
+# AIX IXR 2 +1
+0247  B881
+# JMA to top
+0248  3440
+### Period Checker's address
+0250
+### Space Checker's address
+0251
 ########## Period and Space checker codes by Michael Ashery
+0260
 ########## This is the part of the code where the word and sentence counting takes place.
 ### The word is stored at 5E0 and down
 #
