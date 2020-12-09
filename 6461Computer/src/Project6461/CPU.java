@@ -362,6 +362,7 @@ public class CPU {
 	}
 	public void execute(Word word){ //this is the second part of the control unit. 
 	//It takes the opcode from the decode section and turns it into an executable instruction 
+		System.out.println("Opcode: " + word.opcode);
 		switch (word.opcode) {
 		case 0: hlt();
 				break;
@@ -1335,24 +1336,37 @@ public class CPU {
 	}
 	
 	public void trap(Word word) {//30 Trap code
-		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool
+		if(isaConsole == true) System.out.println("30 TRAP"); //Debugging tool		
 		memory[2] = (short)(pc + 1); // Store the PC+1 in memory location 2
-		pc = (short)(memory[memory[0] + word.trapCode]); // Traps to memory address 0 				
+		pc = (short)(memory[(short) (memory[0] + word.trapCode)]); // set PC to memory[trap table's index] to jump to the corresponding trap subroutine 							
+		runInstructionCycle(); // run instruction cycle to execute the trap subroutine
 		if(isaConsole == true) {System.out.println("Jumping to " + Integer.toHexString(pc));} //Debugging tool		
 	}
 	public void trap(int mfr) { //alternative trap code with no arguments
+		Word executable;		
 		switch (mfr) {
 		case 0: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal memory address to reserved locations");  
-			break; 
+			ir = 30720;
+			executable = decode(ir);
+			trap(executable);
+			break;
 		case 1: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal trap code"); 
+			ir = 30721;
+			executable = decode(ir);
+			trap(executable);
 			break;
 		case 2: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal operation code");
+			ir = 30722;
+			executable = decode(ir);
+			trap(executable);
 			break;
-		case 3: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal memory address to reserved locations");
+		case 3: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal memory address beyond 2048");
+			ir = 30723;
+			executable = decode(ir);
+			trap(executable);
 			break;
 		default: gui.visualizefield.setText("Trap occurred @ " + Integer.toHexString(pc) + "illegal command");	
-		}
-		hlt();
+		}		
 	}
 	
 	

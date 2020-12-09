@@ -2,6 +2,19 @@
 ### 1. Print out and store six sentences.
 ### 2. Prompt the user to enter a word.
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
+###### Reserved values
+# Trap table space
+0000  0030
+# MFR table space
+0001  0030
+# Trap store PC (initially 0)
+0002  0000
+# 0003 NOT USED
+# MFR store PC (initially 0)
+0004  0000
+# 0005 NOT USED
+0006  0000
+0007  0000
 ###### Central program.
 # 1) LDX 0100 for getting to First Read-in subroutine
 0008  A44A
@@ -14,10 +27,222 @@
 000D  0400
 000E  0500
 0010  0600
-0011  0700
-0012  0230
-0013  00B0
-0014  0650
+0011  0000
+0012  0000
+0013  0123
+0014  05D0
+#EOW character is an @
+0015  0040
+#ASCII value of .
+0016  002E
+#ASCII value of ,
+0017  002C
+#ASCII value of spc
+0018  0020
+#Raw value 7
+0019  0007
+############### Prompts location Trap[0] and Trap[2] and other Trap indexes
+001A  0040
+001B  0059
+001C  006F
+############### More IXR shortcut available to use
+001D  0000
+# Sentence Count
+001E  0001
+# Word Count
+001F  0001
+###############
+###############
+###############
+############### trap table (0030~003F) & MFR table (0030~0033)
+############### NOTE: trap[0~3] = MFR[0~3] (trap[4~15] unassigned yet)
+############### 
+############### : jumps to the corresponding trap subroutine
+###############
+###############
+# 1) Jump to Trap Subroutine 0
+0030  0400
+# 2) Jump to Trap Subroutine 1
+0031  041E
+# 3) Jump to Trap Subroutine 2
+0032  043E
+# 4) Jump to Trap Subroutine 3
+0033  045C
+# 5) Jump to Trap Subroutine 4
+0034  0480
+# 6) Jump to Trap Subroutine 5
+0035  0480
+# 7) Jump to Trap Subroutine 6
+0036  0480
+# 8) Jump to Trap Subroutine 7
+0037  0480
+# 9) Jump to Trap Subroutine 8
+0038  0480
+# 10) Jump to Trap Subroutine 9
+0039  0480
+# 11) Jump to Trap Subroutine 10
+003A  0480
+# 12) Jump to Trap Subroutine 11
+003B  0480
+# 13) Jump to Trap Subroutine 12
+003C  0480
+# 14) Jump to Trap Subroutine 13
+003D  0480
+# 15) Jump to Trap Subroutine 14
+003E  0480
+# 16) Jump to Trap Subroutine 15
+003F  0480
+###############
+###############
+############### Prompt for Machine Fault ID 0 = Trap[0] 
+############### 
+############### "ERR RESERVED"
+###############
+###############
+#E
+0040  0045
+#R
+0041  0052
+#R
+0042  0052
+#
+0043  0020
+#R
+0044  0052
+#E 
+0045  0045
+#S
+0046  0053
+#E 
+0047  0045
+#R
+0048  0052
+#V
+0049  0056
+#E
+004A  0045
+#D
+004B  0044
+###############
+###############
+############### Prompt for Machine Fault ID 1 = Trap[1] 
+############### 
+############### "ERR TRAP CODE"
+###############
+###############
+#E
+004C  0045
+#R
+004D  0052
+#R
+004E  0052
+#
+004F  0020
+#T
+0050  0054
+#R
+0051  0052
+#A
+0052  0041
+#P
+0053  0050
+#
+0054  0020
+#C
+0055  0043
+#O
+0056  004F
+#D
+0057  0044
+#E
+0058  0045
+###############
+###############
+############### Prompt for Machine Fault ID 2 = Trap[2] 
+############### 
+############### "ERR OPCODE"
+###############
+###############
+#E
+0059  0045
+#R
+005A  0052
+#R
+005B  0052
+#
+005C  0020
+#O
+005D  004F
+#P
+005E  0050
+#C
+005F  0043
+#O
+0060  004F
+#D
+0061  0044
+#E
+0062  0045
+###############
+###############
+############### Prompt for Machine Fault ID 3 = Trap[3] 
+############### 
+############### "ERR MEM ADDR"
+###############
+###############
+#E
+0063  0045
+#R
+0064  0052
+#R
+0065  0052
+#
+0066  0020
+#M
+0067  004D
+#E
+0068  0045
+#M
+0069  004D
+#
+006A  0020
+#A
+006B  0041
+#D
+006C  0044
+#D
+006D  0044
+#R
+006E  0052
+###############
+###############
+############### Prompt for all other trap indexes
+############### 
+############### "ERR GENERAL"
+###############
+###############
+#E
+006F  0045
+#R
+0070  0052
+#R
+0071  0052
+#
+0072  0020
+#G
+0073  0047
+#E
+0074  0045
+#N
+0075  004E
+#E
+0076  0045
+#R
+0077  0052
+#A
+0078  0041
+#L
+0079  004C
 ############################################
 ##### 100 Value storage loop - By Michael Ashery
 #100-107 are reserved for storing variables.
@@ -25,8 +250,9 @@
 0100  0006
 #ASCII value of .
 0101  002E
+#ASCII value of end 
 # LDX IXR2 with paragraph location
-0108  A491
+0108  A490
 # LDR reg 3 with variable at 100 (should be 6)
 0109  0740
 # LDR Reg 2 with period 0x2E
@@ -65,32 +291,489 @@
 0119  FA01
 # SCRL
 011A  F000
-# LDR 3 into Reg 2 (CLR)
-011B  0603
 #####################
 # Accepting a value from the user - by Michael Ashery
-
-
-###Keyboard loop
-#
 ###The Check KB status loop. 
-# Ensure Reg 1 empty #
-0208  0403
 # Check Device status. If on, set gpr0 to 1 #w
-0209  FC00
-# If gpr0 is 0, jump back to 109. Otherwise proceed. #
-020A  2849
-##### Input Int Loop.
-# LDX Pointer to X2
-020B  A495
-# Input single char from buffer #
-020C  F400
-# Store char at pointer addr using IXR2 #
-020D  0880
-# Print char to printer #
-020E  F801
+011B  FC00
+# If gpr0 is 0, jump back to 11B. Otherwise proceed. #
+011C  285B
+########## Input Loop.
+###Setup
+#LDX IXR 3 -> 5D0 (x14)
+011D  A4D4
+#LDR gpr0 addr 3
+011E  0403
+#LDR gpr1 addr 3
+011F  0503
+#LDR gpr2 the EOW character 
+0120  0615
+#LDR gpr3 addr 3
+0121  0703
+#LDX IXR 1 -> 123 (x13)
+0122  A453
+###Loop
+#IN gpr1
+0123  F500
+#STR gpr1 at IXR 3
+0124  09C0
+#TRR reg 1 and reg 2
+0125  5980
+#JCC if true to 012A
+0126  3047
+#OUT Reg 1
+0127  F901
+#AIX IXR3 +1
+0128  B8C1
+#JMA to start of loop (123)
+0129  3440
+# LDX ixr1 for next part
+012A  A44B
+# LDX ixr 2 to start of paragraph
+012B  A490
+# Reset IXR 3 to start of word (x14)
+012C  A4D4
+# JMA to next part
+012D  344A
+############ The Comparison Loop - by Michael Ashery
+############ Checks to see if the words match.
+# Address for Word Scroller
+0200  0240
+# Address for Period incrementer 
+0201  0260
+# Address for End Printer
+0202  02A0
+# Address for Space Incrementer (space incrementer is period + x000D)
+0203  0269
+# AIX ixr2 +1
+0208  B881
+# AIX ixr3 +1
+0209  B8C1
+# START HERE LDR gpr 1 with pgh letter (ixr2)
+020A  0580
+# LDR gpr 2 with word letter (ixr3)
+020B  06C0
+# TRR r1,r2
+020C  5980
+# JCC back to top
+020D  3050
+# JZ gpr 3 to space check (#10)
+020E  2B63
+# JMA to word scroller
+020F  3460
+# LDR ascii space to gpr0
+0210  0418
+# TRR r0 r1
+0211  5840
+# JCC End Printer if true (put at start?)
+0212  3062
+# Otherwise LDR asci comma to gpr0
+0213  0417
+# TRR r0 r1
+0214  5840
+# JCC to End printer if true
+0215  3040
+# Otherwise LDR asci period to gpr0
+0216  0416
+# TRR r0 r1
+0217  5840
+# JCC to End printer if true
+0218  3042
+# JMA to word scroller
+0219  3444
+######### Word Scroller code by Michael Ashery
+######### scrolls through characters that aren't space or period, and aren't part of the matched word.
+# LDR gpr1 pgph letter (IXR2)
+0240  0580
+# LDR gpr0 space char
+0241  0418
+# TRR 0,1
+0242  5840
+# JCC to Space checker
+0243  3051
+# LDR gpr0 period char
+0244  0416
+# TRR 0,1
+0245  5840
+# JCC to Period checker
+0246  3050
+# AIX IXR 2 +1
+0247  B881
+# JMA to top
+0248  3460
+### Period Checker's address
+0250  0260
+### Space Checker's address
+0251  0269
+# Fail Printer address
+0252  0280
+########## Period and Space checker codes by Michael Ashery
+# LDR gpr3 linecount. If it’s a period, start from here
+0260  071E
+# AIR gpr3 +1
+0261  1B01
+# LDR gpr0 raw value 7
+0262  0419
+# TRR 0,3
+0263  58C0
+# JCC to Failure End
+0264  3052
+# STR gpr3 at linecount
+0265  0B1E
+# AIX ixr2 +1
+0266  B881
+# LDR gpr3 wordcount reset value(0) addr3
+0267  0703
+# STR gpr3 wordcount location
+0268  0B1F
+# LDR gpr3 wordcount. If it’s just a space, start from here.
+0269  071F
+# AIR gpr3 +1
+026A  1B01
+# STR gpr3 wordcount location
+026B  0B1F
+# AIX IXR2 +1
+026C  B881
+# LDX ixr3 start of word (5D0 = x0014)
+026D  A4D4
+# LDX ixr1 compariosn loop
+026E  A44B
+# JMA to comparison loop
+026F  3448
+########## Failure Printout
+0280
+########## Success Printout
+02A0
+### The word is stored at 5E0 and down
 #
-### The sentences are stored at 0700 and down.
+#
+#
+###############
+###############
+############### Execute trap subroutines - By Jaeseok Choi
+###############
+###############
+############### Machine Fault ID 0
+############### Trap[0] 
+############### Print "ERR RESERVED"
+###############
+###############
+# SCRL
+0400  F000
+# Clear IXR1 
+0401  A443
+# Load IXR1 with contents of 001A 
+0402  A45A
+#LDR char to reg (1/12)
+0403  0440
+#OUT char
+0404  F801
+#LDR char to reg (2/12)
+0405  0441
+#OUT char
+0406  F801
+#LDR char to reg (3/12)
+0407  0442
+#OUT char
+0408  F801
+#LDR char to reg (4/12)
+0409  0443
+#OUT char
+040A  F801
+#LDR char to reg (5/12)
+040B  0444
+#OUT char
+040C  F801
+#LDR char to reg (6/12)
+040D  0445
+#OUT char
+040E  F801
+#LDR char to reg (7/12)
+040F  0446
+#OUT char
+0410  F801
+#LDR char to reg (8/12)
+0411  0447
+#OUT char
+0412  F801
+#LDR char to reg (9/12)
+0413  0448
+#OUT char
+0414  F801
+#LDR char to reg (10/12)
+0415  0449
+#OUT char
+0416  F801
+#LDR char to reg (11/12)
+0417  044A
+#OUT char
+0418  F801
+#LDR char to reg (12/12)
+0419  044B
+#OUT char
+041A  F801
+# SCRL
+041B  F000
+# After printing out the prompt, halts the program
+041C  0000
+###############
+###############
+############### Machine Fault ID 1
+############### Trap[1] 
+############### Print "ERR TRAP CODE"
+###############
+###############
+# SCRL
+041E  F000
+# Clear IXR1 
+041F  A443
+# Load IXR1 with memory[001A]
+0420  A45A
+# Add 000C (12 decimal) to IXR1
+0421  B84C
+#LDR char to reg (1/13)
+0422  0440
+#OUT char
+0423  F801
+#LDR char to reg (2/13)
+0424  0441
+#OUT char
+0425  F801
+#LDR char to reg (3/13)
+0426  0442
+#OUT char
+0427  F801
+#LDR char to reg (4/13)
+0428  0443
+#OUT char
+0429  F801
+#LDR char to reg (5/13)
+042A  0444
+#OUT char
+042B  F801
+#LDR char to reg (6/13)
+042C  0445
+#OUT char
+042D  F801
+#LDR char to reg (7/13)
+042E  0446
+#OUT char
+042F  F801
+#LDR char to reg (8/13)
+0430  0447
+#OUT char
+0431  F801
+#LDR char to reg (9/13)
+0432  0448
+#OUT char
+0433  F801
+#LDR char to reg (10/13)
+0434  0449
+#OUT char
+0435  F801
+#LDR char to reg (11/13)
+0436  044A
+#OUT char
+0437  F801
+#LDR char to reg (12/13)
+0438  044B
+#OUT char
+0439  F801
+#LDR char to reg (13/13)
+043A  044B
+#OUT char
+043B  F801
+# SCRL
+043C  F000
+# After printing out the prompt, halts the program
+043D  0000
+###############
+###############
+############### Machine Fault ID 2
+############### Trap[2] 
+############### "ERR OPCODE"
+###############
+###############
+# SCRL 
+043E  F000
+# Clear IXR1 
+043F  A443
+# Load IXR1 with memory[001B]
+0440  A45B
+#LDR char to reg (1/10)
+0441  0440
+#OUT char
+0442  F801
+#LDR char to reg (2/10)
+0443  0441
+#OUT char
+0444  F801
+#LDR char to reg (3/10)
+0445  0442
+#OUT char
+0446  F801
+#LDR char to reg (4/10)
+0447  0443
+#OUT char
+0448  F801
+#LDR char to reg (5/10)
+0449  0444
+#OUT char
+044A  F801
+#LDR char to reg (6/10)
+044B  0445
+#OUT char
+044C  F801
+#LDR char to reg (7/10)
+044D  0446
+#OUT char
+044E  F801
+#LDR char to reg (8/10)
+044F  0447
+#OUT char
+0450  F801
+#LDR char to reg (9/10)
+0451  0448
+#OUT char
+0452  F801
+#LDR char to reg (10/10)
+0453  0449
+#OUT char
+0454  F801
+# SCRL
+0455  F000
+# After printing out the prompt, halts the program
+0456  0000
+###############
+###############
+############### Machine Fault ID 3
+############### Trap[3] 
+############### Print "ERR MEM ADDR"
+###############
+###############
+# SCRL 
+045C  F000
+# Clear IXR1 
+045D  A443
+# Load IXR1 with memory[001B] + 000A (10 decimal)
+045E  A45B
+# Add 000A (10 decimal) to IXR1
+045F  B84A
+#LDR char to reg (1/12)
+0460  0440
+#OUT char
+0461  F801
+#LDR char to reg (2/12)
+0462  0441
+#OUT char
+0463  F801
+#LDR char to reg (3/12)
+0464  0442
+#OUT char
+0465  F801
+#LDR char to reg (4/12)
+0466  0443
+#OUT char
+0467  F801
+#LDR char to reg (5/12)
+0468  0444
+#OUT char
+0469  F801
+#LDR char to reg (6/12)
+046A  0445
+#OUT char
+046B  F801
+#LDR char to reg (7/12)
+046C  0446
+#OUT char
+046D  F801
+#LDR char to reg (8/12)
+046E  0447
+#OUT char
+046F  F801
+#LDR char to reg (9/12)
+0470  0448
+#OUT char
+0471  F801
+#LDR char to reg (10/12)
+0472  0449
+#OUT char
+0473  F801
+#LDR char to reg (11/12)
+0474  044A
+#OUT char
+0475  F801
+#LDR char to reg (12/12)
+0476  044B
+#OUT char
+0477  F801
+# SCRL
+0478  F000
+# After printing out the prompt, halts the program
+0479  0000
+###############
+###############
+############### Default trap subroutines
+############### Trap[4~15] 
+############### "ERR GENERAL"
+###############
+###############
+# SCRL 
+0480  F000
+# Clear IXR1 
+0481  A443
+# Load IXR1 with memory[001C] 
+0482  A45B
+#LDR char to reg (1/11)
+0483  0440
+#OUT char
+0484  F801
+#LDR char to reg (2/11)
+0485  0441
+#OUT char
+0486  F801
+#LDR char to reg (3/11)
+0487  0442
+#OUT char
+0488  F801
+#LDR char to reg (4/11)
+0489  0443
+#OUT char
+048A  F801
+#LDR char to reg (5/11)
+048B  0444
+#OUT char
+048C  F801
+#LDR char to reg (6/11)
+048D  0445
+#OUT char
+048E  F801
+#LDR char to reg (7/11)
+048F  0446
+#OUT char
+0490  F801
+#LDR char to reg (8/11)
+0491  0447
+#OUT char
+0492  F801
+#LDR char to reg (9/11)
+0493  0448
+#OUT char
+0494  F801
+#LDR char to reg (10/11)
+0495  0449
+#OUT char
+0496  F801
+#LDR char to reg (11/11)
+0497  044A
+#OUT char
+0498  F801
+# SCRL
+0499  F000
+# After printing out the prompt, halts the program
+049A  0000
+############ Trap subroutines end
+### The sentences are stored at 0600 and down.
 #
 ##### 
 ##### 
