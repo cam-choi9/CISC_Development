@@ -4,14 +4,10 @@
 ### 3. Return the value amongst the 20 values that is closest to the entered value.
 ###### Reserved values
 # Trap table space
-0000  0030
 # MFR table space
-0001  0030
-# Trap store PC (initially 0)
-0002  0000
+# Trap store PC
 # 0003 NOT USED
-# MFR store PC (initially 0)
-0004  0000
+# MFR store PC
 # 0005 NOT USED
 0006  0000
 0007  0000
@@ -23,11 +19,11 @@
 # Make some IXR shortcuts for faster reference later Reserved 0A-2F
 000A  0100
 000B  0200
-000C  0300
+000C  0308
 000D  0400
 000E  0500
 0010  0600
-0011  0000
+0011  0300
 0012  0000
 0013  0123
 0014  05D0
@@ -47,19 +43,13 @@
 001C  006F
 ############### More IXR shortcut available to use
 001D  0000
-# Sentence Count
+# Sentence Counter
 001E  0001
-# Word Count
+# Word Counter
 001F  0001
-###############
-###############
-###############
 ############### trap table (0030~003F) & MFR table (0030~0033)
 ############### NOTE: trap[0~3] = MFR[0~3] (trap[4~15] unassigned yet)
-############### 
 ############### : jumps to the corresponding trap subroutine
-###############
-###############
 # 1) Jump to Trap Subroutine 0
 0030  0400
 # 2) Jump to Trap Subroutine 1
@@ -92,13 +82,8 @@
 003E  0480
 # 16) Jump to Trap Subroutine 15
 003F  0480
-###############
-###############
 ############### Prompt for Machine Fault ID 0 = Trap[0] 
-############### 
 ############### "ERR RESERVED"
-###############
-###############
 #E
 0040  0045
 #R
@@ -123,13 +108,8 @@
 004A  0045
 #D
 004B  0044
-###############
-###############
 ############### Prompt for Machine Fault ID 1 = Trap[1] 
-############### 
 ############### "ERR TRAP CODE"
-###############
-###############
 #E
 004C  0045
 #R
@@ -156,13 +136,8 @@
 0057  0044
 #E
 0058  0045
-###############
-###############
-############### Prompt for Machine Fault ID 2 = Trap[2] 
-############### 
+############### Prompt for Machine Fault ID 2 = Trap[2]  
 ############### "ERR OPCODE"
-###############
-###############
 #E
 0059  0045
 #R
@@ -183,13 +158,8 @@
 0061  0044
 #E
 0062  0045
-###############
-###############
 ############### Prompt for Machine Fault ID 3 = Trap[3] 
-############### 
 ############### "ERR MEM ADDR"
-###############
-###############
 #E
 0063  0045
 #R
@@ -214,13 +184,8 @@
 006D  0044
 #R
 006E  0052
-###############
-###############
 ############### Prompt for all other trap indexes
-############### 
 ############### "ERR GENERAL"
-###############
-###############
 #E
 006F  0045
 #R
@@ -345,6 +310,12 @@
 0202  02A0
 # Address for Space Incrementer (space incrementer is period + x000D)
 0203  0269
+# Address for first character of fail end
+0204
+# Address for first character of pass end
+0205
+# x30 for use during pass and fail printouts.
+0206  0030
 # AIX ixr2 +1
 0208  B881
 # AIX ixr3 +1
@@ -441,23 +412,120 @@
 # JMA to comparison loop
 026F  3448
 ########## Failure Printout
-0280
+# SCRL
+0280  F000
+# LDX IXR 2 x11
+0281  A491
+# LDX IXR3 xC
+0282  A4CC
+# AIX IXR3 to statement start
+0283  B8CD
+# LDR IXR3 Gpr0
+0284  04C0
+# JZ to addr 6 (halt)
+0285  2806
+# OUT GPR 0
+0286  F800
+# AIX IXR 3
+0287  B8C1
+# JMA to the LDR (X3)
+0288  3480
 ########## Success Printout
-02A0
-### The word is stored at 5E0 and down
-#
-#
-#
-###############
-###############
+# SCRL
+02A0  F000
+# LDX IXR2 x11
+02A1  A491
+# LDX IXR3 xC
+02A2  A4CC
+# LDR Word count Gpr0
+02A3  041E
+# AMR x30 to GPR0
+02A4  1046
+# STR in Print values at…
+02A5  08CC
+# LDR IXR3 Gpr0
+02A6  04C0
+# JZ to #12 word count math (X2+…)
+02A7  2882
+# OUT GPR 0
+02A8  F800
+# AIX IXR 3
+02A9  B8C1
+# JMA to the LDR (X2+…) 
+02AA  3481
+# LDR wordcount GPR0
+02AB  041F
+# LDR addr 3 into GPR2
+02AC  0603
+# AIR xA into GPR2
+02AD  1A0A
+# DVD rx0 ry2
+02AE  5480
+# AMR x30 GPR 0
+02AF  1046
+# AMR x30 GPR 1
+02B0  1146
+# OUT GPR0
+02B1  F800
+# OUT GPR1
+02B2  F900
+# Halt.
+02B3  0000
+############ Pass and fail print out values - by Michael Ashery
+### Mostly just jump addresses
+#Jump value for Fail printloop
+0300  0284
+# Jump value for Pass printloop
+0301  02A6
+# Jump value for Pass wordcount math
+0302  02AB
+### Text for printout
+# S -53 --PASS START 0300
+0308 0053
+# E -45
+0309  0045
+# N -4E
+030A  004E
+# Spc -20
+030B  0020
+# Sentcount val -001E PROGRAM SHOULD OVERWRITE
+030C  0031
+# Spc -20
+030D  0020
+# W -57
+030E  0057
+# O -4F
+030F  004F
+# R -52
+0310  0052
+# D -44
+0311  0044
+# Spc -20
+0312  0020
+# 0000
+0313  0000
+# N -4E --FAIL START 30D
+0315  004E
+# O -4F
+0316  004F
+# T -54
+0317  0054
+# Spc -20
+0318  0020
+# F -46
+0319  0046
+# O -4F
+031A  004F
+# U -55
+031B  0055
+# N -4E
+031C  004E
+# D -44
+031D  0044
 ############### Execute trap subroutines - By Jaeseok Choi
-###############
-###############
 ############### Machine Fault ID 0
 ############### Trap[0] 
 ############### Print "ERR RESERVED"
-###############
-###############
 # SCRL
 0400  F000
 # Clear IXR1 
@@ -516,13 +584,9 @@
 041B  F000
 # After printing out the prompt, halts the program
 041C  0000
-###############
-###############
 ############### Machine Fault ID 1
 ############### Trap[1] 
 ############### Print "ERR TRAP CODE"
-###############
-###############
 # SCRL
 041E  F000
 # Clear IXR1 
@@ -580,20 +644,16 @@
 #OUT char
 0439  F801
 #LDR char to reg (13/13)
-043A  044B
+043A  044C
 #OUT char
 043B  F801
 # SCRL
 043C  F000
 # After printing out the prompt, halts the program
 043D  0000
-###############
-###############
 ############### Machine Fault ID 2
 ############### Trap[2] 
 ############### "ERR OPCODE"
-###############
-###############
 # SCRL 
 043E  F000
 # Clear IXR1 
@@ -644,13 +704,9 @@
 0455  F000
 # After printing out the prompt, halts the program
 0456  0000
-###############
-###############
 ############### Machine Fault ID 3
 ############### Trap[3] 
 ############### Print "ERR MEM ADDR"
-###############
-###############
 # SCRL 
 045C  F000
 # Clear IXR1 
@@ -711,19 +767,16 @@
 0478  F000
 # After printing out the prompt, halts the program
 0479  0000
-###############
-###############
 ############### Default trap subroutines
 ############### Trap[4~15] 
 ############### "ERR GENERAL"
-###############
 ###############
 # SCRL 
 0480  F000
 # Clear IXR1 
 0481  A443
 # Load IXR1 with memory[001C] 
-0482  A45B
+0482  A45C
 #LDR char to reg (1/11)
 0483  0440
 #OUT char
@@ -773,8 +826,8 @@
 # After printing out the prompt, halts the program
 049A  0000
 ############ Trap subroutines end
+### The word is stored at 5E0 and down
 ### The sentences are stored at 0600 and down.
-#
 ##### 
 ##### 
 ##### END OF THE PROGRAM 2 #####
