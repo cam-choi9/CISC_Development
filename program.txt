@@ -311,9 +311,9 @@
 # Address for Space Incrementer (space incrementer is period + x000D)
 0203  0269
 # Address for first character of fail end
-0204
+0204  0315
 # Address for first character of pass end
-0205
+0205  0308
 # x30 for use during pass and fail printouts.
 0206  0030
 # AIX ixr2 +1
@@ -431,54 +431,62 @@
 # JMA to the LDR (X3)
 0288  34A0
 ########## Success Printout
-# SCRL
+# SCRL#
 02A0  F000
-# LDX IXR2 x11
+# LDX IXR2 x11 #
 02A1  A491
-# LDX IXR3 xC
+# LDX IXR3 xC #
 02A2  A4CC
-# LDR Word count Gpr0
+# LDR SENT count Gpr0 #
 02A3  041E
-# AMR x30 to GPR0
-02A4  1046
+# AIR x18 to GPR0 #
+02A4  1818
+# AIR x18 to GPR0 #
+02A5  1818
 # STR in Print values at…
-02A5  08CC
+02A6  08C4
 # LDR IXR3 Gpr0
-02A6  04C0
+02A7  04C0
 # JZ to #12 word count math (X2+…)
-02A7  28A2
+02A8  28A2
 # OUT GPR 0
-02A8  F801
+02A9  F801
 # AIX IXR 3
-02A9  B8C1
+02AA  B8C1
 # JMA to the LDR (X2+…) 
-02AA  34A1
+02AB  34A1
 # LDR wordcount GPR0
-02AB  041F
+02AC  041F
 # LDR addr 3 into GPR2
-02AC  0603
+02AD  0603
 # AIR xA into GPR2
-02AD  1A0A
+02AE  1A0A
 # DVD rx0 ry2
-02AE  5480
-# AMR x30 GPR 0
-02AF  1046
-# AMR x30 GPR 1
-02B0  1146
+02AF  5480
+# AIR x30 GPR 0
+02B0  1818
+# AIR x30 GPR 0
+02B1  1818
+# AIR x30 GPR 1
+02B2  1918
+# AIR x30 GPR 1
+02B3  1918
 # OUT GPR0
-02B1  F800
+02B4  F801
 # OUT GPR1
-02B2  F900
+02B5  F901
 # Halt.
-02B3  0000
+02B6  0000
 ############ Pass and fail print out values - by Michael Ashery
 ### Mostly just jump addresses
 #Jump value for Fail printloop
 0300  0284
 # Jump value for Pass printloop
-0301  02A6
+0301  02A7
 # Jump value for Pass wordcount math
-0302  02AB
+0302  02AC
+# Store value for x30
+0303  0030
 ### Text for printout
 # S -53 --PASS START 0300
 0308 0053
@@ -489,7 +497,7 @@
 # Spc -20
 030B  0020
 # Sentcount val -001E PROGRAM SHOULD OVERWRITE
-030C  0031
+030C  0001
 # Spc -20
 030D  0020
 # W -57
