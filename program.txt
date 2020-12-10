@@ -580,7 +580,7 @@
 #OUT char
 0439  F801
 #LDR char to reg (13/13)
-043A  044B
+043A  044C
 #OUT char
 043B  F801
 # SCRL
@@ -723,7 +723,7 @@
 # Clear IXR1 
 0481  A443
 # Load IXR1 with memory[001C] 
-0482  A45B
+0482  A45C
 #LDR char to reg (1/11)
 0483  0440
 #OUT char
@@ -775,6 +775,12 @@
 ############ Trap subroutines end
 ### The sentences are stored at 0600 and down.
 #
+############ Debugging each subroutine Trap[0], Trap[1], Trap[2], Trap[3], and Trap[4~15]
+049B  7800
+049C  7801
+049D  7802
+049E  7803
+049F  7804
 ##### 
 ##### 
 ##### END OF THE PROGRAM 2 #####
