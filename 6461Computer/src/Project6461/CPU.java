@@ -608,63 +608,63 @@ public class CPU {
 		else {
 			switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 			case 0: 
-				if ((gpr0 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				if ((gpr0 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 					cc = 8; //set overflow
 					hlt();
 					break;
 				}
-				else if ((gpr0 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				else if ((gpr0 + memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 					cc = 4; //set underflow
 					hlt();
 					break;
 				}
 				else {
-				gpr0 += effectiveAddress(word);
+				gpr0 += memory[effectiveAddress(word)];
 				break;
 				}
 			case 1: 
-				if ((gpr1 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				if ((gpr1 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 					cc = 8; //set overflow
 					hlt();
 					break;
 				}
-				else if ((gpr1 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				else if ((gpr1 + memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 					cc = 4; //set underflow
 					hlt();
 					break;
 				}
 				else {
-					gpr1 += effectiveAddress(word);
+					gpr1 += memory[effectiveAddress(word)];
 					break;
 				}
 			case 2: 
-				if ((gpr2 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				if ((gpr2 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 					cc = 8; //set overflow
 					hlt();
 					break;
 				}
-				else if ((gpr2 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				else if ((gpr2 + memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 					cc = 4; //set underflow
 					hlt();
 					break;
 				}
 				else {
-					gpr2 += effectiveAddress(word);
+					gpr2 += memory[effectiveAddress(word)];
 					break;
 				}
 			case 3: 
-				if ((gpr3 + effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+				if ((gpr3 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 					cc = 8; //set overflow
 					hlt();
 					break;
 				}
-				else if ((gpr3 + effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+				else if ((gpr3 + memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 					cc = 4; //set underflow
 					hlt();
 					break;
 				}
 				else {
-					gpr3 += effectiveAddress(word);
+					gpr3 += memory[effectiveAddress(word)];
 					break;
 				}
 			default: gui.visualizefield.setText("AMR failed.");
@@ -675,63 +675,63 @@ public class CPU {
 		if(isaConsole == true) System.out.println("05 SMR"); //Debugging tool
 		switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 		case 0: 
-			if ((gpr0 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			if ((gpr0 - memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 				cc = 8; //set overflow
 				hlt();
 				break;
 			}
-			else if ((gpr0 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			else if ((gpr0 - memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 				cc = 4; //set underflow
 				hlt();
 				break;
 			}
 			else {
-			gpr0 -= effectiveAddress(word);
+			gpr0 -= memory[effectiveAddress(word)];
 			break;
 			}
 		case 1: 
-			if ((gpr1 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			if ((gpr1 - memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 				cc = 8; //set overflow
 				hlt();
 				break;
 			}
-			else if ((gpr1 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			else if ((gpr1 - memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 				cc = 4; //set underflow
 				hlt();
 				break;
 			}
 			else {
-				gpr1 -= effectiveAddress(word);
+				gpr1 -= memory[effectiveAddress(word)];
 				break;
 			}
 		case 2: 
-			if ((gpr2 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			if ((gpr2 - memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 				cc = 8; //set overflow
 				hlt();
 				break;
 			}
-			else if ((gpr2 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			else if ((gpr2 - memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 				cc = 4; //set underflow
 				hlt();
 				break;
 			}
 			else {
-				gpr2 -= effectiveAddress(word);
+				gpr2 -= memory[effectiveAddress(word)];
 				break;
 			}
 		case 3: 
-			if ((gpr3 - effectiveAddress(word)) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
+			if ((gpr3 - memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
 				cc = 8; //set overflow
 				hlt();
 				break;
 			}
-			else if ((gpr3 - effectiveAddress(word)) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
+			else if ((gpr3 - memory[effectiveAddress(word)]) < -32768) { //Java stores shorts as signed values, so this is the lower limit.
 				cc = 4; //set underflow
 				hlt();
 				break;
 			}
 			else {
-				gpr3 -= effectiveAddress(word);
+				gpr3 -= memory[effectiveAddress(word)];
 				break;
 			}
 		default: gui.visualizefield.setText("SMR failed.");
