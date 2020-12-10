@@ -425,7 +425,7 @@
 # JZ to addr 6 (halt)
 0285  2806
 # OUT GPR 0
-0286  F800
+0286  F801
 # AIX IXR 3
 0287  B8C1
 # JMA to the LDR (X3)
@@ -448,7 +448,7 @@
 # JZ to #12 word count math (X2+…)
 02A7  28A2
 # OUT GPR 0
-02A8  F800
+02A8  F801
 # AIX IXR 3
 02A9  B8C1
 # JMA to the LDR (X2+…) 

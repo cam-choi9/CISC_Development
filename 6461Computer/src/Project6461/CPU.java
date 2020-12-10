@@ -414,7 +414,7 @@ public class CPU {
 				break;
 		case 26: tir(word);
 				break;
-		case 30: trap(word); //nonfunctional, waiting for part 3
+		case 30: trap(word); 
 				break;
 		case 31: src(word);
 				break;
