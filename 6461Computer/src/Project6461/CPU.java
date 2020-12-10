@@ -604,8 +604,7 @@ public class CPU {
 		}
 	}
 	public void amr(Word word) {// 04 Add Memory to Register
-		if(isaConsole == true) System.out.println("04 AMR"); //Debugging tool
-		else {
+		if(isaConsole == true) {System.out.println("04 AMR");} //Debugging tool
 			switch (word.gprN) { //uses gpr number in the word to determine which register to use.
 			case 0: 
 				if ((gpr0 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
@@ -619,8 +618,8 @@ public class CPU {
 					break;
 				}
 				else {
-				gpr0 += memory[effectiveAddress(word)];
-				break;
+					gpr0 += memory[effectiveAddress(word)];
+					break;
 				}
 			case 1: 
 				if ((gpr1 + memory[effectiveAddress(word)]) > 32767) { //Java stores shorts as signed values, so this is the upper limit.
@@ -669,7 +668,7 @@ public class CPU {
 				}
 			default: gui.visualizefield.setText("AMR failed.");
 			}
-		}
+		
 	}
 	public void smr(Word word) {// 05 Subtract Memory from Register
 		if(isaConsole == true) System.out.println("05 SMR"); //Debugging tool
