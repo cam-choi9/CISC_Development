@@ -429,7 +429,7 @@
 # AIX IXR 3
 0287  B8C1
 # JMA to the LDR (X3)
-0288  3480
+0288  34A0
 ########## Success Printout
 # SCRL
 02A0  F000
@@ -446,13 +446,13 @@
 # LDR IXR3 Gpr0
 02A6  04C0
 # JZ to #12 word count math (X2+…)
-02A7  2882
+02A7  28A2
 # OUT GPR 0
 02A8  F800
 # AIX IXR 3
 02A9  B8C1
 # JMA to the LDR (X2+…) 
-02AA  3481
+02AA  34A1
 # LDR wordcount GPR0
 02AB  041F
 # LDR addr 3 into GPR2
