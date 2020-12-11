@@ -280,12 +280,12 @@
 ###Loop
 #IN gpr1
 0123  F500
-#STR gpr1 at IXR 3
-0124  09C0
 #TRR reg 1 and reg 2
-0125  5980
+0124  5980
 #JCC if true to 012A
-0126  3047
+0125  3047
+#STR gpr1 at IXR 3
+0126  09C0
 #OUT Reg 1
 0127  F901
 #AIX IXR3 +1
@@ -314,8 +314,10 @@
 0204  0315
 # Address for first character of pass end
 0205  0308
-# x30 for use during pass and fail printouts.
-0206  0030
+# Jump to Space in Word Scroller
+0206  0269
+# Address for failure end
+0207  0280
 # AIX ixr2 +1
 0208  B881
 # AIX ixr3 +1
@@ -327,9 +329,9 @@
 # TRR r1,r2
 020C  5980
 # JCC back to top
-020D  3050
+020D  3048
 # JZ gpr 3 to space check (#10)
-020E  2B63
+020E  2A50
 # JMA to word scroller
 020F  3460
 # LDR ascii space to gpr0
@@ -351,7 +353,7 @@
 # JCC to End printer if true
 0218  3042
 # JMA to word scroller
-0219  3444
+0219  3460
 ######### Word Scroller code by Michael Ashery
 ######### scrolls through characters that aren't space or period, and aren't part of the matched word.
 # LDR gpr1 pgph letter (IXR2)
@@ -361,13 +363,13 @@
 # TRR 0,1
 0242  5840
 # JCC to Space checker
-0243  3051
+0243  3066
 # LDR gpr0 period char
 0244  0416
 # TRR 0,1
 0245  5840
 # JCC to Period checker
-0246  3050
+0246  3061
 # AIX IXR 2 +1
 0247  B881
 # JMA to top
@@ -388,7 +390,7 @@
 # TRR 0,3
 0263  58C0
 # JCC to Failure End
-0264  3052
+0264  3067
 # STR gpr3 at linecount
 0265  0B1E
 # AIX ixr2 +1
